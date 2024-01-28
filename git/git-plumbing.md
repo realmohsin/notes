@@ -1,4 +1,4 @@
-take stdin then hash and write it to object database
+take stdin, hash it (to create filename), then write it to object database
 - echo 'test content' | git hash-object -w --stdin
  
 find and print all files in .git/objects

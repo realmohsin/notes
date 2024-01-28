@@ -12,12 +12,11 @@ To have lines wrap in nano, use alt+shift+4 (Double check in list of options wit
 
 Use ctrl+w and then enter a search phrase to search FORWARD in the file from your current cursor location. To search backwards use alt+b or esc+b
 
-To replace use ctrl+\ and then enter the word you want to replace. Then enter the replacement and decide whether to replace specific matches or all matches.
 
 WE can use spellchecking inside of nano, but we have to enable it first in the Nano config file located at /etc/nanorc
 
 
-
+ 
 
 ctrl+g to open and close help docs
 alt+shift+4 for enabling/disabling soft wrapping (to read things easily)

@@ -24,11 +24,11 @@ To determine which files are in which state
 To track files, to stage files, to mark merge-conflicted files as resolved: 
 - git add <filename-or-directory>
 
-To compare unstaged files against staged files  (untracked files do not show up)
+To compare unstaged files against last commit (untracked files do not show up)
 - git diff
 
 To compare staged changes against last commit:
-- git diff --cached 
+- git diff --staged
 
 To commit with editor opened for receiving commit message:
 - git commit
@@ -70,7 +70,7 @@ To add a remote server:
 To get data from your remote servers:
 - git fetch <remote-name>
 
-To fetch and then merge a remote branch into your current branch:
+To fetch and then merge the tracked branch of your currently checked-out branch:
 - git pull
 
 To push any commits you've done back up to the server:
@@ -112,3 +112,59 @@ To delete a tag from a remote server:
 To view the versions of files a tag is pointing to:
 - git checkout <tag-name>
 
+To view all branches
+- git branch
+To view all branches merged into current checked-out branch
+- git branch --merged
+To view all branches not merged into current checked-out branch
+- git branch --no-merged
+To view remote-tracking branches
+- git branch -r
+To view all branches with the remote branches they're tracking
+- git branch -vv
+
+To create new branch on current checked-out commit
+- git branch <branch-name>
+To create branch based on another branch
+- git branch <new-branch-name> <branch-to-be-based-on>
+Can use to create local version of remote tracking branch
+
+To switch to an existing branch
+- git checkout <branch-name>
+To create and switch to a new branch in one command
+- git checkout -b <branch-name> <optional-branch-to-be-based-on>
+If <optional-branch-to-be-based-on> is not given, checked-out branch is used
+
+To switch to an existing branch with newer command
+- git switch <branch-name>
+To create and switch to a new branch in one command
+- git switch -c <branch-name> <optional-branch-to-be-based-on>
+If <optional-branch-to-be-based-on> is not given, checked-out branch is used
+
+To delete a branch
+- git branch -d <branch-name>
+
+To rename local branch
+- git branch --move <old-branch-name> <new-branch-name>
+To push a branch up to remote
+- git push --set-upstream origin <new-branch-name>
+To delete a branch in remote
+- git push origin --delete <new-branch-name>
+
+
+To merge a branch with new commits into checked-out older branch
+- git merge <branch-with-new-commits>
+To abort a merge during a merge conflict
+- git merge --abort
+
+To make and/or update a remote branch based on the checked-out local branch
+- git push <remote> <branch-name-on-remote>
+Add -u to remember association between local and remote, for subsequent 'git push' invocations
+
+To manually set or change upstream branch
+- git branch -u origin/<branch> 
+
+To delete a remote branch on the server
+- git push <remote> --delete <branch-name>
+
+To

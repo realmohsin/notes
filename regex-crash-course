@@ -1,0 +1,8 @@
+. - matches any single character
+^ - matches the start of a line
+$ - matches the end of a line
+[abc] - matches any character in the set
+[^abc] - matches any character not in the set
+[A-Z] - matches characters in a range
+* - repeat previous expression 0 or more times
+\ - escape meta-characters

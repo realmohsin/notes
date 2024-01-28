@@ -22,6 +22,7 @@ other times (digital ocean) root user is only user initially created and has a p
 - public key will be asked for by many services like github to establish secure connection
 - ssh username@remote_host - to connect to remote server
 - ssh-agent - service that auto types your private key's passphrase (not necessary)
+- typing 'exit' disconnects ssh connection to remote server
 
 - remote server setup (create server with ssh public key, connect, create superuser, enable firewall, allow SSH connection with new superuser)
 - (digitalocean) choose physical destination, choose hardware specs, choose OS, provide public ssh key, get back created server's IP
@@ -35,7 +36,7 @@ other times (digital ocean) root user is only user initially created and has a p
 - ufw app list, ufw allow OpenSSH, ufw enable, ufw status (ufw will block all connections except SSH)
 - make sure you can SSH into the newly created user account directly
 - since public key is already in the root account's home directory, we can copy that file and directory structure to our new user account's home directory
-- rsync --archive --chown=username:username ~/.ssh /home/username (rsync copies files with the correct ownership and permissions), now client machince can connect to remote server as newly created user
+- rsync --archive --chown=username:username ~/.ssh /home/username (rsync copies files with the correct ownership and permissions), now client machine can connect to remote server as newly created user
 
 - dns
 
@@ -44,3 +45,4 @@ other times (digital ocean) root user is only user initially created and has a p
 
 
 (https://www.digitalocean.com/community/tutorials/ufw-essentials-common-firewall-rules-and-commands)
+https://linuxjourney.com/
