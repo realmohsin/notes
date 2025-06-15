@@ -1,0 +1,5 @@
+# Visual Studio Code Installation on Ubuntu 22.04.4
+
+1. Go to 'https://code.visualstudio.com/docs/setup/linux' and click the link '.deb package (64-bit)' to download it.
+2. Navigate to '~/Downloads/' and install the deb package using `sudo apt install ./<file>`
+3. Check that Visual Studio Code is installed using `code -v`. 

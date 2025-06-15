@@ -1,0 +1,63 @@
+image - single file with all the deps and config required to run a program
+- more accurately an image is file system snapshot, and a specific startup command
+container - instance of an image, runs a program, with its own isolated set of hardware resources
+- a set of processes that have a grouping of resources specifically assigned to it. basically its using operating system features - namespacing and cgroups to isolate and limit resources to certain processes. the kernel checks what process is making a system call and directs it to a specific portion of the hardddrive, ram, cpu or network
+
+docker for windows/mac
+docker client (docker cli) - tool that we are going to issue commands to
+docker server (docker daemon) - tool that is responsible for creating images, running containers, etc (will be running behind the scenes)
+
+docker run hello-world
+to run a container from an image named hello-world
+
+What happened when this command ran - 
+- the docker client (cli) contacted the docker daemon (presumably always running in the background when comp started?)
+checked to see if there was a local copy of hello-world in the 'image cache'
+- did not find in Image Cache, so it reached out to DockerHub - a repository of free public images - to find the image hello-world and downloaded it to the image cache
+- the docker daemon created a container based on the image 
+- in the container a single program was started that produced some output
+- docker daemon took that output and streamed it to the docker client to show in the terminal of host
+
+namespacing and cgroups are features of linux, so whehn you install docker on mac or windows, you're actually running a linux virtual machine (or some variation of this). And all your containers exist on that virtual machine.
+
+docker run <image-name> <command> 
+command will be executed inside the container instead of any default command, (the command must be valid, must exist as an executable in the file system of container)
+
+docker run busybox ls
+will list out folders in container but that output is streamed back to our terminal
+
+docker ps
+list all the running containers on your machine,  `docker run busybox ls` does not create a running container because it shuts down after it executed ls
+
+docker ps --all
+show all containers we have ever created
+
+
+docker run  = docker create + docker start
+docker run is actually doing two things, creating and staring a container
+creating a container (docker create) is the step of using the image file system snapshot to set things up.
+starting a container (docker start) is the step of calling the startup command inside the container
+
+docker create hello-world
+
+docker start -a <container-id-given-from-create-command>
+-a is telling the command to stream the output of the container to our terminal (happens automatically in `docker run`)
+
+when a container is exited we can still start it back up. we can start and stop containers. exited containers we see with `docker ps --all` can be started with `docker start -a <container-id>`. However you can't change the command when you start an exited container. You can only change the default command by providing extra argument when you first run it.
+
+(question: what happens to the hardware resources of an exited container?) seems the answer is they take up disk space on the computer, but maybe not ram or cpu because those are for running processes.
+
+docker system prune
+- will remove all stopped containers, image cache, etc and tell you in the output how much disk space has been reclaimed by deleting those resources
+
+if we forget to use `docker start` with -a, we can use `docker logs <container-id>` to get all the output emitted on that container on our terminal. `docker logs` is a good way to inspect a container to see whats been going on inside it
+
+docker stop <container-id>
+SIGTERM hardware signal sent to primary process inside that container. SIGTERM is used when you want to give the process time to shut down gracefully for cleanup, to allow it time to save some files or emit some exit message, etc. (docker stop will give container 10 sec, then it will send SIGKILL)
+
+docker kill <container-id>
+SIGKILL hardware signal sent to primary process inside that container. SIGKILL tells a process to immediately stop without doing anything else.
+
+
+
+

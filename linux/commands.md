@@ -153,8 +153,12 @@ To add executable permissions for owner
 To set permissions to read-only for all
 - chmod a=r <filename>
 
-To start a shell as another user from within current user's shell session
+To start a new login shell as another user from within current user's shell session
 - su - <username>
+To start a non-login shell as another user, using current user environment settings
+- su <username>
+To switch into root user, using non-login shell
+- su root
 
 To print current user 
 - whoami
@@ -162,8 +166,12 @@ To print current user
 To see commands that can be run with sudo as current user
 - sudo -l
 
-To update packages
+To check for updates available
 - sudo apt update
+To list upgradable packages (usually used after `sudo apt update`)
+- apt list --upgradable
+To download and install upgradable pacakges
+- sudo apt upgrade
 
 To change owner of a file/directory
 - sudo chown <user> <file>
@@ -259,8 +267,10 @@ To turn a directory of files into a single file
 To unpack archive
 - tar -xvf <tar-file-name>
 
-To install a .deb package
+To install a .deb package (without installing its dependencies)
 - dpkg -i <deb-package.deb>
+To install a .deb package and its dependencies
+- sudo apt install <deb-package.deb>
 To remove a .deb package
 - dpkg -r <deb-package.deb>
 To list all installed packages

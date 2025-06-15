@@ -1,0 +1,3 @@
+# http
+
+All http requests go to port 80 of the target web server, by default. All https requests go to port 443 of the target web server, by default.

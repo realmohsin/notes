@@ -1,23 +1,7 @@
-os
-- two families - microsoft nt descendants like windows and everything else Unix descendants like mac os, linux and android
-- original unix design choices live on like multi-user os and hierarchical file systems.
-- unix philosophy - modular software design, write programs that do one thing well, combine programs, write programs to handle text streams, because that is a universal interface
-- linux created from linux kernel and GNU project software with goal to make unix-like os that is open source
-- kernel is core of operating system that facilitates interactions between hardware and software, and manages critical tasks like memory management and task scheduling and allocation of resources. 
-- many different linux distributions like fedora, ubuntu, debian. etc
-- shell is an interface to an operating system. shells expose an OS's services to users or other programs. terminal is a program that runs a shell. there are many shells, such as bash, zsh, powershell etc, 
-- bash is the most common shell and is the default on linux. (git-bash is a good emulation on windows computers to be able to use unix-like commands)
 
-everything in linux is a file
 
-- man pages are built-in documentation for linux
 
-- 4 types of commands (use type command to tell us the type of another command)
-  - executable program - usually stored in /bin, /usr/bin, or /usr/local/bin. there are compiled binary files
-  - built-in shell command - these commands are part of the shell (bash in our case)
-  - shell function
-  - alias
-- some commands do not have a man page entry, like many shell built-ins. use help command for those commands
+## more file system
 
 - The starting point for the file system is the root folder /. (Confusingly there is a sub-directory named root, which is not the same as /.)
 - /home contains a home folder (~) for each user on the system
@@ -33,24 +17,23 @@ everything in linux is a file
   - home - folder that contains home folder for each user on the os
   - usr - lots of executable files, libraries, programs. if we install software, usually ends up here. (most likely user specific programs go here whereas system wide programs go to bin?)
 
+
 - extension does not determine file type, but should match expectations otherwise programs cannot open properly
 
 - a file is specified without slash at the end. directories are specified with slash at the end like logs/
 
-- nano - simple text editor that can be used from terminal. simpler than vim or emacs
 
-- bash keeps a record of the commands we previously entered. You can scroll through the history using the up and down arrows, but also see a file of the history at ~/.bash_history. You can search the history at the command line with ctrl+r, then use ctrl+r again to cycle through, enter to use command, down arrow to exit search.
 
-- less - program for viewing a file rather than editing, useful for viewing large files as they are broken up into 'pages' to turn
-
-- standard streams 
+## standard streams 
 - the three standard streams are communication channels between a computer program and its environment - standard input, standard output and standard error. (is this the case for user made binaries or just built-in or common programs? can you tap into this notion of standard streams in nodejs programs?)
 - standard streams are data streams that connect a computer program to the environment its executing in
 - standard output is a place to which a program or command can send information. We can control where standard output sends its data to, although there is a default per environment, usually the terminal. We can send standard output to a file, printer, another command. We can chain commands together when we send the output of one command as the input to another command. (for the notion of sending standard output to another command, does this mean for command line programs the program needs to end by outputting standard output? what happens if a command outputs to standard output twice, once at start then at end of script, which output gets used by chained command as input?)
 - standard error is where programs send error messages. by default the shell directs error information to the screen, but we can change that.
-- standard input is where a program or co mmand gets its input information from. by default, the shell directs standard input from the keyboard. the input information could come from a keyboard, a file, or even another command. 
+- standard input is where a program or command gets its input information from. by default, the shell directs standard input from the keyboard. the input information could come from a keyboard, a file, or even another command. 
 - standard input is different from accepting arguments. It's a separate channel to accept data from, and its default of coming from the keyboard is rarely used. (rare example of default stdin being used - cat command with no arguments waits for you to type things to echo back.) any program that begins a prompt for you to type into is using stdin and its default of keyboard usage.
 - redirection describes the ways we can alter the source of standard input (from its default keyboard), and the destinations for standard output and standard error (from its default terminal)
+
+
 - redirecting output - the redirect output symbol (>) tells the shell to redirect the output of a command to a specific file instead of the screen. Use (>>) to append to the file instead of overwriting.
 - to pass contents of a file to standard input use (<) - command < filename
 - can redirect standard input and output at the same time. example - cat < original.txt > output.txt (taking advantage of the fact that cat echoes standard input)
@@ -71,11 +54,15 @@ everything in linux is a file
 
 - tee command reads standard input and sends to standard output and a file. Used for saving something to a file in the middle of pipes. 
 
+## globbing patterns
+
 - globbing patterns or pathname expansion - special characters used within command arguments that represent patterns for the command to match against. * used as pathname expansion for part of a filename in current directory. * gets expanded to any number of possible characters. ? gets expanded to represent any single character. but matches are made from possible files in current directory, hence the term 'pathname expansion'. To match range of characters - [A-F]. To represent 'not' use ^ like [^A-F]
 - ~ expands to home directory absolute pathname
 - brace expansion - used to generate arbitrary strings - example: touch page{1,2,3}.txt leads to page1.txt, page2.txt, page3.txt
 - arithmetic expansion - $((math-expression)) allow shell to perform math
 - command substitution - $(command) expands into output of command given (useful in scripts)
+
+## file metadata
 
 - The system stores three timestamps for every file:
   - mtime, modification time, is when a file was last modified (when its contents changed)
@@ -88,26 +75,8 @@ everything in linux is a file
 
 - with timestamps and find command, can find files taht have been modified in the last hour, or find files that have not been accessed in the last week, etc
 
-- logical operators can be used with find
-examples:
-- list all files that have chick or kitty in name
-find -name "*chick*" -or -name "*kitty*"
-- list all non html files
-find -type -f -not -name "*.html"
-! is alternative syntax for -not 
-- and (-and) operator/command is optional because it's implied through multiple options
 
-- we can provide find with our own action to perform using each matching pathname 
-find -exec command {};
-The {} are a placeholder for the current pathname(each match), and the semicolon is required to indicate the end of the command.
-
-- when using find, when we provide a command via -exec, that command is executed separately for every single element. We can instead use a special command called xargs to build up the input into a bundle that will be provided as an argument list to the next command. 
-
-- xargs is not just for usage within find. Its used anytime we want to pass a list of arguments to another command. Useful for when a command is not setup to accept sdin so piping without xargs first would not work. 
-
-- the grep command searches for patterns in each file's contents. grep will print each line that matches a pattern we provide. -i will make search case insensitive, -w will make sure to match words only instead of fragments located inside of other words. 
-
-- useful to pipe outputs of other commands to grep to search for something in the output 
+## Permissions
 
 - linux systems are multiuser operating systems - more than one person can be using the same computer at the same time. as regular users, we do not have permission to write or even read every file on the machine.
 - a single user may be the owner of files and directories, meaning they have control over their access. 
@@ -162,12 +131,16 @@ chmod a=r file.txt
 
 - theres another way to tell chmod how to set permissions that's called octal notation which uses base-8, a set of numbers (8) equal to the number of possible permission combinations, that creates a mapping and then specifies just one base8 number for each set - user, group and all.
 
+## su command and sudo relating to permissions
+
 Sometimes we might want to start a shell as another user, from within our own shell session. We can use the su command. using with - will make sure to log you in as new user without mixing environments, and so is the recommended way to do this. type exit to exit session to previous user's session.
 
 The root user can run any command and access any file regardless of the file's actual owner. (I believe only the root user can change the owner of a file, not even the owner itself can change that, but can with sudo.) Sometimes in ubuntu the root user cannot be accessed directly (probably based on inital setup?). This is fine because there is a way for normal users to gain abilities of the root user.
 - sudo allows you run commands as the root user. individual users are granted an allowed list of commands they can run as the super user. (the first user created is usually allowed to do everything.) run sudo -l to see the permitted commands for your particular user. 
 
 To change the owner of a file and the file group owner use the chown command. may need to use sudo depending on desired change.
+
+## environment variables
 
 - The shell maintains a set of information during a shell session known as the environment. It's just a series of key value pairs that define properties like your home directory, working directory, name of your shell, name of logged in user. Can view the environment using printenv.
 
@@ -186,6 +159,9 @@ For login sessions:
   - ~/.profile - used if previous two aren't found
 
 We can define our own commands using the alias keyword, and like shell vs environment vs truly global variables, where we define them will determine their scope. If saving to .bashrc can instead save to .bash_aliases and create a link from .bashrc for better organization. for something more dynamic and specific than aliases, need to write our own scripts.
+
+
+## bash scripting and cron
 
 - bash scripting
 basic steps -
@@ -219,6 +195,8 @@ random aside - difference between regex and glob patterns is regex usually match
 
 random aside - tabs are treated differently than spaces in many ways, the expand and unexpand command changes tabs in a file. Maybe look into tabs if you ever come across issues.
 
+## permissions again
+
 - When running a process, it will run as the owner of that process.
 - users and groups have UID and GID
 - In linux, you'll have (non-human/symbolic?) users in addition to the normal humans that use the system. Sometimes these users are system daemons that continuously run processes to keep the system functioning. 
@@ -233,6 +211,21 @@ random aside - tabs are treated differently than spaces in many ways, the expand
 - Process Permissions - there are 3 UIDs associated with every process - effective user ID, real user ID, saved user ID. The real user Id is the user who ran the program. the effective user id is usually also the real user ID.  effective user id's permissions are what are used. setuid can be used to set a different user as effective user id. saved user ID is used to switch between effective user id and real uid, to make sure a process only gets elevated privileges when needed. 
 
 - the sticky bit - t - this permision bit (like r, w, x) in the  place x says that only the owner (or root) can delete or modify the file. (useful for shared directories - no one can delete the directory, but users can add files, modify files in that directory)
+
+## sockets
+
+Sockets are a way to enable inter-process communication between programs running on a server, or between programs running on separate servers. Communication between servers relies on network sockets, which use the Internet Protocol (IP) to encapsulate and handle sending and receiving data.
+
+Network sockets on both clients and servers are referred to by their socket address. An address is a unique combination of a transport protocol like the Transmission Control Protocol (TCP) or User Datagram Protocol (UDP), an IP address, and a port number.
+
+Types of sockets include:
+  * Stream sockets - which use TCP as their underlying transport protocol
+  * Unix Domain sockets, which use local files to send and receive data isntead of network interfaces and IP packets. 
+    - Used by local processes to communicate with each other.
+    - MySQL on Ubuntu defaults to using a file name /var/run/mysqld/mysql.sock for communication with local clients. Clients read from and write to the socket, as does MySQL server itself.
+
+
+## processes
 
 
 - processes
@@ -302,6 +295,248 @@ T: Stopped, a process that has been suspended/stopped
 
 - You can't interact with a shell while a process is running, However you can run a program in the background - send a job to the background by appending a & to the command. To view all background jobs use the jobs command. In the output + denotes most recent background job and - denotes second most recent background job.  To send an existing job to the background, suspend it with ctrl+z (send a SIGSTOP signal), then run bg command. (aside: ctrl+c ends a running program/process by sending a SIGINT). To move a job from the background to the foreground, find job id from jobs command, then run fg <job-id>. You can kill a background job/process by using their job id with kill command.
 
+
+
+
+
+
+
+## Filesystem
+
+- / - The root directory of the entire filesystem hierarchy, everything is nestled under this directory.
+- /bin - Essential ready-to-run programs (binaries), includes the most basic commands such as ls and cp.
+- /boot - Contains kernel boot loader files.
+- /dev - Device files.
+- /etc - Core system configuration directory, should hold only configuration files and not any binaries.
+- /home - Personal directories for users, holds your documents, files, settings, etc.
+- /lib - Holds library files that binaries can use.
+- /media - Used as an attachment point for removable media like USB drives.
+- /mnt - Temporarily mounted filesystems.
+- /opt - Optional application software packages.
+- /proc - Information about currently running processes.
+- /root - The root user's home directory.
+- /run - Information about the running system since the last boot.
+- /sbin - Contains essential system binaries, usually can only be ran by root.
+- /srv - Site-specific data which are served by the system.
+- /tmp - Storage for temporary files
+- /usr - This is unfortunately named, most often it does not contain user files in the sense of a home folder. This is meant for user installed software and utilities, however that is not to say you can't add personal directories in there. Inside this directory are sub-directories for /usr/bin, /usr/local, etc.
+- /var - Variable directory, it's used for system logging, user tracking, caches, etc. Basically anything that is subject to change all the time.
+
+There are many different types of filesystems, so a VFS - Virtual File System abstraction layer exists so applications can work with any underlying filesystem.
+
+Journaling is a crucial element of most filesystems - it refers to keeping a log of every action, start and sucessful end. This way if the system shuts down suddenly without the current action being completed, for example, in the middle of a file being copied, the system can still recover the correct state the file system needs to be in. 
+
+Filesystem types: 
+ext4 - the most current version of the native linux filesystems - the standard choice for linux filesystems
+XFS - high performance journaling file system, great for a system with large files such as a media server
+NTFS, NAT - Windows filesystems
+HFS+ - Macintosh filesystem
+
+Hard disks can be subdivided into partitions, essentially making multiple block devices. Usually /dev/sda is the whole disk, and /dev/sda1 is the first partition, /dev/sda2 is the second partition, etc. If you need a certain filesystem, you can create a partition instead of making the entire disk one filesystem type.
+
+Every disk will have a partition table, this table tells the system how the disk is partitioned. This table tells you where partitions begin and end, which partitions are bootable, what sectors of the disk are allocated to what partition, etc. There are two main partition table schemes used, Master Boot Record (MBR) and GUID Partition Table (GPT).
+
+File system anatomy
+ - Boot block - This is located in the first few sectors of the filesystem, and it's not really used the by the filesystem. Rather, it contains information used to boot the operating system. Only one boot block is needed by the operating system. If you have multiple partitions, they will have boot blocks, but many of them are unused.
+ - Super block - This is a single block that comes after the boot block, and it contains information about the filesystem, such as the size of the inode table, size of the logical blocks and the size of the filesystem.
+ - Inode table - Think of this as the database that manages our files. Each file or directory has a unique entry in the inode table and it has various information about the file.
+ - Data blocks - This is the actual data for the files and directories.
+
+To see partition table use `sudo parted -l`
+
+A USB is essentially a file system, and it can be partitioned if needed. Many tools can be used for partitioning, such as the command line tool `parted`. After partitioning, filesystems can be created on a partition with the `mkfs` tool: `sudo mkfs -t ext4 /dev/sdb2`. You generally only want to create a filesystem on a new partition, because creating one on top of an existing one usually leaves it in a corrupted state.
+
+Mounting/Unmounting
+You have to mount a filesystem onto a mount point to view it. You'll need the device location, the filesystem type and the mount point. THe mount pooint is a directory on the system where the filesystem will be attached. For instance, you can mount a USB's filesystem on a certain directory location. For example: `sudo mount -t ext4 /dev/sdb2 /mydrive`. To unmount  `sudo umount /mydrive`. For some types of device categories, the kernal names devices in the order it finds them, so sometimes you might need to use a devices UUID (universally unique ID) instead of a name. 
+
+When we want to automatically mount filesystems at startup we can add them to a file called /etc/fstab. By default you can notice that on boot, the main filesystem gets mounted on / . 
+
+There is something called a swap partition. This is a partition that can be used to allocate virtual memory. If you are low on memory, the system can use this partition to 'swap' pieces of memory of idle processes to the disk partition to lessen the load.
+
+Tools for checking disk usage include 
+ - `df -h` for showing utilization of currently mounted filesystems
+ - `du -h` for showing sized of files and directories in current directory
+
+Filesystems can beome corrupted, for example due to a sudden shutdown, in which case tools like `fsck` can be used to check the consistency and repair things.
+
+Inodes
+A filesystem is comprised of all our actual files and a database that manages those files. The database is known as the inode table. An inode is an entry in this table. Entries contains all sorts of information - file type, owner, group, access permissions, timestamps, number of hardlinks to the file, size of the file, number of blocks allocated to the file, pointers to the data blocks of the file, almost everything except the filename and file itself.
+
+Inodes are identified by numbers, when a file gets created it is assigned an inode number. You can see inode numbers, run `ls -li`. The first field will show the inode number of a file. 
+
+Data is not necessarily stored sequentially and so inodes are needed to point to the actual data blocks of the files. 
+
+The link count in `ls -li`, third column, refers to the total number of hard links a file has. There are two types of links, symlinks and hard links. 
+
+symlinks are like shortcuts in Windows, they are just aliases, they link to another file through filenames. Hard links are acutal files that contain a link to an inode. So a hardlink will have the same inode number of its copies.  
+
+To create hardlink `ln somefile somelink`
+To create symlink `ln -s myfile mylink`
+
+
+
+
+  
+## systemd
+
+systemd is a suite of basic building blocks for a Linux system. It provides a system and service manager that runs as PID 1 and starts the rest of the system. systemd provides an init model for managing an entire machine from boot onwards. systemd's advantage over older init systems is mainly its aggressive parallelization capabilities.  
+
+The basic object that systemd manages and acts upon is a “unit”.  Units are the objects that systemd knows how to manage. These are basically a standardized representation of system resources that can be managed by systemd. Units can be said to be similar to services or jobs in other init systems. However, a unit has a much broader definition, as units can be used to abstract not only services, but also network resources, devices, filesystem mounts, and isolated resource pools. 
+
+** systemd doesn't just stop and start services, it can mount filesystems, monitor your network sockets, etc and because of that robustness it has different types of units it operates. **
+ 
+Categories of units include:
+
+* .service - A service unit describes how to manage a service or application on the server. This will include how to start or stop the service, under which circumstances it should be automatically started, and the dependency and ordering information for related software. 
+
+* .socket - A socket unit file describes a network or IPC socket, or a FIFO buffer that systemd uses for socket-based activation. These always have an associated .service file that will be started when activity is seen on the socket that this unit defines.
+
+* .device - A unit that describes a device that has been designated as needing systemd management by udev or the sysfs filesystem. Not all devices will have .device files. Some scenarios where .device units may be necessary are for ordering, mounting, and accessing the devices.
+
+* .target - A target unit is used to provide synchronization points for other units when booting up or changing states. They also can be used to bring the system to a new state. Other units specify their relation to targets to become tied to the target’s operations. 
+
+A target unit can be a collection of other units that together represent a 'goal'. systemd uses these target goals to drive things - basically you have a target that you want to achieve and this target also has dependencies that we need to achieve. Here's what happens on boot:
+  * First, systemd loads its configuration files, usually located in /etc/systemd/system or /usr/lib/systemd/system
+  * Then it determines the boot goal, which is usually default.target
+  * systemd figures out the dependencies of the boot target and activates them
+
+systemd can boot into different targets:
+  * poweroff.target - shutdown system
+  * rescue.target - single user mode
+  * multi-user.target - multiuser with networking
+  * graphical.target - multiuser with networking and GUI
+  * reboot.target - restart    
+
+The default boot goal of default.target usually points to graphical.target . 
+
+Once a single unit is activated, everything below that unit gets activated as well. So let's say we boot into default.target and this target groups together the networking.service unit and crond.service unit, so those services will be activated.
+
+The files that define how systemd will handle a unit can be found in many different locations. The system has a copy in /lib/systemd/system. When software installs unit files on the system, this is the location where they are placed by default. You should not edit files in this directory. If you wish to modify the way that a unit functions, the best location to do so is within the /etc/systemd/system directory. Unit files found in this directory location take precedence over any of the other locations on the filesystem.
+
+If you wish to override only specific directives from the system’s unit file, you can actually provide unit file snippets within a subdirectory. These will append or modify the directives of the system’s copy, allowing you to specify only the options you want to change. The correct way to do this is to create a directory named after the unit file with .d appended on the end. So for a unit called example.service, a subdirectory called example.service.d could be created. Within this directory a file ending with .conf can be used to override or extend the attributes of the system’s unit file.
+
+Example of basic service unit file for foobar.service
+
+```
+[Unit]
+
+Description=My Foobar
+Before=bar.target
+
+
+[Service]
+
+ExecStart=/usr/bin/foobar
+
+
+[Install]
+
+WantedBy=multi-user.target
+```
+At the beginning of the file, we see a section for [Unit], this allows us to give our unit file a description as well as control the ordering of when to activate the unit. The next portion, [Service] section, under here we can start, stop or reload a service. And the [Install] section is used for dependency management. 
+
+
+## systemctl
+
+To manage services in particular, our main tool is the `systemctl` command.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## incorporated are below
+
+## Boot Process
+
+1. BIOS - Basic Input/Output System - initializes the hardware and makes sure with a Power On Self Test (POST) that all hardware is ready. The main job of the BIOS is to load up the bootloader.
+
+  * BIOS firmware common in IBM PC computers, dominant type of computers today. 
+  * BIOS firmware can be used to change the boot order of your harddisks, check system time, get machine's mac address, etc
+  * Once BIOS boots up the hard drive, it searches for the boot block, the first sector of the hard drive, (that gets reserved in every partition), to figure out how to find the bootloader.
+  * Linux uses BIOS. However there is another fireware type EFI/UEFI that was designed to be the successor to BIOS. Today Macintosh machines use EFI/UEFI while Windows is moving to it, but Linux is using BIOS. (BIOS seems independent of Linux, Windows, Mac, etc since its below them as the very first level on top of hardware. So it might be more appropriate to say that Linux can only run on top of BIOS, not EFI/UEFI)
+
+2. Bootloader - loads the kernel into memory and then starts the kernal with a set of kernel parameters. 
+
+  * Boots into an operating system, selects a kernel to use and specifies kernel parameters.
+  * Most common bootloader for Linux is GRUB.
+  * Can enter GRUB menu by clicking 'e' during startup. You can find kernel parameters from this menu:
+    - initrd - specifies the location of initial RAM disk
+    - BOOT_IMAGE - where the kernel image is located
+    - root - location of root filesystem
+    - ro - flag for read-only mode
+    - quiet - added so that you don't see display messages that are going on in the background during boot
+    - splash - lets splash screen be shown
+
+3. Kernel - when loaded, it immediately initializes devices and memory. The main job of the kernel is to load up the init process. The kernel will talk to hardware to make sure it does what we want our processes to do.
+
+  * The kernel manages our systems hardware, however not all drivers are available to the kernel during boot up, so we depend on a temporary root filesystem that contains just the essential modules that the kernel needs to get the rest of the hardware. 
+    - In the past, this job was given to the initrd (initial ram disk) - the kernel would mount the initrd, get the necessary bootup drivers, then when it was done loading everything, it would replace the initrd with the actual root filesystem.
+    - In the present, initramfs is used instead - a temporary root filesystem that is built into the kernel inself to load all the necessary drivers for the real root filesystem, so no more locating the initrd file. 
+  * After getting all the modules it needs, it mounts the root partition in read-only mode first to run `fsck` to check for system integrity, then afterwards it remounts the root filesystem in read-write mode.
+  * After the root filesystem is mounted, the kernel locates the init program and executes it.
+  * When we talk about the Linux operating system, we organize it into 3 different levels of abstraction - the hardware, the kernel, and the user space (the shell, the programs you run, the graphics, etc). We separate the kernel and user space because we want them to operate in different modes for security.
+    - The kernel operates in kernel mode. In kernel mode, the kernel has complete access to the hardware. Anything that involves hardware - reading/writing to disk, controlling our network, etc, is done in kernel mode.  
+    - The user space operates in user mode - there is a very small amount of safe memory and CPU that is allowed access in user mode. 
+    - There are two main levels and modes in x86 architecture that correspond to kernel and user modes, expressed as Ring #0 and Ring #3, respectively. 
+    - When we need to do anything that involves hardware in our user mode - which is the level we're usually always at - we need to make system calls which performs a privileged instruction in kernel mode, then switches back to user mode.
+    - syscall - System calls provide user space processes a way to request the kernel to do somethign for us. The kernel makes certain services available through the system call API. There is a fixed table of system calls, each identified by a unique ID, that do things like read/write to a file, modify memory usage, modify the network, etc.
+    - When a program like `ls` is called, the code inside this program has as 'system call wrapper' that invokes the system call through its syscall ID, which goes the process of switching to kernel mode to do what needs to be done, before returning to user mode. You can view and debug system calls with `strace`, example: `strace ls`
+  * You can have multiple kernels installed on your system - we can choose which kernel to use from the GRUB bootloader menu. To see what kernel version you have use `uname -r`. To upgrade to latest kernal version, you can use `sudo apt dist-upgrade` which will upgrade all packages on your system. 
+  * The kernel is located in the /boot directory. The file vmlinuz is the actual linux kernel. There are various kernel-related configuration files in the directory. 
+  * Kernel modules are pieces of code that can be loaded and unloaded into the kernel on demand - they allow us to extend the functionality of the kernel without actually adding to the core kernel code. Kernel modules can be found in the /lib directory.
+    - To list currently loaded kernel modules use `lsmod`
+    - Loading a module example: `sudo modprobe bluetooth`
+    - Removing a module example: `sudo modprobe -r bluetooth`
+  * To load modules during system boot, instead of temporarily loading them with modprobe, add a configuration file to the /etc/modprobe.d directory. 
+ 
+
+
+4. Init - the first process that gets started, init starts and stops essential service processes on the system, as the mother of all processes. There are three implementations of init in Linux:
+  - System V init (sysv): This is the traditional init system.
+  - Upstart: This is the init you'll find in older Ubuntu installations. It uses the idea of jobs and events, it works by starting jobs that perform certain actions in response to events.
+  - Systemd - is the new standard for init. It is goal oriented - basically, you have a goal that you want to achieve and systemd tries to satisfy the goal's dependencies to complete the goal.
+
+  
+## find command
+
+- logical operators can be used with find
+examples:
+- list all files that have chick or kitty in name
+find -name "*chick*" -or -name "*kitty*"
+- list all non html files
+find -type -f -not -name "*.html"
+! is alternative syntax for -not 
+- and (-and) operator/command is optional because it's implied through multiple options
+
+- we can provide find with our own action to perform using each matching pathname 
+find -exec command {};
+The {} are a placeholder for the current pathname(each match), and the semicolon is required to indicate the end of the command.
+
+- when using find, when we provide a command via -exec, that command is executed separately for every single element. We can instead use a special command called xargs to build up the input into a bundle that will be provided as an argument list to the next command. 
+
+- xargs is not just for usage within find. Its used anytime we want to pass a list of arguments to another command. Useful for when a command is not setup to accept sdin so piping without xargs first would not work. 
+
+## grep command
+
+- the grep command searches for patterns in each file's contents. grep will print each line that matches a pattern we provide. -i will make search case insensitive, -w will make sure to match words only instead of fragments located inside of other words. 
+
+- useful to pipe outputs of other commands to grep to search for something in the output 
+
+
+
+
+## packages
+
 - packages
 - packages are installed with package managers, but can also be installed through source code.
 Two main varieties of packages are Debian (.deb) and Red Hat (.rpm). Ubuntu uses .deb. Packages are lots of files compiled into one. The people that write this software are known as upstream providers, they compile their code and write up how to get it installed. These upstream providers work on getting out new software and update existing software. When they are ready to release it to the world, they send their package to package maintainers, who handle getting this piece of software in the hands of the users. These package maintainers review, manage and distribute this software in the form of packages.
@@ -321,7 +556,39 @@ Package management systems like apt and yum were created so that you dont have t
 
 It's a best practice to update your package repositories so they are up to date before you install and update a package. 
 
-Sometimes you might have to install the rare obscure package from source code, in which case you'll need to install the build-essential package with apt, which will give you the make command. Then you'll have to uncompress/unarchive the source code, go inside and run any configure scripts to check for dependencies, then you'll have to make sure there's a makefile, then run make install. (make is the compiler for C programs. C programs seem to exist parallel to bash scripting, same low level for OS programming )
+Sometimes you might have to install the rare obscure package from source code, in which case you'll need to install the build-essential package with apt, which will give you the make command. Then you'll have to uncompress/unarchive the source code, go inside and run any configure scripts to check for dependencies, then you'll have to make sure there's a makefile, then run make install. (make is the compiler for C programs. C programs seem to exist parallel to bash scripting, same low level for OS programming.)
 
-Devices are abstractions that 'do something' that can be considered a little removed from in-memory data movement. There are external devices like printers, hard disks/ filesystems, usb, and then there are psuedo devices. External devices usually transfer data in blocks and thus called block devices. Pseudo devices are usually character devices, as they work with data character at a time, like /dev/null that takes input and discards it. Named pips allow two or more processes to communicate with each other. Socket devices facilitate communication between many processes at once. SCSI devices are peripherals like hard disks. /sys filesyemns contains all the information for all devices on system, while /dev directory is simple, it allows other programs to access devices themselves, while the /sys filesystem is used to view information and manage the device. There is a udevd daemon that is running on the system and it listens for messages from the kernel about devices connected to the system. Udevd will parse that information then create and remove device files from /dev. dd tool is useful for copying data. It reads input from a file or data stream and writes it to a file or data stream. Can be used to create backups of anything, even whole disk drives. 
+## devices
 
+Devices are abstractions that 'do something' that can be considered a little removed from in-memory data movement. There are external devices like printers, hard disks/ filesystems, usb, and then there are psuedo devices. External devices usually transfer data in blocks and thus called block devices. Pseudo devices are usually character devices, as they work with data character at a time, like /dev/null that takes input and discards it. Named pipes allow two or more processes to communicate with each other. Socket devices facilitate communication between many processes at once. SCSI devices are peripherals like hard disks. /sys filesyemns contains all the information for all devices on system, while /dev directory is simple, it allows other programs to access devices themselves, while the /sys filesystem is used to view information and manage the device. There is a udevd daemon that is running on the system and it listens for messages from the kernel about devices connected to the system. Udevd will parse that information then create and remove device files from /dev. dd tool is useful for copying data. It reads input from a file or data stream and writes it to a file or data stream. Can be used to create backups of anything, even whole disk drives. 
+
+
+## os
+- two families - microsoft nt descendants like windows and everything else Unix descendants like mac os, linux and android
+- original unix design choices live on like multi-user os and hierarchical file systems.
+- unix philosophy - modular software design, write programs that do one thing well, combine programs, write programs to handle text streams, because that is a universal interface
+- linux created from linux kernel and GNU project software with goal to make unix-like os that is open source
+- kernel is core of operating system that facilitates interactions between hardware and software, and manages critical tasks like memory management and task scheduling and allocation of resources. 
+- many different linux distributions like fedora, ubuntu, debian. etc
+- shell is an interface to an operating system. shells expose an OS's services to users or other programs. terminal is a program that runs a shell. there are many shells, such as bash, zsh, powershell etc, 
+- bash is the most common shell and is the default on linux. (git-bash is a good emulation on windows computers to be able to use unix-like commands)
+
+everything in linux is a file
+
+
+## Linux command line
+
+- man pages are built-in documentation for linux
+
+- 4 types of commands (use type command to tell us the type of another command)
+  - executable program - usually stored in /bin, /usr/bin, or /usr/local/bin. there are compiled binary files
+  - built-in shell command - these commands are part of the shell (bash in our case)
+  - shell function
+  - alias
+- some commands do not have a man page entry, like many shell built-ins. use help command for those commands
+
+- nano - simple text editor that can be used from terminal. simpler than vim or emacs
+
+- bash keeps a record of the commands we previously entered. You can scroll through the history using the up and down arrows, but also see a file of the history at ~/.bash_history. You can search the history at the command line with ctrl+r, then use ctrl+r again to cycle through, enter to use command, down arrow to exit search.
+
+- less - program for viewing a file rather than editing, useful for viewing large files as they are broken up into 'pages' to turn

@@ -9,7 +9,7 @@ const GOOGLE_API_KEY = "AIzaSyCIaAc2c5M3VpbCH6PPq_guwy9lHuowXOs";
 // declare var google: any;
 
 type GoogleGeocodingResponse = {
-  results: { geometry: { location: { lat: number; lng: number } } }[];
+  results: { geometry: { location: { lat: numb er; lng: number } } }[];
   status: "OK" | "ZERO_RESULTS";
 };
 
@@ -23,7 +23,7 @@ function searchAddressHandler(event: Event) {
         enteredAddress
       )}&key=${GOOGLE_API_KEY}`
     )
-    .then((response) => {
+    .then((response) => {               
       if (response.data.status !== "OK") {
         throw new Error("Could not fetch location!");
       }

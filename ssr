@@ -1,0 +1,143 @@
+in normal, spa react app, browser makes request for page, page is light html file, which asks for fetching a large javascript file, the javascript file has react in it and it fills in more html by constructing it, then (potentially) the javascript code asks to fetch some json data, and once that json data arrives, the page renders content based on that data. This is a lengthy process. Using SSR instead is a way to make the content come to the screen as fast as possible. With SSR instead of 3 round trip requests before content appears, we have just one. 
+
+In ssr:
+receive request -> load up react app in memory -> fetch any required data, render the react app, take the generated html, send it to user --> user sees content as html is painted to the screen --> when parsing reaches bottom of html and it sees request for large javascript file, it makes the request while user is interacting with rendered html --> large bundle is received --> React boots up (presumably recreates the html and renders again) and continues running as react app
+
+rendering html is hardware intensive so ssr rendering server in ssr setups can be slow
+
+
+ReactDOM -
+render - creates instances of a bunch of components and mounts them to a DOM node (adds them to an existing DOM)
+renderToString - renders a bunch of components one time (on a 'fake' DOM in the server) and produces a string out of all the resulting html 
+
+
+DOM is just a tree data structure. in the browser it's used to paint the monitor. On the server it's just a tree data structure thats used temporarily by react to generate the html structure for a file.
+
+server side rendering - generating html on the server 
+
+because ssr is not specific enough (since sending formed html was the norm in the past), two more terms were coined -
+universal javascript - the same code runs on the server and the browser
+isomorphic javascript - the same code runs on the server and the browser
+
+renderToString function from 'react-dom/server' creates a temporary dom structure on the server and derives html from it that can then be sent to the client. 
+
+HTML from renderToString will not have event handlers because attaching listeners is a javascript action. 
+
+renderToString is used to create the raw html from the first render of an application. Then it is injected into a bare html template that has a script tag at the end. That script tag points to what would be a normal react app. Once that's fetched, the normal react app takes over. So renderToString is used to create the raw html of the first render of a normal app, that raw html is sent first so that the user can see the content of the first render while the full app loads up.
+
+Steps: 
+App rendered on server into some div in a template -> raw html of app with template sent to users browser --> browser renders html file on screen, then loads client bundle --> client bundle loads and manually renders the react app a 'second' time into the same div --> react renders our app on the client side and compares the new html to the what exists in the document --> React takes over the existing rendered app, binds event handlers, etc
+
+presumably when react compares whats on the document to what it rendered in its virtual dom, if there are any discrepancies then it raises hydration errors (?)
+
+This process of putting functionality back into the DOM that was already rendered is referred to as hydration.
+
+Client react apps that are meant to be hydrated should use ReactDOM.hydrate(<App />, document.querySelector("#root")) instead of ReactDOM.render (even though render will work) for clarity (and perhaps better support). 
+
+(small aside: with node, unlike the browser, we can require node modules at runtime (we don't need to have one giant js file, that's needed on the browser because of script tags). So for webpack setups we don't need one giant server.js file like we do for browser. For brower we actually do want third party libraries and our own code to be bundled into one file.)
+
+There are usually two tiers (or layers) of routing, express route handling and then react-router (library) route handling. Usually for anything meant to return html, we want react router to handle it. Usually react-router's BrowserRouter looks at the url in the address bar. Since there is no address bar in the server, we will use StaticRouter for the first server side render, but use BrowserRouter in the client. StaticRouter was made for these use cases.
+
+So to setup routing, express should pass all (or all html related) routes to renderer function which should use StaticRouter to create the html for the template. The template will have script tag that fetches bundle when on client. That bundle should be have BrowserRouter instead of StaticRouter but same routes and components.
+
+When there is data fetching involved for generation of content for first render, we have additional challenge of waiting for that data before we renderToString, so we can construct useful html to send to client. Primary challenge in react-ssr is finding a way to detect when all initial data loading has completed on the server.
+
+When calling renderToString(), lifecycle methods are not even invoked in the temp server DOM tree. Because the purpose is to create raw html made from the DOM tree structure.
+
+REMINDER: renderToString is extremely computationally intensive. 
+
+Data Fetching Strategy for first render of SSR App (NextJS uses this strategy) -
+attach a little function to all of our components that describes the data that component needs to load in order to be rendered. 
+
+
+1. Figure out what components would have rendered (based on URL)
+2. Call a 'loadData' method attached to each of those components.
+3. Wait for response.
+4. Somehow detect all requests are complete.
+5. Render the app with the collected data.
+6. Send result to browser.
+
+Pros - only render the app once, makes data requirements of each component clear
+Cons - requires a ton of extra code
+
+Need to use react-router-config to help with step 1.
+
+For fetching initial data for SSR - 
+
+Create routes with this pattern, attaching the data loading functions needed for each route - 
+```javascript
+export default [
+  {
+    path: "/",
+    component: Home,
+    exact: true,
+  },
+  {
+    path: "/users",
+    component: UsersList,
+    loadData,
+  },
+];
+```
+Now you have an array of routes and the data loading function each route eneds.
+Feed the above into 'react-router-config' which will use it to create routes.
+
+Create a state container outside of the react app. Use the utility matchRoutes from 'react-router-config' to find the matched route, call the associated data loading function, once its done loading, insert the loaded data into the external state container. Pass the state container and the route to renderToString, which will create the fully formed html to send to client.
+
+```javascript
+app.get("*", (req, res) => {
+  // create external state container
+  const store = createStore();
+
+  // find the matching route (its an array in case multiple routes match, but generally that shouldn't happen)
+  const promises = matchRoutes(Routes, req.path).map(({ route }) => {
+    // call the data fetching function associated with the route
+    return route.loadData ? route.loadData(store) : null;
+  });
+
+  // once the data is done fetching, pass filled-in external store and path to renderToString
+  Promise.all(promises).then(() => {
+    res.send(renderer(req, store));
+  });
+});
+```
+With this strategy, there will be a hydration error because when the client app boots up, it's first render will be missing data (because it's fetched onMount, and from react principles, react renders the app while it waits for data to load on the client). To solve this, we will pass the results of data loading that happened in the server to the client using a script tag and attach it to window global object. Then react can read that data and use it as initial state. Like below:
+
+```javascript
+// to avoid xss attack, use serialize instead of JSON.stringify()
+import serialize from 'serialize-javascript';
+
+export default (req, store) => {
+  const content = renderToString(
+    <Provider store={store}>
+      <StaticRouter location={req.path} context={{}}>
+        <div>{renderRoutes(Routes)}</div>
+      </StaticRouter>
+    </Provider>
+  );
+
+  return `
+    <html>
+      <head></head>
+      <body>
+        <div id="root">${content}</div>
+        <script>
+          window.INITIAL_STATE = ${serialize(store.getState())}
+        </script>
+        <script src="client-bundle.js"></script
+      </body>
+    </html>
+  `;
+};
+```
+
+And in client code - 
+```javascript
+const store = createStore(
+  reducers,
+  window.INITIAL_STATE,
+  applyMiddleware(thunk)
+);
+```
+
+This setup might make you think we no longer need to fetch initial data on the client anymore. But we are only fetching data on the server if that was the first page the user requested. After first browser request, React completely takes over, and any other page navigation will be handled entirely by client. So in case this page is not the first page they come to, you need to keep the onMount client side fetching.

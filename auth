@@ -1,0 +1,220 @@
+Cookies -
+THe idea is to have a mini database that can allow our servers to be a little more stateless, and allow our browsers to manage some state. 
+
+Its the most secure mechanism we have for authentication.
+
+Cookies vs local storage 
+you want to use cookies for anything that involves the initial render of your application if your rendering on the server. Also local storage is worse for security.
+
+
+can set cookies on the client and the server () 
+
+A cookie (also known as a web cookie or browser cookie) is a small piece of data a server sends to a user's web browser. The browser may store cookies, create new cookies, modify existing ones, and send them back to the same server with later requests. Cookies enable web applications to store limited amounts of data and remember state information; by default the HTTP protocol is stateless.
+
+Typically, the server will use the contents of HTTP cookies to determine whether different requests come from the same browser/user and then issue a personalized or generic response as appropriate.
+
+Setting cookies:
+Set-Cookie: <cookie-name>=<cookie-value>
+
+Example:
+
+HTTP/2.0 200 OK
+Content-Type: text/html
+Set-Cookie: yummy_cookie=chocolate
+Set-Cookie: tasty_cookie=strawberry
+
+[page content]
+
+
+When a new request is made, the browser usually sends previously stored cookies for the current domain back to the server within a Cookie HTTP header:
+
+GET /sample_page.html HTTP/2.0
+Host: www.example.org
+Cookie: yummy_cookie=chocolate; tasty_cookie=strawberry
+
+
+Cookies are organized in the browser by domain. 
+
+Depending on the attributes set within the Set-Cookie header when the cookies are created, they can be either permanent or session cookies.
+
+Permanent cookies are deleted after the date specified in the Expires attribute, or after the period specified in the Max-Age attribute. 
+Set-Cookie: id=a3fWa; Expires=Thu, 31 Oct 2021 07:28:00 GMT;
+Set-Cookie: id=a3fWa; Max-Age=2592000
+
+Session cookies — cookies without a Max-Age or Expires attribute – are deleted when the current session ends. The browser defines when the "current session" ends, and some browsers use session restoring when restarting. This can cause session cookies to last indefinitely.
+
+you can update cookie values with Set-Cookie using the existing cookie's name and a new value:
+Set-Cookie: id=new-value
+
+
+# Updating cookies via javascript
+In the browser, you can create new cookies via JavaScript using the Document.cookie property, or the asynchronous Cookie Store API.
+
+document.cookie = "yummy_cookie=chocolate";
+document.cookie = "tasty_cookie=strawberry";
+
+The above will set new cookies, (expected javascript behavior is that the second line will overwrite the first line, but the api is setup magically such that setting document.cookie will only add to the list of cookies, not replace (strange..))
+
+You can also access existing cookies and set new values for them, provided the HttpOnly attribute isn't set on them (i.e., in the Set-Cookie header that created it).
+
+Note that, for security purposes, you can't change cookie values by sending an updated Cookie header directly when initiating a request, i.e., via fetch() or XMLHttpRequest.
+
+Note that there are also good reasons why you shouldn't allow JavaScript to modify cookies — i.e., set HttpOnly during creation.
+
+
+## Security
+
+When you store information in cookies, by default all cookie values are visible to, and can be changed by, the end user. You really don't want your cookies to be misused, A criminal could for example steal a session ID and use it to set a cookie that makes it look like they are logged in as someone else, taking control of their bank or e-commerce account in the process.
+
+You can secure your cookies in a variety of ways:
+
+Block access to your cookies:
+You can ensure that cookies are sent securely and aren't accessed by unintended parties or scripts in one of two ways: with the Secure attribute and the HttpOnly attribute:
+
+Set-Cookie: id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly
+
+A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol. It's never sent with unsecured HTTP (except on localhost), which means man-in-the-middle attackers can't access it easily.
+
+A cookie with the HttpOnly attribute can't be accessed by JavaScript, for example using Document.cookie; it can only be accessed when it reaches the server. This precaution helps mitigate cross-site scripting (XSS) attacks.
+
+
+## Define where cookies are sent
+The Domain and Path attributes define the scope of a cookie: what URLs the cookies are sent to.
+
+The Domain attribute specifies which server can receive a cookie. If specified, cookies are available on the specified server and its subdomains.
+
+Set-Cookie: id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly; Domain=mozilla.org
+
+If the Set-Cookie header does not specify a Domain attribute, the cookies are available on the server that sets it but not on its subdomains. Therefore, specifying Domain is less restrictive than omitting it.
+
+The Path attribute indicates a URL path that must exist in the requested URL in order to send the Cookie header.
+
+Set-Cookie: id=a3fWa; Expires=Thu, 21 Oct 2021 07:28:00 GMT; Secure; HttpOnly; Path=/docs
+
+The path attribute lets you control what cookies the browser sends based on the different parts of a site. It is not intended as a security measure, and does not protect against unauthorized reading of the cookie from a different path. 
+
+If path is '/' that means cookie will be sent with all requests (?). 
+
+
+## Controlling third-party cookies with SameSite
+
+The SameSite attribute lets servers specify whether/when cookies are sent with cross-site requests — i.e., third-party cookies.
+
+Cross-site requests are requests where the site (the registrable domain) and/or the scheme (http or https) do not match the site the user is currently visiting. This includes requests sent when links are clicked on other sites to navigate to your site, and any request sent by embedded third-party content.
+
+SameSite helps to prevent leakage of information, preserving user privacy and providing some protection against cross-site request forgery attacks. It takes three possible values: Strict, Lax, and None:
+
+Strict: causes the browser to only send the cookie in response to requests orginating from the cookie's origin site. This should be used when you have cookies relating to functionality that will always be behind an initial navigation, such as authentication or storing shopping cart information. 
+
+
+Set-Cookie: cart=110045_77895_53420; SameSite=Strict
+
+
+Lax: is similar, except the browser also sends the cookie when the user navigates to the cookie's origin site (even if the user is coming from a different site). This is useful for cookies affecting the display of a site — for example you might have partner product information along with an affiliate link on your website. When that link is followed to the partner website, they might want to set a cookie stating that the affiliate link was followed, which displays a reward banner and provides a discount if the product is purchased. (my analysis of this scenario is that the benefit of the partner website to allow lax samesite cookie is that it will know information about the user when the user follows the link to the partner's website. It can show initial content based on cookies it receives from the cross-site request.)
+
+Set-Cookie: affiliate=e4rt45dw; SameSite=Lax
+
+
+None specifies that cookies are sent on both originating and cross-site requests. This is useful if you want to send cookies along with requests made from third-party content embedded in other sites, for example, ad-tech or analytics providers. Note that if SameSite=None is set then the Secure attribute must also be set — SameSite=None requires a secure context. (So this means you want to set samesite=none if you expect your website links to be embedded in other peoples website and you want to know info about the user so you can track them - for example then you can see the url and say - this guy visited this particular site that our site is embedded in. Basically if you are a tracker company and you can convince many websites to include you in their site then you can gather data on users if a user visits multiple sites you are embedded in.)
+
+Set-Cookie: widget_session=7yjgj57e4n3d; SameSite=None; Secure; HttpOnly
+
+If no SameSite attribute is set, the cookie is treated as Lax by default.
+
+
+## cookie prefixes 
+Look into cookie prefixes to avoid sub-domain attacks.
+
+Browsers are thinking about not allowing third-party cookies. From my understanding this means browsers are not going to allow the samesite=none option anymore right? (Lax is OK, since it only sends cookies on active navigation to another site.)
+
+
+# Sessions
+Session can refer to many things in web development. But in the context of authentication it usually refers to a data structure that is used to store data about a user. (Specifically data about a user's authentication and authorization status and how long they have that status.) Cookies are used to track a users's session, and there are different ways to store 'session' - in the cookie itself, or in a database.
+
+In practice, it's generally best to avoid storing too much data in the cookie itself as it will be sent to the server with every request. This can slow down the user's experience and can also cause problems if the cookie is too large.
+In my experience, most of the time the only persistent data stored in a session cookie is an ID that can be used to look up the rest of the data in a database. Sometimes temporary data is also stored in the cookie using a pattern called a "Cookie Flash".
+
+(For Remix but idea of flash can be understood: When you use session.flash it automatically unsets the value after the next get of that value.) In Next when you set a cookie within in a server function, the associated page you are on is rerendered on the server and sent back with the POST request for that server function. this is most likely to avoid a hard re-render of the page. So in Next if you want to flash a cookie, you can just set it with maxAge of 0.  
+
+In auth a session is a cookie with the userId or other user information that expires after a certain amount of time. It should be set once a user logs in, then for subsequent requests to the server if that cookie exists and is valid, we will consider client to be authenticated. 
+
+
+
+# Password Management
+
+Best way to store password is by storing the hash of the password.  A hash is a one-way function that takes in a string and returns a fixed-length string. The same input will always return the same output, but it's impossible to go from the output to the input. This means that if an attacker gets access to your database, they can't use the hashes to log in as the user. So, to verify the password is correct, you simply hash the password the user provides and compare it to the hash stored in the database. If they match, the password is correct.
+
+A brute force attack is when an attacker tries every possible combination of characters until they find the correct password. This is not very efficient, but if an attacker is after a specific user's account, it doesn't have to be. Eventually they will find the correct password.
+To protect against this, password hashing algorithms have been designed to be slow. This means that it takes a relatively long time to hash a password. This is fine for a user logging in, but it makes it very difficult for an attacker to brute force a password.
+
+A Rainbow Table is a precomputed table of hashes and their inputs. This allows an attacker to simply look up the hash in the table to find the input. This means that if an attacker gets access to your database, they can simply look up the hashes to find the passwords.
+To protect against this, password hashing algorithms use a salt. A salt is a random string that is added to the password before hashing. This means that even if two users have the same password, their hashes will be different. This makes it impossible for an attacker to use a rainbow table to find the passwords.
+
+A good algorithm that checks these boxes is bcrypt and a great library for generating bcrypt hashes is bcryptjs.
+bcrypt hashes are slow and generate a random salt for you. This means that you don't need to worry about generating a salt and you can simply store the whole thing as is. Then when the user logs in, you provide the stored hash and the password they provide to bcryptjs's compare function will verify the password is correct.
+
+Modeling Passwords requires special consideration. A password hash is a single field, so it may make sense to simply include the hash on the User model. However, recall that the default behavior for a select statement (particularly in Prisma where you can leave off the select) is to return all fields. So if we were to include the hash on the User model, then every time we queried for a User we would get the hash back. An unfortunate oversight on the part of a developer could lead to leaking all password hashes in the UI. 😱
+Instead, we will create a separate Password model that has a one-to-one relationship to the User model. This way, the default of query the User will not include the password hash (at worst, it will include the id of the password which is not a concern).
+Unfortunately, it's not possible to enforce a required value on both sides of a one-to-one relationship. So we can't enforce that a password is required on the User model at the database level. However, it's worth the tradeoff to avoid the risk of leaking passwords. 
+
+
+# Login
+
+Because we're generating the hash and salt using bcrypt, we simply take the hash we stored and pass it to bcrypt along with the provided password to verify that the password is correct.
+
+bcrypt will take care of splitting the hash into it's salt and hash parts and then hashing the provided password with the salt to see if it matches.
+
+
+# Logout
+
+Logging out of a cookie-managed session is pretty easy. You simply need to remove the part of the cookie that identifies the user. You could delete the cookie altogether, or you could simply "unset" the user ID portion of the cookie.
+
+It's important to note that you should almost never perform mutations within a GET request, so rather than having a link to a /logout page which is too common, you should have a button that performs a POST request to /logout. This reduces the risk of CSRF attacks.
+
+When a cookie expires, the browser will automatically delete it. So it won't show up in future requests. Almost like it was never created in the first place.
+By default, a cookie will expire when the session is over, which is when the browser is closed. However, you can set an expiration date on the cookie so that it will expire at a certain time. This is useful for things like "remember me" functionality, where you want the user to remain logged in for a long time.
+
+The expiration time can be configured one of two ways:
+expires - A Date object representing the time the cookie should expire.
+maxAge - A number representing the number of seconds the cookie should remain valid.
+Neither is better than the other.
+
+Another time to log the user out automatically is when the user's session is invalid. The primary reason for this is that the user's account may have been deleted. In this case, you'll want to send them to the login page so they can login with a different account or create a new one.
+
+
+automatic logout
+Automatic logout is a little more complicated. If you wish to do this without client-side JavaScript, it involves setting a cookie with every single request and checking that cookie on subsequent requests. If the cookie is not present, then you can log the user out. It's a jarring experience and in the modern age, not likely necessary.
+With client-side JavaScript, you simply create a timer and so long as the user is actively using the site, you reset the timer. If the timer expires, you log the user out. You can even provide them with a modal to notify them of the impending logout and give them the option to stay logged in.
+Depending on the application, this may not be necessary or desired, but for highly sensitive applications, it's a good idea.
+
+
+## Protecing Routes 
+
+redirect from login and signup pages if already logged in.
+guard authenticated routes
+guard authorized routes 
+
+Redirecing from Login if user is logged out on a protected page from another window, or goes there manually from browser, or gets there by a nav link. 
+
+
+## RBAC - Role Based Access Control
+
+"Role-Based Access Control." In this system, each user has a set of roles, and each role has a set of permissions. Then when the user is trying to perform an action, the app checks whether the user's roles have the necessary permissions.
+
+We're going to be using many-to-many relationships for our roles and permissions. A user can have many roles. A role can have many users. A role can have many permissions. A permission can have many roles.
+
+but we're going to need this seeding in production as well.
+So, what we need is to manually update our migration.sql file we just made for our permissions to create and insert some initial roles and permissions. That way when we deploy our updates to production, the production database will automatically get these roles and permissions.
+
+A data dump refers to the process of extracting and copying a large amount of data from one system or database to another, typically for backup, analysis, or migration purposes.
+
+
+## Managed Sessions
+
+Instead of storing the userId in the cookie, the managed sessions pattern stores 'sessions' in the database and the sessionId in the cookie. The session has the userId and expirationDate, the two things the old userId cookie had - the userId and the cookie's expiration was all that was needed. This allows us to create features that will allow users to remotely log out of other sessions. It will also give us more control over logging out users, as all we need to do is delete all sessions a user has.
+
+
+## Email
+
+Resend is a good option for sending emails for authentication flow. To test and develop authentication flows with email, you can use msw to mock out email service so you don't make real requests or send real emails.
+

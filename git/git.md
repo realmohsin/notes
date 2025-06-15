@@ -1,3 +1,6 @@
+To check if git is installed, and its version
+- git --version
+
 To install git 
 - sudo apt install git-all
 
@@ -24,11 +27,23 @@ To determine which files are in which state
 To track files, to stage files, to mark merge-conflicted files as resolved: 
 - git add <filename-or-directory>
 
-To compare unstaged files against last commit (untracked files do not show up)
+To compare unstaged files against last commit + staged changes (untracked files do not show up)
 - git diff
+- git diff <filename>
 
 To compare staged changes against last commit:
 - git diff --staged
+
+To compare file(s) in working directory (except untracked files) against what it looked like at certain commit -
+- git diff <commit> 
+- git diff <commit> <filename>
+
+To compare files betwen two commits -
+- git diff <earlier-commit> <later-commit>
+- git diff <earlier-commit> <later-commit> <filename>
+
+NOTE: The above nuances of git diff make it hard to use. 
+PERSONAL STRATEGY - If you want to compare working directory changes to last commit, stage everything with `git add .` then use `git diff HEAD`. Use `git diff HEAD <filename>` for single file (after staging). If you want to compare last commit to previous commit use `git diff HEAD~1 HEAD <filename>`.  
 
 To commit with editor opened for receiving commit message:
 - git commit
@@ -56,8 +71,15 @@ To add changes to or modify the last commit without creating a new commit:
 
 To move a file from staged to unstaged:
 - git restore --staged <filename>
-To restore a file to what it looked like when you last committed:
+To move all staged files to unstaged:
+- git restore --staged .
+To restore a file to what it looked like when you last committed (must be unstaged first):
 - git restore <filename>
+To restore all files to last commit (must be unstaged first)
+- git restore .
+To restore a file to what it looked like at a previous commit - 
+- git restore -s <commit> <filename>
+example - git restore -s HEAD~3 file1.txt
 
 To see which remote servers you have configured:
 - git remote
@@ -95,8 +117,10 @@ To create tag at previous commit:
 To create non-annotated tag:
 - git tag <tag-name>
 
-To show tag data:
-- git show <tag-name>
+To show details of a blob, tree, tag or commit:
+- git show <git-object-name>
+To who file contents at certain commmit:
+- git show <commit>:<filename> // git show HEAD~1:file1.txt
 
 To push a tag to a remote: 
 - git push <remote-name> <tag-name>
@@ -127,7 +151,7 @@ To create new branch on current checked-out commit
 - git branch <branch-name>
 To create branch based on another branch
 - git branch <new-branch-name> <branch-to-be-based-on>
-Can use to create local version of remote tracking branch
+Can use to create local version of remote tracking branch and it will be a 'tracking branch'
 
 To switch to an existing branch
 - git checkout <branch-name>
@@ -159,7 +183,7 @@ To abort a merge during a merge conflict
 
 To make and/or update a remote branch based on the checked-out local branch
 - git push <remote> <branch-name-on-remote>
-Add -u to remember association between local and remote, for subsequent 'git push' invocations
+Add -u to remember association between local and remote, for subsequent 'git push' invocations. Sets up to track remote branch.
 
 To manually set or change upstream branch
 - git branch -u origin/<branch> 
@@ -167,4 +191,21 @@ To manually set or change upstream branch
 To delete a remote branch on the server
 - git push <remote> --delete <branch-name>
 
-To
+To show summary information about a remote
+- git remote show <remote>
+
+
+To replay commits from one branch onto another
+- git rebase <branch-to-rebase-onto>
+
+To show what a file looked like at a certain commit
+- git show <commit>:<filename>
+
+
+
+
+git stash, git stash apply, git stash pop, git stash list, git stash drop x, git stash clear (max's git & github course)
+
+git reflog - has history of what head has done in the last 30 days, you can find commit from commit message and use the hash given to bring it back
+
+if you use git push --force and change commits that your teammate has pulled down, then your teammate will not be allowed to pull normally the next time they try. They will have to fetch and then rebase (look into this)

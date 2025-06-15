@@ -1,16 +1,22 @@
+# Git Installation on Ubuntu 22.04.4
+
+1. Check if Git is installed or not using `git --version`.
+2. Install Git using `sudo apt install git-all`. 
+3. Set name using `git config --global user.name "Real Mohsin"`
+4. Set email using `git config --global user.email "real@realmohsin.com"`
+5. Install Visual Studio Code, then set editor using `git config --global core.editor "code --wait"`
+6. Verify settings are set and check where they are coming from using `git config --list --show-origin`.
+
+
+# old notes
 Git is a Distributed Version Control System, where clients don't just check out the latest snapshot of files, but rather they fully mirror the repository, including its FULL history. Thus if any server dies, any of the client repositories can be copied back up to the server to restore it. Every clone is really a full backup of all the data.
 
-- installing git
-on linux, sudo apt install git-all
-on windows, go to website, download installer, run installer
 
 - git config variables
 - /etc/gitconfig - file for values applied to every user on the system
 - ~/.gitconfig - file for values applied to current user
 - .git/config in directory where git is being used to create a repository - local values
 Each level overrides values in the previous level.
-
-After install, check config options, make sure your name, email and default editor is set.
 
 You can get more info for a git command with git help <verb>, git <verb> --help, or man git-<verb>
 
@@ -29,7 +35,7 @@ To start controlling a project directory with git, use git init to create a subd
 
 Files are stored as blobs, and directories are stored as trees in the objects/ database folder. They are both stored and referenced by the hash of their contents. EACH version of a new file commited will generate a new saved file in the objects/ folder. If a file is changed and committed 10 times, there will be 10 files in objects/ folder, each representing a version of that same file. If a file is not changed when a commit happens, that file's saved file in objects/ remains the same and is still pointed to by the latest commit. 
 
-A tree in objects/, representing a version of a directory, is file listing the real file names that constitute that directory and the corresponding hashes that represent those files in the objects/ directory. 
+A tree in objects/, representing a version of a directory, is a file listing the real file names that constitute that directory and the corresponding hashes that represent those files in the objects/ directory. 
 
 Sample tree file:
 100644 blob ca35a4cae90ebfce16d872449fc7998f080a4f11    hellogit.txt
@@ -49,9 +55,27 @@ Second commit
 
 Commit's will always reference the top level nameless tree that represents the root working directory.
 
-A branch in Git is simply a lightweight movable pointer to a commit.
+A git reference, or ref, is a file that contains the SHA-1 of a commit. The file's name can then be used as an easy to remember shortcut for that SHA-1 to reference in commands.
 
-HEAD is a pointer to a branch.
+You can find these refs in .git/refs directory. 
+
+A branch in Git is simply a lightweight movable pointer to a commit. (Branches are refs, you can find them in .git/refs/heads). A branch is a simple pointer or reference to the head of a line of work.
+
+HEAD is a pointer to a branch, Its a ref, but it points to another ref file. But sometimes it can contain a SHA-1 value itself, this happens when you checkout a tag, commit or remote branch which puts your repository in 'detached HEAD' state. 'Detached HEAD' state can then be defined as when the HEAD ref file directly contains a SHA-1 commit hash. 
+
+<left off at tag section of Git Internals>
+
+
+Git fetch fetches all new commits and the pointers to them from remote. Git fetch only downloads the data, does not automatically merge it with any of your work. You have ot merge it manually.
+
+If your current branch is set up to track a remote branch, you can use the git pull command to automatically fetch and then merge that remote branch into your current branch. 
+
+The git clone command automatically sets up your local master branch to track the remote master branch on the server you cloned from.
+
+The git push command only works if nobody has pushed to that branch since you pulled. Your push will be rejected and you'll have to fetch and incorporate the new commits first.
+
+
+- renaming a branch essentially means - renaming the local branch, pushing the renamed branch to remote (from remote's perspective its a new branch), the old named branch will exist in remote, so delete it
 
 
 Fast-forward merge
@@ -81,3 +105,36 @@ When you create a local branch based on a remote-tracking branch (for master, wh
 to do - think about merge conflicts when git pulling
 to do - think about merge conflicts when rebasing
 to do - read git rebase --help page
+
+With rebase, you take all the changes that were committed on one branch and replay them on the a different branch. 
+
+Do not rebase commits that exist outside your repository and that people may have based work on.
+
+
+(TO DO: set up credential cache so you don't have to type in password everytime you push to a team repository.)
+
+(TO DO: merge conflict when pulling? or when merging corresponding remote-tracking branch)
+(TO DO: merge conflict when pushing?)
+
+
+
+Only amend commits that are still local and have not been pushed somewhere. Amending previously pushed commits and force pushing the branch will cause problems for your collaborators. For more on what happens when you do this and how to recover if you're on the receiving end read The Perils of Rebasing.
+
+test time of commit on order after fast forward merge (answer should be obvious, but lets settle)
+
+
+Git uses the git reflog command to record changes made to the tips of branches. 
+
+if using git pull --rebase, or setting it with `git config --global pull.rebase true`, what gets rebased onto what? 
+Answer: You're replaying your local commits onto the remote tracking branch
+
+rebase when you rebase - when you rebase, merge commits and commits that have the same 'patch-id' as a commit on rebase target don't get replayed. this means that if you're history accidentally has commits that were rebased, your rebase will not include duplicated commits. 
+
+
+git describe for tagging and naming releases
+git archive for creating physical release 
+
+to create a tarball of project release
+git archive master --prefix='project/' | gzip > `git describe master`.tar.gz
+
+In certain git commands, commits can be refered to relative to the HEAD. For example, the last commit is HEAD, the commit before it is HEAD~1, and the commit before that one is HEAD~2, and so on.  

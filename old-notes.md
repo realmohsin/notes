@@ -1,13 +1,5 @@
-ubuntu vm -
-install oracle vm virtualbox and its dependencies
-download linux iso, create vm with iso, do not skip installation, specify hostname. specify new user and (global?) password for ubuntu.
-after ubuntu is installed, give sudo privileges to new user, had to use "su -" (might be better ways)
-install guest additions from within (https://www.youtube.com/watch?v=w4E1iqsn_wA or other videos that make sense),
-guest additions make it so os knows its in a vm and will play nice with resolution change and window resizing.  
-
-
 ssh
-storing a public key in the authorized_keys file will allow the owner of hte private k  ey to connect through ssh to this host
+storing a public key in the authorized_keys file will allow the owner of hte private key to connect through ssh to this host
 digitalocean asks for a public key during dashboard creation of a node (this just means it will create a authorized_keys file and put it there)
 To put a public key in another host, tools like ssh-copy-id may help. Manual copying and typing it out works, or anyway to do it.
 OpenSSH is the service, process that allows for connections. It listens on a port. It must be enabled withing firewalls like ufw.
@@ -62,7 +54,6 @@ server {
 		root /var/www/example;
 		index index.html;
 	}
-
 }
 ^ the above says - whenever any request comes to example.com on this nginx instance, serve the files specified in location 
 you need to change ownership of served folder to user specified in the top directory because worker process needs permission to serve:
@@ -144,3 +135,19 @@ docker run --rm (remove when stopped)
 docker run --name (name the container)
 docker run -it (connect STDIN and create tty)
 docker container prune
+
+
+## vscode
+keybindings.json -
+{ "key": ".", "command": "" } // add this for npmintellisense + pathintellisense extensions - https://github.com/ChristianKohler/NpmIntellisense/issues/12
+
+## regex crash course
+
+. - matches any single character
+^ - matches the start of a line
+$ - matches the end of a line
+[abc] - matches any character in the set
+[^abc] - matches any character not in the set
+[A-Z] - matches characters in a range
+* - repeat previous expression 0 or more times
+\ - escape meta-characters

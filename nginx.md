@@ -94,7 +94,7 @@ after installation and getting certificate certobt adds a systemd timer to run t
 Steps for each domain + its www subdomain
 
 1. make sure snapd core is up to date
-- sudo snap install core; sudo snap refresh core
+- sudo snap install core; sudo snap refresh core 
 2. remove any manually installed certbot installs, so command will use snap version
 - sudo apt remove certbot
 3. install the certbot snap package
@@ -112,3 +112,47 @@ Steps for each domain + its www subdomain
 10. test renewal process
 - sudo certbot renew --dry-run
 
+Look at what certbot added to server blocks to see how to redirect http traffic to https in nginx (in case you need to do it manually ever, or need to know how to manually redirect something)
+
+summary
+- start by mapping port 80 and port 443 requests to go to nginx - set up two server blocks for each port (the server block for port 80 should just 301 redirect to back to port 443, certbot will write the config for you)
+- if you use root directive to point to a folder, you are using nginx's built in server, 
+- in each server block you need to define location blocks to map the rest of the url to either: 
+  - folders (nginx web server will handle) or 
+  - to other ports/machines (in which case you are using nginx as reverse proxy)
+
+To use nginx's built in web server, set location block's try_files value to $uri to point back to root directory to use that will have the files you want to serve, html docs, css, etc
+
+example of server block for simple static file serving with nginx's web server:
+server {
+        server_name realmohsin.io www.realmohsin.io;
+
+        root /var/www/realmohsin.io;
+        index index.html;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
+
+example of reverse proxy to port 3000:
+server {
+        server_name realmohsin.io www.realmohsin.io;
+        location / {
+                proxy_pass http://45.55.200.218:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+        }
+}
+
+
+reverse-proxy - a server positioned in front of web services/servers
+benefits of reverse proxy:
+- clients never directly interact with the origin server, which eliminates certain vectors of attack. 
+- caching can be implemented on the reverse-proxy which will lower the load on the main web server
+- reverse proxy can load balance  by distributing requests across multiple web servers
+- can be in charge of ssl encryption and 301 redirecting http requests to https so that the main server does not have to deal with that load
+- monitoring can be set up on the reverse proxy

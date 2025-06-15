@@ -1,0 +1,93 @@
+# SSH
+
+The most common way of connecting to a remote Linux server is through SSH. SSH allows a secure way of executing commands remotely. When you connect through SSH, you log in using a linux user account that exists on the remote server. Upon connecting, you have access to a remote shell through your host shell.
+
+To connect using SSH, the user computer needs an ssh client and the remote server needs to have a ssh daemon called OpenSSH. The ssh daemon listens for connections on port 22 (by default). 
+
+SSH clients and daemons usually come installed in Linux. 
+
+SSH keys are stored in .ssh/ folder. To generate a key pair use the command `ssh-keygen`. You can use default options and choose to set a password or not. 
+Recommended, skip password, but use following:
+```bash
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+```
+Add optional comment with -C flag if needed, many people add their email here since a key pair represents an identity, similar to a password, so an email as a label makes sense.
+
+When prompted to enter file in which to save the key, you can append to the default file name if you want multiple keys for different purposes. (This does not really increase security as all the private keys will reside in the same folder, if one is compromised, chances are all will be comprimised. But having multiple key pairs can help with privacy. Using the same public key everywhere can possibly be used to track you across the different services you authenticate to.) When intending to create multiple keys, you will have to make sure each 'identity' is known to the ssh-agent. List added identities using:
+```bash
+ssh-add -L
+```
+If missing, add using:
+```bash
+ssh-add ~/.ssh/id_rsa_digitalocean
+```
+The public key can be given to remote servers and services to connect to them in lieu of a password. 
+
+To connect to remote server:
+```bash
+ssh username@remote_host_IP 
+```
+To disconnect ssh connection type 'exit'.
+
+
+SSH daemons allow connection through linux user account password authentication, but it's discouraged to use this. Connecting using ssh keys is recommended.
+
+To connect to remote server using SSH keys, provide a public key to the remote server. The public key should be put in the file `~/.ssh/authorized_key` on the remote server. This will allow password-less connection to the remote server.
+
+ 
+
+
+# Steps for new Client Machine
+
+1. Check ~/.ssh/ folder. If empty, it means keys were not made. Create a private and public key pair using the command `ssh-keygen`. Press enter through to the end to pick default options. You should have two keys now in ~/.ssh/ folder - id_rsa and id_rsa.pub.
+2. Upload public key to GitHub. Go to Profile > Settings > SSH and GPG keys > New SSH key. Get public key from terminal using `cat ~/.ssh/id_rsa.pub`. Copy the output and paste it to GitHub. Should be able to connect to GitHub using SSH now.
+
+
+
+
+----
+
+One of the first things that need to be done at a new job is setting up SSH on your GitHub account.
+ 
+
+----
+
+1. What is SSH? A protocol, like HTTPS, FTP, and others, that allows us to communicate between two computers over the internet. SSH, which stands for Secure Shell, is a  communication protocol for computers. There's other communication protocols for computers like HTTP, but SSH was made to be used for communicating over shell. The SSH protocol is used by shells like bash. Generally we don't have to understand the ins and outs of the protocal as we normally don't work with the source code of bash. But essentially SSH is a protocol that says something like - if I sent a certain pattern of bytes, interpret this in such and such a manner. Any communication protocol is an agreement between two parties about what certain patterns mean. So when one computer sends bytes in a certain manner, perhaps, by prepending an agreed upon set of other bytes, the receiver knows that these bytes should be interpreted as commands that should be executed on the terminal of receiving computer.  Going back to a more higher level, SSH allows you to connect and login to a remote computer and allows you to execute commands on that computer. SSH allows secure connection over an unsecured network. 
+
+SSH uses symmetrical encryption, asymmetrical encryption and hashing together to create a secure connection over a potentially unsecured network. 
+
+Symmetric encryption
+Encryption where if a party has a key, it can use that key to to decrypt a message. The key is shared through a 'Key Exchange Algorithm'. The Key is never directly shared, instead the two computers use asymmetric encryption and an algorithm called Difiie Hellman Key Exchange to share public pieces of data, then manipulate it to independently calculate the key. 
+
+Asymmetric encryption is where you have a private key and a public key. You share the public key which can be used to encrypt a message that only the private key can decrpyt. Asymmetric encryption is used alongside the Difiie Hellman Key exchange algorithm to generate the key needed for symmetric encryption in SSH.
+
+Hashing is the process of converting data of any size into a fixed-size string of characters. Hashing is deterministic, the same input always gives the same output, this is why it can be used to verify data integrity, to make sure data has not been tampered with. It's irreversible, you cannot use the hash to get the original input, since there's a infinite number of possibilities. Hashing maps an infinite space to a particular finite space. One-way irreversility means you can share hashes without compromising original data. Hashes are generally collision- resistant - it's very hard to to have two inputs that produce the same hash, which means they can be used as identity markers. Hashes are used by Git to store versions of files. Hashing is used as part of SSH to ensure security. 
+
+Once a secure connection has been established, an ssh daemon needs to make sure the client has the right to access it. You can show you have this right by providing linux password of remote linux account each time you connect. Or you can use RSA keys to prove identity. It is preferred to use RSA keys. 
+
+ssh-keygen -C "Add optional comment with -C flag if needed, many people add their email here since a key pair represents an identity, similar to a password, so an email as a label makes sense"
+
+For more security:
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+When prompted to enter file in which to save the key, you can append to the default file name if you want multiple keys for different purposes. (This does not really increase security as all the private keys will reside in the same folder, if one is compromised, chances are all will be comprimised. But having multiple key pairs can help with privacy. Using the same public key everywhere can possibly be used to track you across the different services you authenticate to.)
+
+If you have multiple ssh key pairs in .ssh/ folder, you have to add the key to ssh client:
+ssh-add ~/.ssh/id_rsa_digitalocean
+This essentially adds your identity to the ssh client agent. You can check the identities added to your ssh agent:
+ssh-add -L
+These will be the active identities you can use to connect to ssh daemons that have one of these public keys.
+
+You can copy the public key to clipboard using 
+pbcopy < ~/.ssh/id_rsa_digitalocean.pub
+
+You will encounter two files in the .ssh folder:
+- authorized_keys - will have list of public keys. The holders of the private keys of these public keys will be able to SSH into this computer without a password. 
+
+- known_hosts - stores the host ids of remote servers you've connected to BEFORE. This is to make sure you are made aware if you are connecting to a known server but the host id is different, which can signify a man-in-the-middle attack. When connecting to a host for the first time, you'll be prompted to confirm, if you do, the host id will be added to known_hosts for the future. 
+
+
+ssh config has options to enable / disable password based authentication. Digital ocean disables password based authentication if you provide ssh key on droplet creation. Perhaps you can turn it back on by changing settings. 
+
+
+
