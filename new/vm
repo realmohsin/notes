@@ -1,0 +1,32 @@
+# Ubuntu 22.04.5 Virtual Machine Installation on Windows 11 PC
+
+1. Go to https://www.virtualbox.org/wiki/Download_Old_Builds_6_1 and click "Windows hosts" under "VirtualBox 6.1.50" to download installer. Install.
+2. Go to https://ubuntu.com/download/desktop and click button "Download 22.04.5 LTS" to download ubuntu image ISO. 
+3. From Oracle VM VirtualBox Manager program, click "New". Name the virtual machine and select "Linux" for "Type" and "Ubuntu (64-bit)" for "Version". Select half of system memory to allocate to virtual machine. Choose to "Create a virtual hard disk now". Choose default options for creating dynamically allocated virtual hard disk. Choose a size limit for the size of the virtual hard disk.
+4. Start virtual machine by clicking "Start". Select the downloaded ubuntu image (ubuntu-22.04.5-desktop-amd64.iso) as start-up disk. Choose default options all the way through to 'Who are you?' scrren. Fill in the form and choose "Log in automatically". After installation, go through automated restart. Choose to skip through 'Online Accounts' and 'Ubuntu Pro' screen options. Choose "No, don't send system info" on 'Help improve Ubuntu' screen. Allow "Location Services" on 'Privacy' screen. Choose not to download anything if installer popup asks.
+5. Click power button and turn off virtual machine by choosing "Power Off/Log Out" > "Power Off...". Right click the newly created virtual machine from Oracle VM VirtualBox Manager program and click "Settings...". Click "System" > "Processor" and select half of the total CPUs on "Processor(s)" slider. Click "Display" > "Screen" and select max value for "Video Memory" slider. Check "Enable 3D Acceleration". Click "OK".
+6. Start up the virtual machine. Verify that `sudo` works with `sudo ls`. Update the system package index using `sudo apt update`. List the upgradable packages with `apt list --upgradable`. Download and upgrade the packages using `sudo apt upgrade`. 
+7. From Oracle VM VirtualBox toolbar, click "Devices" > "Insert Guest Additions CD image...". Click the CD image from the Ubuntu Taskbar. Make note of the script "VBoxLinuxAdditions.run". Close the folder and in terminal run `findmnt`. Make note of path to the inserted CD "/media/:username/VBox_GAs_6.1.50". Run the script with `sudo /media/:username/VBox_GAs_6.1.50/VBoxLinuxAdditions.run`. 
+8. Message should say "This system is currently not set up to build kernel modules.". Run the command `sudo apt install build-essential gcc make perl dkms` to install required packages. Run the script again with `sudo /media/:username/VBox_GAs_6.1.50/VBoxLinuxAdditions.run` (Use 'Up' arrow key to find the command in history.) 
+9. Run the command `sudo reboot`. 
+
+
+
+
+## 
+
+Log into Google Account
+realmohsin67@gmail.com
+laer..
+
+Log into Firefox Account
+realmohsin67@gmail.com
+Moh..
+
+Log into GitHub Account
+realmohsin67@gmail.com
+Moh..
+
+Log into DigitalOcean Account
+realmohsin67@gmail.com
+Moh..

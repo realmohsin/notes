@@ -1,0 +1,9 @@
+# DigitalOcean
+
+1. Log into dashboard at cloud.digitalocean.com. Click Create > Droplets. Chose New York, Datacenter 1 NYC1, Ubuntu 24.10 x64, Droplet Type Basic, Regular SSD, $4/month. Choose SSH Key as Authentication Method, paste in public key from .ssh/ folder using `cat ~/.ssh/id_rsa.pub`. Name the droplet and click Create Droplet.
+
+2. Log in as root user through SSH by `ssh root@remote_server_IP`. Accept warning about host authenticity. Create new user using `adduser realmohsin`. Choose password Moh.., provide name, then skip rest of options. Give user sudo privileges using `usermod -aG sudo realmohsin`.
+
+3. Set up firewall using ufw to make sure only connections to certain services are allowed. Applications can register their profiles with ufw upon installation. The ssh daemon has registered profile as OpenSSH, check this using `ufw app list`. Allow SSH connections in firewall using `ufw allow OpenSSH`. Enable the firewall using `ufw enable`. Make sure it's been enabled using `ufw status`. The firewall is now blocking all connections except SSH. To allow new traffic, see https://www.digitalocean.com/community/tutorials/ufw-essentials-common-firewall-rules-and-commands.
+
+4. Allow external access for the regular user created in step 2, by running `rsync --archive --chown=realmohsin:realmohsin ~/.ssh /home/realmohsin`. Exit the session by typing 'exit'. Log into server as new user by running `ssh realmohsin@remote_server_IP`.

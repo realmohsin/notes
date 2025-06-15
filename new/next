@@ -1,0 +1,729 @@
+To access params and searchParam, you can get from props of page level server components and using the associated hook in client components (useParams, useSearchParams). To access them from non-page level server components you need to get it passed down to you from page component through props, or you can use headers() which might be less performant. If you need full url you might need to use middleware.
+
+check responses of server functions. When setting cookie in server function, it re-renders the page on the server and sends back the new html with the POST Response. Re-renders without page refresh. 
+
+React context is not supported in server components.
+
+cookies can only be modified in a server action or route handler, but cookies can be read from server components.
+
+you can flash a cookie by setting maxAge to 0. 
+
+looks like you can't force layout (and everything else?) to re-render wihtout POST request
+
+server actions
+- number one way to change data in a next app
+- super close integration with html forms
+- server actions are functions that will be called with the values a user entered into a form
+
+client components - essentially the same kind of react components you are already used to using
+
+server components - bends the rules, usually we want to use server components - better performance + ux
+
+All components made in nextjs are server components. they can use async await syntax directly in the body of a component. cannot use any kind of hook. cannot assign any event handlers. 
+
+Server components - Their code isn't included in the JS bundle, and so they never hydrate or re-render.
+
+to make a client component add 'use client' at the very top of the file. Limitation - client component cannot directly show a server component (there is an exception)
+
+use a client component if you need to use hooks and/or you need to use event handlers.
+
+just like server components, the html of client components also get created on the server to be sent to the user for the first render of the application. The javascript for those client components are fetched after the html hits the user's browser. 
+
+loading.tsx is for displaying load  r while a server component is fetching some data. But how does it work exactly? Is
+
+server actions cannot be defined in client components. either define in a server component and pass it down or define in a different file with 'use server' at top of file
+
+server components can't pass event handlers down to client components because data sent from a server component to a client component will go through http, so data sent has to be serializable, but functions are not.  but server actions are an exception because its just sending a reference (Symbol most likely)
+
+To run a server function whenever a user does anything besides submitting a form you can use startTransition. When you use a server function usually you're going to change some data then redirect the user to somewhere else in the application. The goal of startTransition is to sync up the change in data in our database with that navigation. It makes sure we don't navigate until our data has been updated. 
+
+Grider is saying startTransition makes sure we have updated data before we attempt to navigate. But that's handled by await / promises. But maybe what he means is that even if we navigate away while the transition is happening, without startTransition, the component we were on would unmount and data in the client app would never be updated, but with startTransition, the component will always exist in the background and will be re-rendered in the background even if the user is somewhere else when the async function finishes.
+
+
+https://nextjs.org/docs/messages/sync-dynamic-apis - learn to use codemods 
+
+
+useActionState for managing state that's updated by server function (?). To use useActionState you need to use Client Component, however, useActionState works without JavaScript enabled on the page. However, server components cannot use hooks, however, the fact that client components are rendered on the server (once at the start) is what allows useActionState to work without javascript on the client. But we thought even though client components render on the server, their javascript based functionality does not start on the server, but apparently useActionState does run on the server? Is this an exception? or does useState also run on the server, but just doesn't get used? Or does it get used in first render now?  how to untangle the magic? 
+
+In React 19, forms are reset after submission. 
+
+Do not put redirect() in try..catch because redirect() always throws an error and next just redirects in response to that error. Apparently this is intentionaly design?? Anyway, just avoid putting redirect in try..catch.
+
+From redirect documentation - redirect internally throws an error so it should be called outside of try/catch blocks.
+
+Next implements caching in several locations:
+
+Data cache - Responeses from requests made with 'fetch' are stored and used across requests.
+Router cache - 'Soft' navigation between routes are cached in the browser and reused when a user revisits the page. 
+Request memoization - make two or more 'GET' requests with 'fetch' during a user's request to your server? Only one 'GET' is actually executed.
+Full route cache - At build time, next decides if your route is static or dynamic. If it is static, the page is rendered and the result is stored. In production, users are given this pre-rendered result.
+
+(are the first 3 only in dev mode?)
+
+Full route caching system - when the app is built, next decides which page is static and which is dynamic. In the build success output it designates this using a circle for static and lambda sign for dynamic. 
+
+Static routes will be built once and cached and the same html will be sent on every request. Dynamic routes will trigger the actual request every time.
+
+A page will be dynamic if you can do one of the following ...
+- calling a 'dynamic function' or referencing a 'dynamic variable' when your route renders
+  - cookies.set(), cookies.delete(), useSearchParams(), searchParams prop
+- assigning specific 'route segment config' options
+  - export const dynamic = 'force-dynamic', export const revalidate = 0
+- calling 'fetch' and opting out of caching of the response
+  - fetch('...', { next: { revalidate: 0 } });
+- using a dynamic route
+  - /snippets/[id]/page.tsx
+
+
+There are several ways to control caching:
+time-based - every x seconds, ignore the cached response and fetch new data
+```javascript
+export const revalidate = 3; // create fresh response if last response was sent more than 3 seconds ago
+```
+on-demand - forcibly purge a cached response
+```javascript
+import {revalidatePath} from 'next/cache';
+
+revalidatePath('snippets');
+```
+
+disable caching - don't do any caching at all
+```javascript
+export const revalidate = 0;
+
+export const dynamic = 'force-dynamic';
+``` 
+
+Fully disabled cache is usually for when we are relying on data outside that we don't know when itll change and we still want the latest data.
+
+on-demand is best for an app where we know when data changes and the user expects to see up-to-date data
+
+We can also enable some caching for routes that are dynamic due to dynamic route segments liek [id]. 
+To cache dynamic routes, we can use generateStaticParams:
+```javascript
+export async function generateStaticParams() {
+  const snippets = await db.snippet.findMany();
+
+  return snippets.map((snippet) => ({
+    id: snippet.id.toString(), // one gotcha in nextjs. for some reason you need to convert number to string when generating static params
+  }));
+}
+```
+The above will generate individual pages for each param option we return from generateStaticParams. Then we can use on-demand cache busting strategically
+
+---
+
+
+Next is a React framework for building full-stack react apps. Under the hood, Nextjs abstracts the tooling needed for React, like bundling, compiling, etc
+
+main Features of next 
+- file based routing system based on Server Component architecture which streams components and data from server to client. 
+- allows server-side rendering alongside the client-side rendering of React. There are options to have the server-side rendering be static or dynamic. 
+- provides various optimizations for images, fonts, and other things that aid in improving web application performance
+
+The App router incorporates the latest features like Server Components, Transitions, Streaming (which is use of Suspense and the use API to load content incrementally as its done loading) and Server Functions. 
+
+## Installation
+
+Automatically
+npx create-next-app@latest
+
+Manually
+npm install next@latest react@latest react-dom@latest
+
+package.json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  }
+}
+
+create app folder for routing. create layout.tsx file for the root layout - which is required and MUST contian the <html> and <body> tags.
+
+create public folder at the root to store static assets such as images and fonts. Files inside public can then be referenced by your code starting from the base URL (/).
+
+To add typescript, rename a file to .ts / .tsx and run next dev. Nextjs will automatically install the necessary dependencies and add a tsconfig.json file with the recommended config options.
+
+next.js includes a custom typescript plugin and type checker (when you install typescript in the above step?). You can enable the plugin in vscode by opening the command palette, searching for 'TypeScript: Select TypeScript Version' and selecting 'Use Workspace Version'. 
+
+next.js comes with built-in eslint. to manually add eslint, add 'next lint' as a script in package.json. Then running the command will guide you through installation and configuration. There are 3 options - Strict, Base, and Cancel. Strict adds a base eslint configuration along with a stricter Core Web Vitals rule-set. Base, as the name suggests is just Next.js's base eslint configuration. Picking Cancel will allow you to set up your own custom eslint configuration. Linting check will run during every build (next build).  
+
+By default, Next.js will run ESLint for all files in the pages/, app/, components/, lib/, and src/ directories. However, you can specify which directories using the dirs option in the eslint config in next.config.js for production builds:
+```javascript
+module.exports = {
+  eslint: {
+    dirs: ['pages', 'utils'], // Only run ESLint on the 'pages' and 'utils' directories during production builds (next build)
+  },
+}
+```
+The above should be placed in next.config.js.
+
+(As can be seen, some of the configurations and settings you would specify in eslint.config.js should be put in next.config.js because it's a framework that takes over certain things. check https://nextjs.org/docs/app/api-reference/config/eslint in addition to eslint docs to figure out how to configure eslint properly for nextjs.)
+
+
+
+Next.js has in-built support for the "paths" and "baseUrl" options of tsconfig.json and jsconfig.json files. These options allow you to alias project directories to absolute paths.
+
+```javascript
+{
+  "compilerOptions": {
+    "baseUrl": "src/",
+    "paths": {
+      "@/styles/*": ["styles/*"],
+      "@/components/*": ["components/*"]
+    }
+  }
+}
+``` 
+(Is the paths part needed? if @ represents src/ then aren't these particular paths redundant?)
+
+## Project Structure
+
+top level folders
+- app - App router folder for defining routes and pages
+- public - static assets to be served
+- src - optionl application source folder
+
+top level files
+- next.config.js - configuration file for Next.js
+- middleware.ts - next.js request middleware
+- next-env.d.ts - typescript declaration file for next.js
+
+- layout - Layout
+- page - Page
+- loading - Loading UI
+- not-found - Not found UI
+- error - Error UI
+- global-error - Global Error UI
+- route - API endpoint
+- template - re-rendered layout (?)
+- default - parallel route fallback page
+
+- folder - Route segment
+- folder/folder - Nested route segment
+
+- [folder] - Dynamic route segment
+- [...folder] - Catch-all route segment
+- [[...folder]] - Optional catch-all route segment
+
+- _folder - private folder
+
+- (folder) - route group, for organization, will be skipped in route matching
+
+- @folder, (.)folder, (..)folder, (..)(..)folder, (...)folder - parallel and intercepted routes (check docs for more details)
+
+- favicon.ico - favicon file
+- icon .ico .jpg .jpeg .png .svg - app icon file
+- icon .js .ts .tsx - generated app icon
+- apple-icon .jpg .jpeg .png - apple app icon file
+- apple-icon .js .ts .tsx - generated apple app icon
+
+- opengraph-image .jpg .jpeg .png .gif - open graph image file
+- opengraph-image .js .ts .tsx - generated open graph image
+- twitter-image .jpg .jpeg .png .gif - twitter image file
+- twitter-image .js .ts .tsx - generated twitter image
+
+- sitemap.xml - sitemap file
+- sitemap .js .ts - generated sitemap
+- robots.txt - robots file
+- robots .js .ts - generated robots file
+
+
+### Special File Component Hierarchy
+
+The components defined in special files are rendered in a specific hierarchy:
+- layout.js
+ - template.js (?)
+  - error.js (React error boundary)
+   - loading.js (React suspense boundary)
+    - not-found.js (React error boundary)
+     - page.js or nested layout.js
+
+```javascript
+<Layout>
+  <Template>
+    <ErrorBoundary fallback={<Error />}>
+      <Suspense fallback={<Loading />}>
+        <ErrorBoundary fallback={<NotFound />}>
+          <Page />
+        </ErrorBoundary>
+      </Suspense>
+    </ErrorBoundary>
+  </Template>
+</Layout>
+```
+The components are rendered recursively in nested routes.
+
+In the app directory, nested folders define route structure. Each folder represents a route segment that is mapped to a corresponding segment in a URL path. However, even though route structure is defined through folders, a route is not publicly accessible until a page.js or route.js file is added to a route segment. 
+
+You can use route groups not just for route organization, but also to apply layout and loading files strategically to include and/or exclude routes. 
+
+
+## Layouts and Pages
+
+A page is UI that is rendered on a specific route. Made by default exporting a React component from page file.
+```javascript
+export default function Page() {
+  return <h1>Hello World</h1>
+}
+```
+A layout is UI that is shared between multiple pages. On navigation, layouts preserve state, remain interactive, and do not rerender. Made by default exporting a React component from a layout file. Should accept a children prop which can be a page or another layout.
+
+A root layout is defined at the root of app directory. It is required and must contain <html> and <body> tags.
+
+Wrapping a folder name in square brackets (e.g. [slug]) creates a 'dynamic route segment'(?) which is used to generate multiple pages from data. (HOw does this work for static site generation)
+
+
+You can use teh <Link> component to navigate between routes. <Link> is a built-in Next.js component that extends the HTML <a> tag to provide prefetching and client-side navigation. 
+```javascript
+import Link from 'next/link';
+
+<Link href=""></Link>
+```
+Link should be the primary way to navigate between pages, but the useRouter hook can be used for advanced navigation.
+
+
+
+## Images and Fonts
+
+Next.js comes with automatic iamge and font optimization. 
+
+The next.js <Image> component extends the html img element to provide:
+- size optimization - automatically serving correctly sized images for each device, using modern image formats like WebP
+- visual stability - preventing 'layout shift' automatically when images are loaded
+- faster page loads - only loading images when they enter the viewport using native browser lazy loading, with optional blur-up placeholders
+- asset flexibility - resizing images on-demand, even images stored on remote servers
+
+```javascript
+import Image from 'next/image';
+import profilePic from './me.png'; // there should be a me.png file in /public directory
+
+export default function Page() {
+  return (
+    <Image 
+      src={profilePic} 
+      alt="Picture of the author"
+      // width={500} automatically provided
+      // height={500} automatically provided
+      // blurDataURL="data:..." automatically provided
+      // placeholder="blur" // Optional blur-up while loading
+    />
+  )
+}
+```
+Next.js will automatically determine the intrinsic width and height of your image based on the imported file. These values are used to determine the image ratio and prevent Cumulative Layout Shift while your image is loading.
+
+To include remote images with src (example: src="https://s3.amazonaws.com/my-bucket/profile.png") you need to provide the width, height and optional blurDataURL props manually. The width and height are used to infer the correct aspect ratio of image and avoid layout shift. To safely allow images from remote servers, you need to define a list of supported URL patterns in next.config.js. Example:
+```javascript
+import { NextConfig } from 'next'
+ 
+const config: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 's3.amazonaws.com',
+        port: '',
+        pathname: '/my-bucket/**',
+        search: '',
+      },
+    ],
+  },
+}
+ 
+export default config
+```
+
+The next/font module automatically optimizes your fonts and removes external network requests for improved privacy and performance.
+
+It includes built-in self-hosting for any font file. This means you can optimally load web fonts with no layout shift.
+
+To start using next/font, import it from next/font/local or next/font/google, call it as a function with the appropriate options, and set the className of the element you want to apply the font to. Example:
+```javascript
+import { Geist } from 'next/font/google'
+ 
+const geist = Geist({
+  subsets: ['latin'],
+})
+ 
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={geist.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+You can automatically self-host any Google Font. Fonts are included in the deployment and served from the same domain as your deployment, meaning no requests are sent to Google by the browser when the user visits your site.
+
+Next recommends using 'variable fonts' for the best performance and flexibility, but if a variable font can't be used, you need to specify a weight:
+```javascript
+const roboto = Roboto({
+  weight: '400',
+  subsets: ['latin'],
+})
+```
+
+You can use local fonts by importing localFont from 'next/font/local' and specifying the src of the local font file.
+Examples:
+```javascript
+import localFont from 'next/font/local'
+ 
+const myFont = localFont({
+  src: './my-font.woff2',
+})
+ 
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className={myFont.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+For multiple local files specifying different weights and sytles:
+```javascript
+const roboto = localFont({
+  src: [
+    {
+      path: './Roboto-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './Roboto-Italic.woff2',
+      weight: '400',
+      style: 'italic',
+    },
+    {
+      path: './Roboto-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: './Roboto-BoldItalic.woff2',
+      weight: '700',
+      style: 'italic',
+    },
+  ],
+})
+```
+
+
+## CSS
+
+CSS Modules - locally scope CSS by generating unique classnames. Importing a css module takes the classes from the stylesheet and creates keys on an object with those classnames. The classnames map to the styles. Additionally when actually put on the DOM, each classname is a unique string so there are no name clashes throughout the app even though the source classes might be duplicated. To start using CSS Modules, create a new file with the extension .module.css and import it into any component inside the app directory.
+
+You can use global CSS to apply styles across the application. To use global styles, create a app/global.css file and import it in the root layout to apply styles to every route in your application.
+
+TailwindCss is a utility-first css framework that integrates seamlessly with nextjs. To install tailwind - `npm install tailwindcss @tailwindcss/postcss postcss`. To configure tailwind, create a postcss.config.mjs:
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+```
+In app/global.css, import tailwind styles using:
+```css
+@import 'tailwindcss';
+```
+Then import app/global.css in root layout. You can then start writing tailwindcss utility classes in your application.
+
+
+Using CSS-in-JS with newer React features like Server Components and Streaming require library authors to support the latest version of React.
+
+For Client Components, css-in-js libraries like @mui/material and styled-components are supported. emotion is currently working on support.
+
+For styling Server Components, CSS Modules or TailwindCSS is recommended. 
+
+To configure CSS-in-JS:
+- create a style registry to collect all CSS rules in a render.
+- use the 'useServerInsertedHTML hook to inject rules before any content that might use them
+- create a client component that wraps your app with the style registry during initial server-side rendering
+
+Check docs of css-in-js libraries for specific integration instructions. For mui check - https://mui.com/material-ui/integrations/nextjs/. 
+
+External stylesheets published by external packages can be imported anywhere in the app. 
+
+
+
+## Fetching Data
+
+Server Components - You can fetch data in Server Components using-
+- the fetch API
+- an ORM (object relational mapper) or database
+
+Client Components - You can fetch data in Client Components using -
+- React's 'use' hook
+- a community library like SWR or React Query
+
+When using async/await in Server components, Nextjs will opt into dynamic rendering. This means the data will be fetched and rendered on the server for every user request. If there are any slow requests, the whole route will be blocked from rendering. 
+
+To improve initial load time and user experience, you can use streaming to break the page's HTML into smaller chunks and progressively send those chunks from the server to client. 
+
+There are two ways to implement streaming:
+- with loading.js file
+- with react's Suspense component
+(Really, there's only one way - Suspense. loading.js file abstracts suspense for you)
+
+You can create a loading.js file in the same folder as your page to stream the entire page while the data is being fetched. The user will see the layout and a loading state while the page is being rendered. Behind the scenes, loading.js will be nested inside layout and will automatically wrap the page.js file in a Suspense boundary.
+This approach works well for route segments, but for more granular streaming, use Suspense.
+
+Suspense allows you to be more granular about what parts of he page to stream. For example, you can immediately show any page content that falls outside of the <Suspense> boundary, and stream in the parts of the UI that need fetched data inside the boundary.
+
+
+
+## Updating Data
+
+You can update data in Nextjs using Server Functions. A Server Function can be defined by using the 'use server' directive. You can place the directive at the top of an asynchronous function to mark the function as a Server Function, or at the top of a separate file to mark all exports of that file. 
+
+Server Functions can be inlined in Server Components by adding the 'use server' directive to the top of the function body.
+
+It's not possible to define Server Functions in Client Components. You can invoke them in Client Components by importing them from a file that has the 'use server' directive at the top of it. 
+
+There are two main ways you can invoke a Server Function:
+- Forms in Server and Client Components
+- Event Handlers in Client Components
+
+React extends the HTML <form> element to allow Server Functions to be invoked with the HTML 'action' prop. When invoked in a form, the function automatically receives the FormData object. You can extract the data using the native FormData methods.
+
+When passed to the action prop of a form, Server Functions are also known as Server Actions.
+
+You can invoke a Server Function in a Client Component by using event handlers such as onClick.
+
+While executing a Server Function, you can show a loading indicator with React's useActionState hook. 
+
+After performing an update, you can revalidate the Next.js cache and show the updated data by calling revalidatePath or revalidateTag within the Server Function. (why do you need to revalidatePath? Are SSR routes cached?)
+
+You may want to redirect the user to a different page after performing an update. You an do this by calling redirect - `import { redirect } from 'next/navigation'`
+
+
+
+## Error Handling
+
+Errors can be divided into two categories: expected errors and uncaught exceptions. Expected errors are those that can occur during the normal operation of the application, such as server-side form validation or failed requests. These errors should be handled explicitly and returned to the client.
+
+You can use the useActionState hook to handle expected errors in Server Functions. For these errors, avoid using try/catch to throw errors. Instead, model expected errors as return values. You can pass your action to the useActionState hook and use the returned state to display an error message. Example:
+```javascript
+'use client'
+ 
+import { useActionState } from 'react'
+import { createPost } from '@/app/actions'
+ 
+const initialState = {
+  message: '',
+}
+ 
+export function Form() {
+  const [state, formAction, pending] = useActionState(createPost, initialState)
+ 
+  return (
+    <form action={formAction}>
+      <label htmlFor="title">Title</label>
+      <input type="text" id="title" name="title" required />
+      <label htmlFor="content">Content</label>
+      <textarea id="content" name="content" required />
+      {state?.message && <p aria-live="polite">{state.message}</p>} // instead of throwing error, error is assumed with presence of state.message
+      <button disabled={pending}>Create Post</button>
+    </form>
+  )
+}
+```
+
+When fetching data inside of a Server Component, you can use the response to conditionally render an error message or redirect. You can call the notFound function within a route segment and use the not-found.js file to show a 404 UI.
+
+Uncaught exceptions are unexpected errors that indicate bugs or issues that should not occur during the normal flow of your application. These should be handled by throwing errors, which will then be caught by error boundaries.
+
+Error boundaries catch errors in their child components and display a fallback UI instead of the component tree that crashed.
+
+Create an error boundary by adding an error.js file inside a route segment and exporting a React component:
+```javascript
+'use client' // Error boundaries must be Client Components
+ 
+import { useEffect } from 'react'
+ 
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error(error)
+  }, [error])
+ 
+  return (
+    <div>
+      <h2>Something went wrong!</h2>
+      <button
+        onClick={
+          // Attempt to recover by trying to re-render the segment
+          () => reset()
+        }
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
+```
+Errors will bubble up to the nearest parent error boundary. This allows for granular error handling by placing error.tsx files at different levels in the route hierarchy.
+
+While less common, you can handle errors in the root layout using the global-error.js. Global error UI must define its own <html> and <body> tags since it is replacing the root layout when active. 
+```javascript
+'use client' // Error boundaries must be Client Components
+ 
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  return (
+    // global-error must include html and body tags
+    <html>
+      <body>
+        <h2>Something went wrong!</h2>
+        <button onClick={() => reset()}>Try again</button>
+      </body>
+    </html>
+  )
+}
+```
+
+
+
+## Metadata and OG images
+
+The Metadata APIs can be used to define your application metadata for improved SEO and web shareability and include:
+- the static 'metadata' object
+- the dynamic 'generateMetadata' function
+- special file conventions that can be used to add static or dynamically generated favicons and OG images. 
+With the above options, Next.js will automatically generate the relevant <head> tags for your page.
+
+There are two default meta tags that are always added even if a route doesn't define metadata:
+- The meta charset tag sets the character encoding for the website.
+- The meta viewport tag sets the viewport width and scale for the website to adjust for different devices.
+
+The other metadata fields can be defined with the Metadata object or the generateMetadata function.
+
+To define static metadata, export a Metadata object from a static layout.js or page.js file. Example:
+```javascript
+import type { Metadata } from 'next'
+ 
+export const metadata: Metadata = {
+  title: 'My Blog',
+  description: '...',
+}
+ 
+export default function Page() {}
+```
+If you need fetched data to generate metadata, use the generateMetadata function. See https://nextjs.org/docs/app/api-reference/functions/generate-metadata.
+
+There may be cases where you need to fetch the same data for metadata and the page itself. To avoid duplicate requests, you can use React's 'cache' function.
+
+Favicons are small icons that represent your site in bookmarks and search results. To add a favicon to your application, create a favicon.ico and add to the root of the app folder.
+
+Open Graph (OG) images are images that represent your site in social media. To add a static OG image to your application, create a opengraph-image.png file in the root of the app folder. You can also add OG images for specific routes by creating a opengraph-image.png deeper down the folder structure.
+
+To generate dynamic OG images see https://nextjs.org/docs/app/getting-started/metadata-and-og-images#generated-open-graph-images.
+
+
+
+## Deploying
+
+For deployment, you can choose a managed infrastructure provider, like Vercel, or self-host your application, for example by using a node.js server on DigitalOcean.
+
+
+
+## Upgrading
+
+To update to the latest version of Nextjs you can use the upgrade codemod: `npx @next/codemod@canary upgrade latest`
+
+Or to upgrade manually, install the latest next adn react versions and then update manually: `npm i next@latest react@latest react-dom@latest eslint-config-next@latest`.
+
+
+
+# Building Your Application
+
+## Routing
+
+### Route Handlers
+
+Route Handlers allow you to create custom request handlers for a given route using the Web Request and Response APIs.
+
+Route Handlers are defined in a route.js|ts file inside the app directory:
+```javascript
+export async function GET(request) {}
+```
+In addition to supporting the native Request and Response APIs, Next.js extends them with NextRequest and NextResponse to provide convenient helpers for advanced use cases.
+
+Route Handlers are not cached by default. You can, however, opt into caching for GET methods. Other supported HTTP methods are not cached. To cache a GET method, use a route config option such as export const dynamic = 'force-static' in your Route Handler file. Other supported HTTP methods are not cached, even if they are placed alongside a GET method that is cached, in the same file.
+
+
+
+
+
+============
+
+Steps for manual set up of next app
+1. git init
+2. touch .gitignore
+3. npm init
+4. node -v > .nvmrc
+5. echo engine-strict=true > .npmrc
+6. mkdir src/
+7. touch jsconfig.json 
+8. Add following in jsconfig.json:
+{
+  "include": ["src/**/*"]
+}
+9. npm i -DE @types/node
+10. type out 'process' in src/index.js to make sure node globals appear in auto-completion
+11. Add "engines" config in package.json:
+"engines": {
+  "node": "22.14.0",
+  "npm": "10.9.2"
+}
+12. Add "start": "node src/index.js" and run script to make sure everything works.
+13. npm i -DE prettier
+14. add .prettierrc with {} in file
+15. add .prettierignore with build and coverage for first two lines
+
+
+
+
+
+If logout is a server function that accepts arguments, then the following will not work:
+```typescript
+'use client';
+import { logout } from '../server-functions/logout';
+
+function LogoutButton() {
+  return <Button onClick={logout}>LOG OUT</Button>
+}
+```
+Has to be written like this:
+```typescript
+'use client';
+function LogoutButton() {
+  const handleLogout = async () => {
+    await logout();
+  };
+  return <Button onClick={handleLogout}>LOG OUT</Button>
+}
+```
+

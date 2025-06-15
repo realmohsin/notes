@@ -1,0 +1,464 @@
+# Prettier
+
+Prettier is an opinionated code formatter with support for JavaScript, TypeScript, CSS, HTML, Yaml, JSON, and more.
+
+It removes all original styling and ensures that all outputted code conforms to a consistent style.
+
+Prettier takes your code and reprints it from scratch by taking the line length into account.
+
+Prettier is a Node package.
+
+
+## How does it compare to ESLint/TSLint/stylelint, etc?
+
+Linters have two categories of rules: Formatting rules (eg max-len, no-mixed-spaces-and-tabs, keyword-spacing,...) and Code Quality rules (eg no-unused-vars, no-extra-bind, no-implicit-globals, prefer-promise-reject-errors, ...). 
+
+Prettier alleviates the need for Formatting rules because Prettier is going to reprint the entire program from scratch in a consistent way so it's not possible for programmers to make a mistake there. 
+
+Prettier does nothing to help with the code quality rules of linters. Those rules are important and can help catch real bugs, so linters should also be used in addition to Prettier.
+
+
+## Use Prettier:
+
+To install prettier locally -
+- npm install --save-dev --save-exact prettier
+
+Create .prettierrc config file to let editors and other tools know that prettier is being used -
+- node --eval "fs.writeFileSync('.prettierrc','{}\n')"
+
+Create .prettierignore to let prettier cli and editors know which files to not format -
+- node --eval "fs.writeFileSync('.prettierignore','# Ignore artifacts:\nbuild\ncoverage\n')"
+
+To format all files (after locally installing it) - 
+- npx prettier . --write
+Replace . with src/ to target specific directories or files only.
+
+To check (but not format) all files - 
+- npx prettier . --check
+This can be a part of a CI setup to make sure everyone is using prettier.
+
+## Prettier in vscode
+
+1. Install 'Prettier - Code formatter' extension. 
+2. Go to Settings, from top right options, open settings.json. Add following settings:
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
+}
+3. Go to Keyboard Shortcuts, search for 'format'. Change "Format Document" shortcut to 'shift + alt + f'. 
+
+## Some notes
+
+Use .prettierignore to ignore files. Prettier will follow rules specified in .gitignore if it exists in same directory. Also, by default node_modules/ is ignored so no need to include it in .prettierignore.
+
+Linters usually contain stylistic rules in addition to code quality rules. Stylistic rules are unnecessary when using Prettier. You can turn off eslint's stylistic rules using the following config `eslint-config-prettier`. 
+
+<< -----Pre commit Hook section TODO ----->>
+
+
+<< -----Run Prettier on CI (https://prettier.io/docs/ci) TODO ----->>
+
+
+
+## Configuration
+
+Prettier does not support global configuration. You can configure Prettier through a 'prettier' key in package.json or a file such as .prettierrc. If a .editorconfig file is in the project, Prettier will parse it and convert its properties to the corresponding prettier configuration. 
+
+Config Options:
+- experimentalTernaries: <bool>
+- experimentalOperatorPosition: "<start|end>"
+- printWidth: <int>
+- tabWidth: <int>
+- useTabs: <bool>
+- semi: <bool>
+- singleQuote: <bool>
+- quoteProps: "<as-needed|consistent|preserve>"
+- jsxSingleQuote: <bool>
+- trailingComma: "<all|es5|none>"
+- bracketSpacing: <bool>
+- objectWrap: "<preserve|collapse>"
+- bracketSameLine: <bool>
+- jsxBracketSameLine: <bool>
+- arrowParens: "<always|avoid>"
+- rangeStart: <int>
+- rangeEnd: <int>
+- parser: "<string>"
+- filepath: "<string>"
+- requirePragma: <bool>
+- insertPragma: <bool>
+- proseWrap: "<always|never|preserve>"
+- htmlWhitespaceSensitivity: "<css|strict|ignore>"
+- vueIndentScriptAndStyle: <bool>
+- endOfLine: "<lf|crlf|cr|auto>"
+- embeddedLanguageFormatting: "<off|auto>"
+- singleAttributePerLine: <bool>
+
+
+Example .prettierrc json config file:
+{
+  "trailingComma": "es5",
+  "tabWidth": 4,
+  "semi": false,
+  "singleQuote": true
+}
+
+
+
+# ESLint
+
+ESLint is a configurable JavaScript linter. It is a tool for identifying and reporting on patterns found in JavaScript code. The goal is to make code more consistent and have less bugs. Every single rule is a plugin and rules can be added at runtime. 
+
+## Rules
+
+Rules are the core building blocks of ESLint. A rule validates if your code meets a certain expectation, and what to do if it does not meet that expectation. Rules can also contain additional configuration options specific to that rule. There are hundreds of built-in rules, and custom rules can be added with plugins.
+
+Rules may optionally provide fixes for violations that they find. Fixes safely correct the violation without changing application logic. Fixes may be applied automatically with the --fix command line option and via editor extensions. Some rules may optionally provide suggestions instead of fixes, which are different in that they may change application logic so they cannot be automatically applied.  
+
+ESLint config file is a place where you put the configuration for ESLint. You can include built-in rules, how you want them enforced, plugins with custom rules, shareable configurations, what files you want rules to apply to, etc.
+
+An ESLint plugin is an npm module that can contain a set of ESLint rules, configurations, processors, and languages. Plugins can be used to support JavaScript extensions like TypeScript, and libraries like React.
+
+To change a rule’s severity, set the rule ID equal to one of these values:
+- "off" or 0 - turn the rule off.
+- "warn" or 1 - turn the rule on as a warning (doesn’t affect exit code).
+- "error" or 2 - turn the rule on as an error (exit code is 1 when triggered)
+
+Rules are typically set to "error" to enforce compliance with the rule during continuous integration testing, pre-commit checks, and pull request merging because doing so causes ESLint to exit with a non-zero exit code. (Presumably how the eslint program ended is used to determine whether we can move to the next check.)
+
+If you don’t want to enforce compliance with a rule but would still like ESLint to report the rule’s violations, set the severity to "warn".
+
+## Configuration
+
+You can turn off every rule and run only with basic syntax validation or mix and match the bundled rules to fit the needs of the project. 
+
+Two ways to configure ESLint - 
+- Configuration Comments - can use JavaScript comments to embed configuration information directly into a file.
+- Configuration Files - an eslint.config.js file which ESLint will look for and read automatically, or you can specify a configuration file on the command line.
+
+
+Options you can configure in ESLint:
+- Globals - the additional global variables your script accesses during execution (to help eslint make sure globals are interacted with properly)
+- Rules - which rules are enabled and at what error level
+- Plugins - which third-party plugins define additional rules, languages, configs etc
+
+The config file eslint.config.js should be placed in the root directory and export an array of configuration objects. If package.json 'type' is not 'module', then the config file should use commonjs.
+
+Example config file:
+// eslint.config.js
+```javascript
+const { defineConfig } = require("eslint/config");
+
+module.exports = defineConfig([
+	{
+		rules: {
+			semi: "error",
+			"prefer-const": "error",
+		},
+	},
+]);
+```
+
+Each configuration object contains all of the information ESLint needs ot execute on a set of files. Each config object is made up of these properties:
+- name - name for identifying config object
+- files - glob pattern indicating files that the config object should apply to
+- ignores - takes glob pattern indicating what files the config object should not apply to. If other options are not set, this can apply to every other config object, and takes on a global effect.
+- extends - an array of strings or config objects or arrays, that contain additional configurations to apply
+- languageOptions 
+  - ecmaVersion - the version of javascript to support. 'latest' by default.
+  - sourceType - the type of javascript source code. possible values are 'script', 'module', and 'commonjs', default is 'module' for .js and .mjs and 'commonjs' for .cjs files.
+  - globals - an object specifying additional objects that should be added to global scope during linting
+  - ...
+- linterOptions - options regarding inline configurations and logging
+- processor - advanced option for plugins
+- plugins - mapping of plugin names to plugin objects. only available to matching files
+- rules - configured rules. when 'files' or 'ignores' are specified, these rule configs are only available to matching files
+- settings - key-value pairs that should be available to all rules
+
+
+By default, ESLint lints files that match the patterns **/*.js, **/*.cjs, and **/*.mjs. Those files are always matched unless you explicitly exclude them using global ignores.
+
+When ignores is used without any other keys (besides name) in the configuration object, then the patterns act as global ignores. This means they apply to every configuration object (not only to the configuration object in which it is defined). Global ignores allows you not to have to copy and keep the ignores property synchronized in more than one configuration object.
+
+Each rule has its own options and the documentation needs to be checked. However each rule has a severity option of 'error' or 'warn'. When configuring rules, if you just want to specify the severity then you do so like -
+{
+	rules: {
+		semi: "error",
+	},
+}
+but if you want to pass rule specific options then specify an array where the first item is the severity and each item afterwards is an option for that rule. Example:
+{
+	rules: {
+		semi: ["error", "never"],
+	},
+},
+
+A configuration object uses extends to inherit all the traits of another configuration object.
+
+ESLint plugins can export predefined configurations. These configurations are referenced like this:=
+```javascript
+import examplePlugin from "eslint-plugin-example";
+import { defineConfig } from "eslint/config";
+
+export default defineConfig([
+	{
+		files: ["**/*.js"],
+		plugins: {
+			example: examplePlugin,
+		},
+		extends: ["example/recommended"],
+	},
+]);
+```
+The predefined configuration can be referenced by name 'example/recommended' or it can be pointed to directly like -
+extends: [examplePlugin.config.recommended]
+
+It’s recommended to always use a files key when you use the extends key to ensure that your configuration applies to the correct files. By omitting the files key, the extended configuration may end up applied to all files, perhaps non-js files as well?
+
+Using ESLint's predefined configurations - 
+
+Eslint has two predefined configurations for JavaScript - js/recommended and js/all. js/all changes with every minor version so not recommended for production.
+
+To use js/recommended -
+```javascript
+// eslint.config.js
+import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
+
+export default defineConfig([
+	{
+		files: ["**/*.js"],
+		plugins: {
+			js,
+		},
+		extends: ["js/recommended"],
+		rules: {
+			"no-unused-vars": "warn",
+		},
+	},
+]);
+```
+Here the js/recommended predefined config is applied first and then another rule and its options are applied. (the specific rule will override any implementation of it in js/recommended)
+
+If a shareable configuration comes by itself, instead of within a plugin, it should be installed as a dependency in the project, then referenced from inside of eslint.config.js like this - 
+```javascript
+import exampleConfig from "eslint-config-example";
+import { defineConfig } from "eslint/config";
+
+export default defineConfig([
+	{
+		files: ["**/*.js"],
+		extends: [exampleConfig],
+		rules: {
+			"no-unused-vars": "warn",
+		},
+	},
+]);
+```
+
+## Specifying Globals
+
+Some of ESLint’s core rules rely on knowledge of the global variables available to your code at runtime. Since these can vary greatly between different environments as well as be modified at runtime, ESLint makes no assumptions about what global variables exist in your execution environment. You can use the globals package to additionally enable all globals for a specific environment. 
+
+For web browsers and for Jest:
+```javascript
+import globals from "globals";
+import { defineConfig } from "eslint/config";
+
+export default defineConfig([
+	{
+		languageOptions: {
+			globals: {
+				...globals.browser,
+				...globals.jest,
+			},
+		},
+	},
+]);
+```
+
+For commonjs, use - ...globals.node
+For modules, use - ...globals.nodeBuiltin
+
+
+## Configuration Comments
+To configure rules inside of a file using configuration comments, use a comment in the following format:
+```javascript
+/* eslint eqeqeq: "off", curly: "error" */
+```
+In this example, eqeqeq is turned off and curly is turned on as an error.
+
+To disable rules in a part of a file -
+```javascript
+/* eslint-disable */
+alert("foo");
+/* eslint-enable */
+```
+
+To disable specific rules in a part of a file - 
+```javascript
+/* eslint-disable no-alert, no-console */
+alert("foo");
+console.log("bar");
+/* eslint-enable no-alert, no-console */
+```
+To disable or enable for entire file, put this on the first line -
+```javascript
+/* eslint-disable no-alert */
+alert("foo");
+```
+To disable rules on a specific line, two ways -
+```javascript
+alert("foo"); // eslint-disable-line no-alert
+
+// eslint-disable-next-line no-alert
+alert("foo");
+```
+
+
+To report unused eslint inline config comments (those that don't change anything from what was already configured), use the reportUnusedInlineConfigs setting:
+{
+	linterOptions: {
+		reportUnusedInlineConfigs: "error",
+	},
+},
+
+
+
+## Debug
+
+To debug eslint isuses when there are lots of options, you can generate a file's calculated config using -
+npx eslint --print-config <file.js>
+
+
+
+
+## Install ESLint
+
+To install and configure ESLint locally use -
+- npm init @eslint/config@latest
+
+Install `eslint-config-prettier` using -
+- npm i -D eslint-config-prettier
+
+Add the following to eslint.config.mjs - 
+```javascript
+import eslintConfigPlugin form "eslint-config-prettier";
+
+export default defineConfig([
+  ...,
+  {
+    files: ["**/*"],
+    extends: [eslintConfigPrettier]
+  }
+])
+```
+Install the extension ESLint (make sure its authored by microsoft) in vscode. The extension will highlight issues with red and yellow underlines in files and the left hand explorer panel will highlight files with eslint issues as well. When you hover over an issue, vscode's hover popup will give options to fix (if possible) or ignore the issue. 
+
+There are settings you can turn on to auto-fix eslint issues on save, but let's not turn them on, as code quality issues should be fixed with intention. 
+
+
+
+- Because webpack and typescript have allowed import statements to contain aliases and import .ts files and all sorts of other custom functionality, the plugin 'import' has resolvers that can be configured to not raise issues. You need to use 'import/resolver'. 
+
+
+
+
+---
+
+To manually install eslint
+
+npm i -DE eslint @eslint/js eslint-plugin-prettier
+touch eslint.config.js
+
+add the following to eslint.config.js - 
+
+For node javascript project:
+if module system is commonjs then use sourceType: 'commonjs',
+if module system is esmodules, then use sourceType: 'module', or omit because thats default
+
+npm i -DE globals
+
+// for css files
+npm i -DE @eslint/css
+
+// for json files
+npm i -DE @eslint/json
+
+```javascript
+import { defineConfig } from "eslint/config";
+import globals from "globals";
+import js from "@eslint/js";
+import json from "@eslint/json";
+import css from "@eslint/css";
+import eslintConfigPrettier from "eslint-config-prettier/flat"
+// if with react add:
+// import pluginReact from 'eslint-plugin-react';
+
+export default defineConfig([
+	{
+		files: ["**/*.js"], // if with react should be: files: ["**/*.{js,jsx}"],
+		languageOptions: {
+			sourceType: "module", // for commonjs - sourceType: "commonjs"
+			globals: globals.browser
+			// for code that will run in browser and node, use:
+			// globals: {
+			// 	...global.browser,
+			// 	...global.node,
+			// }
+		}
+		plugins: {
+			js,
+		},
+		extends: ["js/recommended"],
+		rules: {
+			"no-unused-vars": "warn",
+			"no-undef": "warn",
+		},
+	},
+
+	// if with react add:
+	// pluginReact.configs.flat.recommended,
+
+	// for test files:
+	// {
+	// 	files: ["**/*.test.js"],
+	// 	languageOptions: {
+	// 		sourceType: "module",
+	// 		globals: {
+	// 			...global.browser,
+	// 			...global.node,
+	// 		}
+	// 	},
+	// 	// add plugins and configs for tests here
+	// },
+
+	// for .cjs files in fullstack setups or ssr codebase
+	// { config for .cjs files add global.node }
+
+	// for json files
+	{
+		files: ["**/*.json"],
+		plugins: { json },
+		language: "json/json",
+		extends: ["json/recommended"]
+	},
+
+	// for css files
+	{
+		files: ["**/*.css"],
+		plugins: { css },
+		language: "css/css",
+		extends: ["css/recommended"],
+	},
+
+	// turn off eslint rules that prettier handles
+	{
+		files: ["**/*"],
+		extends: [eslintConfigPrettier]
+	}
+]);
+```
+
+
+For node + browser javascript (for example raw ssr server) - strategy should be use esmodules for all source code and use webpack to create one bundle for browser and one bundle for server. And for remaining files that have to run on the server to start the build perhaps, use .cjs and add flexible configs. 
+

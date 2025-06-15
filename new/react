@@ -1,0 +1,115 @@
+## Server Components
+
+As the name suggests, Server Components render on the server, either once at build time to generate static html or at server runtime, generating new html for every request.
+
+Client does not get the javascript for server components in its scripts, server components are sent as just html. Only client components are sent as javascript to the browser, where they are first hydrated.
+
+If using server components at runtime, you don't need to create an API layer for the web app, since you can perform I/O functions directly from the server components.
+
+For adding interactivity, you need to use Client Components, which you can nest inside Server Components. This works by first rendering the Server Component (and its nested Client Components), then instructing the bundler to create a bundle for the nested Client Components. In the browser, the Client Components will get the output of Server Components as props, for hydration and future re-rendering. The output of the Server Components (results of data fetches) can be sent to the client as raw data alongside the javascript for the client components. The client components will then use that raw data as initial state (or props) for hydration and re-rendering.
+
+When fetching data in Server Components, the component itself can be written as an async function so that await can be used in the component body. When you await in an async component, React will wait for the promise to resolve before resuming rendering. Usually you wait for the promise to resolve on the server, construct the html with the resolved data and send to client. That is the new formula to use when using server components. However, if you have data to fetch that is not critical for the first render, or you want the UI to be recieved by the client progressively while showing loading states, then you can initiate data fetching on the server, and provide the promise, without await-ing it, as props, to a child  client component wrapped in Suspense. Since the promise is not awaited, the html for first render will get created immediately and sent to client while the promise on the server is resolving. Once hydrated on the client, the client component will use the 'use' function to await the promise and signal to the Suspense when the promise has resolved. The Suspense will then show the component fully instead of the fallback it was showing in the first render.
+
+
+
+## Suspense
+
+Suspense is used for 'streaming' components and data. React will display a loading fallback until all the code and data needed by the children has been loaded. The children of a Suspense component are considered 'suspended' while data is loading and the fallback is being shown. Suspension happens when either javascript for the components themselves are loading, or some data the component needs is loading.
+
+Only Suspense-enabled data sources will activate the suspense component. Suspense does not detect when data is fetched inside an Effect or event handler.
+Suspense-enabled data sources include 'lazy' api for lazy-loading component code, and 'use' api for reading the value of cached Promises. Suspense-enabled frameworks, like NextJs, expose their own suspense-enabled data fetching (which just uses the 'lazy' and 'use' APIs in their abstractions).
+
+Suspense components can be nested within each other to create a streaming effect. As the data comes in for each component, the UI progressively shows each component. You can control how the components come to the screen by nesting Suspense components more or less granularly. A Suspense component will wait for ALL its child components to finish loading before removing fallback, so you can choose how to nest Suspense components to control the manner in which data arrives on the screen.
+
+useDeferredValue, startTransition and useTransition can be used to control how and what fallback is shown while components are suspended. useDeferredValue can be used to show current or stale content while fresh content is loading. startTransition and useTransition can be used to prevent hiding content that has already been revealed when switching to showing a fallback. Otherwise this can create a jarring user experience.
+
+
+
+## use
+
+use is a React API that lets you read the value of a resource like a Promise or context. The use API must be called inside a Component or a Hook. Prefer the use API for reading context and for reading promises sent to the client from the server that were not awaited.
+
+use is preferred over useContext for reading context because it is more flexible. Because it is a hook, useContext must be called at the top level of your component, whereas use can be called inside conditionals like if and loops like for. One potential pitfall - like useContext, use always looks for the closest context provider ABOVE the component that calls it - it will not work if the context provider is in the same component.
+
+When called with a Promise, the use API integrates with Suspense and error boundaries. The component calling 'use' suspends while the Promise passed to 'use' is pending. If the Promise passed to 'use' is rejected, the fallback of the nearest Error Boundary will be displayed.
+
+use is a Suspense-enabled data source and can be used to signal to Suspense when fallbacks should be shown. 
+
+use can allow flexible data streaming with Suspense. use allows Server Components to pass un-awaited promises to Client Components which can be waited upon by use API on the client. The use API will alert the Suspense when to stop showing the fallback. When passing a Promise from a Server Component to a Client Component, its resolved value must be serializable. Data types like functions are not serializable and cannot be the resolved value of such a Promise. There are two ways to deal with rejected promises - having an error boundary present, or provding an alternative valud with Promise.catch. 
+
+Prefer creating Promises in Server Components and passing them to Client Components over creating Promises in Client Components. Promises created in Client Components are recreated on every render. Promises passed from a Server Component to a Client Component are stable across re-renders.
+
+
+
+## Transitions
+
+Transitions are state updates whose re-rendering happen in the background. This means the rendered content is not visible until the transition is finished. This also means user interactions on the page are not blocked while the transition is happening. A transition is finished when the function that started it is fully done. If the function is async, then the transition will wait until it resolves. When the function resolves, the resulting UI from all the background renders is finally shown. Functions used in transitions are called Actions.
+
+useTransition
+- React hook that allows you to start transitions - mark state updates as transitions so that their renders happen in the background
+- gives you 'isPending' flag that tells you the status of the transition
+
+startTransition
+- allows you to start a transition, you need to pass a function that eventually updates some state. The function you pass to startTransition is called immediately, marking all state updates that happen while it executes as Transitions. You must wrap any state updates after any async requests in another startTransition to mark them as Transitions (This is a known limitation that will be fixed in the future.)
+
+
+A state update marked as a Transition will be interrupted by other state updates, and the transition's render will occur last. This is what it means for transitions to be non-blocking and allowing user interaction. A transition can take a long time to resolve, while the UI stays responsive. 
+
+Actions - Functions called in startTransition are called Actions. By convention, any callback called inside startTransition should be named action or have 'Action' as a suffix.
+
+You can update state and perform side effects within an Action, and the work will be done in the background without blocking user interactions on the page. For example, if the user clicks a tab but then changes their mind and clicks another tab, the second click will be immediately handled without waiting for the first update to finish.
+
+<-request ordering->
+
+When using Suspense and 'use' together, you might sometimes want to avoid Suspense showing a loading fallback if it makes the user experience jarring by replacing content. This scenario can arise if you need to fetch data after the initial load of the page, in which case since content is already shown, if the components suspend, then seeing the loading again will be jarring, whereas it wasn't jarring at the very beginning because there was no content before. This is another case where transitions can help, if a state update that would cause a suspension is marked as a transition, the render showing the loading fallback will happen in the background and not be shown. The isPending flag can be used to show a less jarring indicator of data loading if desired. 
+
+It is recommended that React frameworks build their routing with Suspense and mark their page navigations as Transitions. This is because Transitions are interruptible, prevent unwanted loading indicators and can wait for all pending actions and side effects to complete before the new page is shown. The App Router in Nextjs is built with transitions. 
+
+If a function passed to startTransition throws an error, you can display an error to your user with an error boundary. To use an error boundary, wrap the component where you are calling the useTransition in an error boundary.
+
+You cannot use a Transition for  state variable that controls an input. This is because updating an input in response to the change event should happen synchronously. You can use useDeferredValue if you wan tto run transitions in response to typing. It will trigger non-blocking re-renders to 'catch up' with the new value automatically. 
+
+State updates in transitions can happen out of order leading to unintended final results. This is because it's possible for previous requests to finish after later requests and React currently has no way to know the intended order because it loses context of the order across the async boundary. Higher-level abstrations like useActionState and <form> actions handle ordering for you, so you might not have to worry about this. For advanced cases, need to implement your own queuing and abort logic to handle ordering. 
+
+
+### Actions 
+
+Actions are functions that use async transitions and will eventually update some state using setX funtions. Transitions are renders that happen in the background. Rendering some components in the background allow you to control how how state updates happen. With a transition you can mark state updates as non-blocking, and so UI can stay responsive in the middle of a re-render, since it's happening in the background, app does not need to wait for it to finish as the original pre-render UI is being shown. 
+
+
+
+## Server Functions
+
+Server Functions allow Client Components to call async functions executed on the server.
+
+when a Server Function is defined with the "use server" directive, your framework will automatically create a reference to the server function, and pass that reference to the Client Component. When that function is called on the client, React will send a request to the server to execute the function, and return the result. Server Functions can be created in Server Components and passed as props to Client Components, or they can be imported and used in Client Components. 
+
+Note: When you run a server function, you're making a request from client to server, an http request. The request handler handler on the server runs your function and returns something in an http response. right? and the request that the client makes is something next creates under the hood. 
+
+It seems like server functions are POST requests to the page URL they are initiated from, and they cause a rerender.
+
+
+## useActionState
+https://medium.com/@an.chmelev/useactionstate-a-new-hero-in-the-react-world-d41400d1771f#:~:text=Differences%20from%20useFormState,calls%E2%80%94and%20that's%20incredibly%20handy!
+
+
+## Forms
+...
+
+
+
+
+---
+how is state handled in class components versus functional components? Whats the difference between using setState in class components and useState in functional components?
+
+---
+
+How is immutability important in state management in react/
+
+---
+
+How is the comflict resolution algorithm implemented in React?
+
+---
+
+What does the useImperativeHandle hook do and how does it work with forwardRef? does sync state between two sibling components? directly change state in a child component? expose ref with additional properties? help with async state management?
