@@ -496,7 +496,7 @@ An EdibleThing type must have name, sweetness and hasSeeds.
 
 If types cannot be combined in a sensible way, the intersection becomes 'never' type.
 
-Literal types represent exact valuesof JavaScript primitives.
+Literal types represent exact values of JavaScript primitives.
 
 ```typescript
 let fruitName: "Apple" = "Apple";

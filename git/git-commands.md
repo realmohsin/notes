@@ -107,4 +107,11 @@ Do not use git rebase to change the history of commits on a public branch.
 
 
 --------
-we need some examples of how to recover from history being re-writte on the remote. 
+we need some examples of how to recover from history being re-written on the remote. 
+
+
+one use case of rebase is in the way git pull can work, git pull --rebase
+
+in merge conflict when rebasing use git rebase --continue after fixing conflicts
+
+To squash commits into one commit and apply on top target branch (similar to git rebase), you can use git merge --squash <branch> 

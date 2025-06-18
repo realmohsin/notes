@@ -1,0 +1,21 @@
+We want libraries and frameworks that will help us have codebases that are more readable and maintainable. As we have to deal with more and more javascript in the front end, libraries like React help us create abstractions that make it easier to develop on top of the foundational html + css + javascript stack.
+
+React is the industry standard at the moment and I've spent my career becoming an expert at it. 
+
+The main benefit of React is it provides a declarative abstraction with which you can just tell React what you want the UI to show for each state of your application and it will handle re-rendering the UI for you. It will handle the imperative re-rendering for you so you don't have to go find the elements that will need to change and recreate and insert them in the dom manually. All this is abstracted away for you. And the reason React in particular has become the industry standard is because it handles the imperative details behind the scenes in an optimal way. ...
+
+
+
+
+====
+
+What is React?
+Why use React?
+What is state?
+What is Redux?
+Why use Redux?
+What is Create React App?
+What is Webpack?
+What is Babel?
+What is ESLint?
+How is Webpack, Babel and ESLint used together in web development?

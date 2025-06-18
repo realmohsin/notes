@@ -1,0 +1,126 @@
+All big companies prioritize fast user experience. 
+
+Amazon calculated that on their website if a page load slows down just one second, that could cost them 1.6 billion in sales each year. Google also did a calculation, and by slowing its search results by just four tenths of a second, they could lose up to a million searches per day, meaning they lose out on all that advertising money. 
+
+There's some research that suggests that there's an expectation that your app should load within 2 seconds and that about half of users will leave if it takes more than 3 seconds. 
+
+
+3 surface areas for performance optimizations
+- frontend processing
+- data transfer
+- backend processing
+
+Data Transfer Optimizations
+- make file sizes smaller
+  - minimize text
+  - minimize images
+    - pick the right file format and compress
+    - reduce png with TinyPNG, reduce JPG with JPEG-optimzer, always lower jpeg quality (30-60%)
+    - lower the resolution (size) to the match the size with which it will be displayed
+    - provide different sized images for different device widths (using media queries)
+    - use cdns like imgix
+    - remove image metadata (www.verexif.com)
+- reduce number of requests
+
+for perfect optimization - identify what data is needed for initial app use, what is 'above the fold', and send just that data, then during downtime, anticipate user action, and prefetch data for just those anticipated actions.
+
+
+Frontend Processing
+Rendering path - the sequence of steps taken by the browser to render the screen. 
+1. Constructing the DOM from the HTML
+2. Constructing the CSSOM from the CSS
+3. Applying any JavaScript that alters the DOM or CSSOM.
+4. Constructing the 'render tree' from the DOM and CSSOM. (DOMContentLoaded event?)
+5. Perform style and layout operations on the page to see what elements fit where.
+6. Handle painting the pixels and drawing the screen (Load event?)
+
+
+
+
+The initial render invokes this process, but as more resources that affect the page's rendering become available, the browser will re-run this process—or maybe just parts of it—to update what the user sees. The steps taken before the very first render is called the 'critical rendering path'. 
+
+The browser will only need to wait for the following before the initial render:
+- Part of the html
+- render-blocking css in the <head> element
+- render-blocking javascript in the <head> element
+
+For the initial render, the browser will not wait for all of the html, fonts, images, non-render-blocking javascript and non-render-blocking css. The browser expects to fill in fonts and images in subsequent page rerenders, but this can mean that areas of blank space can appear in the initial render. If sufficient space is not reserved for content as it streams in, (like when image dimensions are not provided in the HTML), the page's layout will shift. That shifting is now a user experience metric called Cumulative Layout Shift, and is used by Google in ranking webpages.
+
+One thing to note about non-rendering-blocking javascript (or css), they will still block rendering of html below the elements that load them. Perhaps they are called non-rendering-blocking simply because they don't block the painting of html that are above the elements that load them. 
+
+Optimizing the critical rendering path involves reducing the time to receive the first bytes of HTML (Time to First Byte metric) and reducing the impact of render-blocking resources (css and javascript in the head, and above the fold or till the point of html you want in the initial render).
+
+While optimizing critical rendering path is being concerned about the initial render, what's also important is, maybe even more so, is the contentful rendering path - path to First Contentful Paint (FCP) or path to Largest Contentful Paint (LCP), which is when the full content appears on the screen, the fonts, images, etc.
+
+
+
+
+
+1. Constructing the DOM
+2. Constructing the CSSOM
+3. Applying changes to the DOM and CSSOM from JavaScript
+4. Using the DOM and CSSOM to create a so-called 'Render Tree' (DOMContentLoaded event)
+5. Calculating layout of elements
+6. Painting the screen (Load event)
+
+The above process occurs for rendering the screen as resources specificed in the HTML are downloading.
+
+The particular steps of this process occurring for the first render is called the 'critical rendering path'. The first render does not wait for all the html, fonts and images to finish downloading. Renders and re-renders happen as these resources are downloaded. There are two resources, however, that are render-blocking,  css and javascript, where the browser DOES wait for them to finish downloading and being applied before continuing the render process.
+
+Optimizing the 'critical rendering path' or time-to-first browser render, is known to be a worthy performance optimizaiton. To optimize the critical rendering path, a few things are important to understand - css is rendering blocking, javascript is rendering blocking AND parser blocking, and all other resources are neither. With these things in mind, and a few other considerations, the following are some of the best practices for optimizing time to first render:
+- Optimizing time-to-first-byte (TTFB) of HTML, which involves having a fast server and avoiding page redirects.
+- Load style tags in the head of the html (css is render blocking, but not parser blocking so this asks css to be downladed first while the rest of the html is parsed.)
+- Load scripts at the end of the body - because javascript is also parser blocking, we want the html to be fully parsed (so all resource requests get initiated) before the script tag is encountered
+- Load only the CSS that's needed for content above the fold, load the rest after load event of window
+- use media attribute to only load stylesheets relevant to the device screen size
+- use less specific css rules, if possible, as they are more performant
+- embed css that is particular to a page directly with the style tag in head
+- use inline css with the style attribute on html elements, for styles that can't be reused
+- use async scripts for javascript that does not interact with the DOM and deferred scripts for javascript that might interact with the DOM. these will make it so html parsing is not blocked (async scripts might block if they get downloaded early). browser still waits for execution to finish before firing DOMContentLoaded. There is still benefit even if script is at the bottom of body, because browser is unblocked while script is downloading to finish up anything it needs to do. Also since deferred (and sometimes async) does not block parser, you don't have to place them at the bottom of the html, placing them in head is OK if you want the script download to start before other resource downloads start. Starting the script download first might be better for time to first render, while having it start last might be better for time to first contentful paint (FCP).
+- use async scripts for javascript that does not interact with the DOM (it will block parsing if downloaded early)
+- use deferred scripts for javascript that does affect the DOM (it will execute only after html parsing)
+- minimize DOM manipulation and avoid long running javascript
+
+While optimizing the critical rendering path, there is a user experience metric called Cumulative Layout Shift (CLS) that should be considered. In the second to last step of the rendering process, the browser calculates the layout of elements on the page. If the dimensions of images and other yet to be downloaded content are not specified in the HTML, it can lead to a visual shifting of content when images are finally loaded in, causing a poor user experience. This unwanted shifting is measured by the metric Cumulative Layout Shift, which is now a key metric used by Google in ranking webpages.
+
+In addition to the critical rendering path and Cumulutive Layout Shift, there is the 'contentful rendering path', which is arguably even more important. The contentful rendering path si the time to First Contentful Paint (FCP) or Largest Contentful Paint (LCP). Optimizing for this means also optimizing the time it take for fonts and images to finish downloading and appear on the screen. For this, optimization involves techniques that overlap with optimizations for data transfer and backend processing such as considering the number of requests made and making use of cdns and caching, etc.
+
+The critical rendering path and the contentful rendering path focus on the initial render, the initial above-the-fold content. For other pages and below the fold content, an important performance enhancing technique is prefetching. You can use the link tag to do DNS prefetching (notifying the client to resovle the DNS as quickly as possible), preconnecting (resolve the DNS and also establish the TCP handshake), or full prefetching (fetching the resource during downtime).
+
+Things to keep an eye on for data transfer optimizations:
+- http/2 improves network latency and supports multiplexing, which allows multiple requests to be sent over a single connection, so one consequence is bundling resources to lower the number of http requests is not as necessary.
+- http/3 further improves network latency and is something to keep an eye on.
+
+
+Premature optimization is the root of all evil. You can get carried away with over optimizing which leads to spending time and resources inefficiently.  Optimize when you can have a measurable impact. 
+
+
+---------
+
+Another topic within Frontend processing optimizations is optimizing code. Parsing and executing javascript is the biggest bottleneck in the browser's rendering path. One idea to help with this is ahead of time compilation which is used by Angular. It's a strategy to keep an eye out for in case it's incorporated into the ecosystem. Another thing to keep in mind is to limit javascript based animations as they can be expensive.
+
+Ultimately, we want fast time to first meaningful paint and fast time to interactive. 
+
+Code Splitting and Lazy Loading is a technique to optimize the amount of javascript that needs to be downloaded and parsed for the initial render. This involves breaking up the code into smaller chunks and loading them only when needed, rather than loading everything upfront. You can choose the level of granularity for code splitting, such as by route, by component, or even by function.
+
+- Tree Shaking (https://web.dev/articles/reduce-javascript-payloads-with-tree-shaking)
+- Avoiding Memory Leaks
+
+
+Notes about react
+- originally code splittig was only possible through Create React App, but then it became possible to do with dynamic imports and React.lazy and Suspense. Now the latest React Suspense allows for more advanced lazy loading patterns.
+
+
+==
+
+Task: Create a simple website with raw html, css and javascript that demonstrates the following performance optimizations: 
+- optimal placement of stylesheet links in the html, usage of media attribute in stylesheet links
+- utilize style element and inline styles
+- initally load only the css needed for above the fold content, load the rest after the load event of the window
+- optimal placement of async, deferred, and normal scripts in the html
+- code split along routes and either lazy load or prefetch the javascript for other routes
+- prefetch html and css for other routes using link
+
+
+
+come back to lecture 147 for react optimizations
