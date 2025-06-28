@@ -43,3 +43,12 @@ if the contents of a blob are the same as an existing blob, a new blob does not 
 - we added version 1 of test.txt to index and wrote out a tree
 - we added version 2 of test.txt and a new file new.txt to index and wrote out a tree
 - we then added the first tree to the the contents of the second tree (already in index) and wrote out a third tree
+
+Object Packages
+object packages (*.pack) & index files(*.idx)
+  .git/objects/pack
+  git gc (Garbage Collection)
+
+git objects are packed into package files to save space. Usually happens when garbage collection occurs. You can trigger garbage collection with `git gc`
+
+git rev-list - lists commits with only hashcodes (for use in scripts)

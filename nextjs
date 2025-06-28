@@ -1,1 +1,0 @@
-in crud, read function most likely wont be server function since most read will happen in server component. create, update, delete will be server functions that will be done from client components with POST request. (server functions are all POST requests.)

@@ -115,3 +115,90 @@ one use case of rebase is in the way git pull can work, git pull --rebase
 in merge conflict when rebasing use git rebase --continue after fixing conflicts
 
 To squash commits into one commit and apply on top target branch (similar to git rebase), you can use git merge --squash <branch> 
+
+git cherry-pick, git rebase, git merge --squash all applies commits on top of a branch instead of linking them.
+
+when using syntax HEAD@{4} it refers to git objects being pointed to by HEAD in the reflog history.
+
+@ is shorthand syntax or HEAD
+
+git show refs/heads/feature1
+git show refs/remotes/origin/feature2
+
+difference between ~ and ^
+
+the ^ is used to show second parent commit (from merges)
+
+git log --stat for seeing files changed and number of lines changed
+
+git log --oneline --stat --follow -- <path> for searching commits that modify certain files'
+
+git grep 'text' v15.0.0 can be used to search for text in a file at a point in history
+
+git blame <file> used to show all changes to a file and who made them
+
+git bisect can be used hone in on what commit caused an issue by using interactive binary search
+
+git shortlog --summary --numbered --email --no-merges to show list of contributors and their number of commits
+
+
+detached head is for inspeacting the commit in the working directory.  Its for seeing the project in your working directory at a certain commit. to see the state of the project at a certain commit in your working directory - to be able to work with the files as they were at a certain commit
+
+detached head commits can be used to create a branch and merge it in from a convenient commit instead of just making changes on top of current HEAD. Its like going back in time to create branch at an older commit instead of creating the branch from current HEAD. You might want to do this because of convenience of starting from older commit - you expect merge conflict but you want to start working from a cleaner commit. 
+
+How to undo undoing history, how to get back to newer commit after 'deleting it'. use reflog to find the commit you 'deleted' using git reset --hard. then checkout that lost commit and run git reset --hard again. To get back deleted branch, reflog and check out the commit of the deleted branches head, then create a new branch there. 
+
+rebasing is changing a single commit's parent. 
+
+When to use rebase (suggested by one course, loook into this) - when there are new commits on master while you're working on feature branch. you rebase master into feature (?) then fast forward merge feature into master ? 
+
+git cherry-pick - move a copy of a commit on top of a branch
+
+
+A local tracking branch is a branch in your local repo that is configured to track a branch on a remote repo. 
+A remote tracking branch is a read-only copy of a branch from a remote repository, maintained by Git to keep track of the state of the remote branch.
+You can create a local tracking branch from a remote tracking branch using 
+- git branch --track <branchname> <remote>/<remotebranchname> 
+It's recommented to have branchname be the same as it is in remote
+(if you just create a branch from remote tracking branch isn't the resulting local branch automatically tracked to the remote tracking branch? I think so, but this is jsut more explicit)
+
+use git branch -vv to see local tracking branches and what remote tracking branches they track.
+
+to push a new branch that is not tracking a remote branch, use git push origin <branchname>.
+using -u when pushing a new branch will automatically set up the branch to track the remote branch you're creating. Otherwise you would have to manually track the remote by recreating the local branch with --track or find a git command that sets upstream or tracks.
+
+To delete remote tracking branch:
+
+To delete remote branch:
+
+To delete commits that are public (be careful, no way to recover)
+git push --force
+
+
+3 types of github accounts -
+personal user account
+organizational account
+enterprise account - central management of multiple github accounts
+
+A repository owned by a user account has two permission levels: the repository owner and collaborators.
+
+When creating an organization, your personal user account becomes its owner and theres a sort of organization account that gets created as well, which doesn't seem to do much since your personal user account is whats used to create and commit to repositories. 
+
+when inviting to organization you can invite as member or owner. owner will mean same permission as yourself. 
+
+organization members have base permissions which can be changed.
+however, different organization members cannot be given different permissions based on repository. To achieve this you need to use teams.
+
+You can create teams that belong to an organization. then you can assign repositories to teams and specify the permission level of the team members for that repository. Remember organization base permission takes precendence.
+
+you can add outside collabarators to organizational repositories, but lets not worry too much about this until use case is needed then do your own research. 
+
+contribution vs collaboration
+
+collaboration is through  added collaborator on personal user account repo, or outside collaborator on repos in organizations, or being organization member. 
+
+contribution is adding to project without being a collaborator.
+
+
+# pull request
+better name couldve been 'merge request' because that is what it literally is. It is a request to merge one branch into another.
