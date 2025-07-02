@@ -202,3 +202,13 @@ contribution is adding to project without being a collaborator.
 
 # pull request
 better name couldve been 'merge request' because that is what it literally is. It is a request to merge one branch into another.
+
+Forking is a way to contribute to projects you are not a collaborator on. 
+
+Issues are like tickets, they are just a title and description. They can be labeled and associated with pull requests. Ways of organizing bug tickets etc.
+
+Projects in Github allows organizing todo's and tickets. Issues + projects can act as a substitute for Jira. Issues can be added to projects and tracked as they progress from todo -> in progress --> done. 
+
+
+---
+What is kanban?

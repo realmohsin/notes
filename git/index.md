@@ -103,8 +103,8 @@ When you create a local branch based on a remote-tracking branch (for master, wh
 
 
 to do - think about merge conflicts when git pulling
-to do - think about merge conflicts when rebasing
-to do - read git rebase --help page
+to do - think about merge conflicts when rebasing DONE
+to do - read git rebase --help page DONE
 
 With rebase, you take all the changes that were committed on one branch and replay them on the a different branch. 
 

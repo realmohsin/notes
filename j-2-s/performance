@@ -95,7 +95,7 @@ Things to keep an eye on for data transfer optimizations:
 Premature optimization is the root of all evil. You can get carried away with over optimizing which leads to spending time and resources inefficiently.  Optimize when you can have a measurable impact. 
 
 
----------
+---------------
 
 Another topic within Frontend processing optimizations is optimizing code. Parsing and executing javascript is the biggest bottleneck in the browser's rendering path. One idea to help with this is ahead of time compilation which is used by Angular. It's a strategy to keep an eye out for in case it's incorporated into the ecosystem. Another thing to keep in mind is to limit javascript based animations as they can be expensive.
 

@@ -22,6 +22,7 @@
 - What are the dangers of rebasing?
 - What is squashing?
 - What is cherry-picking?
+...
 
 
 # Daily Task
@@ -124,6 +125,14 @@ List remotes
 Use -v to show address of remote
 
 
+git fetch
+
+git push
+
+git pull
+
+
+
 
 ## Comparing and Undoing History
 
@@ -153,6 +162,7 @@ Note: Don't do this with public commit history (?)
 
 To change the last commit, stage changes, then
 - git commit --amend -m "new commit message"
+You can just change the commit message, by not staging any changes.
 
 - interactive rebase
 
@@ -164,7 +174,6 @@ To change the last commit, stage changes, then
 
 
 
-
-
 # Notes
 
+ 

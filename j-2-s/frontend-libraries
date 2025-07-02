@@ -7,7 +7,7 @@ The main benefit of React is it provides a declarative abstraction with which yo
 
 
 
-============================================================================
+========================================================================================
 
 What is React?
 Why use React?
@@ -19,3 +19,5 @@ What is Webpack?
 What is Babel?
 What is ESLint?
 How is Webpack, Babel and ESLint used together in web development?
+
+
