@@ -4,32 +4,19 @@
 - "exclude": ["**/ignored.ts"] - this will ignore all files in all directories with the name 'ignored.ts'.
 
 Personal way to start:
-
 ```json
 "include": ["./src/**/*"],
 "exclude": ["./node_modules/", "**/build/*", "**/*.ignored.ts"]
 ```
 
-a folder name without anything in front usually implies './' in front. once you get used to that you can leave it out.
+A folder name without anything in front usually implies './' in front. once you get used to that you can leave it out.
 
-when learning react with typescript, check this -
-
-```typescript
-type ToasterProps = {
-  toast: string | null;
-};
-
-// when hovering over toast why is it just string and not 'string | nulvml'?
-export default function Toaster({ toast }: ToasterProps) {}
-```
 
 Epiphanies:
 One major point of using TypeScript is knowing exactly when you need to type narrow and when you don't.
 When using TypeScript without a bundler, include .js extension when importing files.
 
-tsconfig.json 'module' is referring to what the  hen you should be using a bundler anyway.
-
-use tsx for running ts code without compiling first. Good for dev environment.
+Use tsx for running ts code without compiling first. Good for dev environment.
 
 JavaScript is dynamically typed, meaning the type of a variable can change in runtime.
 
@@ -130,9 +117,9 @@ Sample tsconfig.json:
 }
 ```
 
-The target field lets us choose what version of JavaScript the compiler will transform our code into. This is useful if we want to target older browsers, like Internet Explorer 11. Targeting older browsers often means adding more code to your JavaScript files for polyfills and workarounds.
+The `target` field lets us choose what version of JavaScript the compiler will transform our code into. This is useful if we want to target older browsers, like Internet Explorer 11. Targeting older browsers often means adding more code to your JavaScript files for polyfills and workarounds.
 
-The module field lets us change what module system the output of our bundle will use. This affects how our import and export statements are transformed in the final JavaScript output. If I were making an app for NodeJS or if I were using a bundler like Webpack, I would choose CommonJS. (For Webpack, why would it matter whether its commonjs or something else?)
+The `module` field lets us change what module system the output of our bundle will use. This affects how our import and export statements are transformed in the final JavaScript output. If I were making an app for NodeJS or if I were using a bundler like Webpack, I would choose CommonJS. (For Webpack, why would it matter whether its commonjs or something else?)
 
 "isolatedModules": true
 When this is on, TypeScript expects every file to be a module. That means it has either an import or an export statement somewhere in the file. If we don't have anything to import or export for some reason, we can turn a file into a module by adding export default {} to the end of the file. This setting is helpful when working with external tools, like Babel. (Unclear explanation) Further explanation: Basically its needed for babel and other build tools because they transpile each file one at a time. Since they transpile one file at a type, you can't have global types from namespaces. That's the main reason for this. There are other restrictions, but the main one is forcing your code to avoid global types.
@@ -144,9 +131,6 @@ Our tsconfig.json file lets us change how strict the type checker is when checki
 
 - strictNullChecks - With this on, TypeScript will automatically warn us any time a variable could be null or undefined. This will help us avoid the dreaded Cannot read property of undefined errors.
 
-- noImplicitThis - If we ever try to access the this variable on an object or class, TypeScript will warn us to make a type annotation so we know what properties we can expect to find on this.
-
-- strictPropertyInitialization - This flag warns us if any of our class properties aren't initialized in the constructor. That would mean that the property is undefined, which could lead to unexpected bugs.
 
 `esModuleInterop`: true
 This flag makes it much easier to use code from both the CommonJS and the ES Modules system. This is often necessary when working with packages from NPM. It adds a small bit of code to our JavaScript output, but saves a lot of headaches.

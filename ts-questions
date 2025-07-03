@@ -1,0 +1,17 @@
+Questions
+
+- What is TypeScript?
+- What are the benefits of using TypeScript?
+- What does it mean that JavaScript is dynamically typed?
+- What is a type error?
+- What is type safety?
+- What is a static analysis tool?
+- What is a compiler?
+- What is a type annotation?
+- What is a type declaration file?
+- What is the library tsx used for?
+- What is the purpose of the tsconfig.json file?
+- What are some important options in the tsconfig.json file?
+- Explain the 'include and exclude' options of a tsconfig.json file?
+- What does the 'strict' option of tsconfig.json do?
+- What is implicit type checking?
