@@ -522,7 +522,7 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: example  # mongo image needs this as per docs
     steps:
 ```
-For communicating with service container - if the job is running in a container as well, then communication is simple and address of container can be specified as service name. But if job is not running on container, then address of service needs to specified as localhost:PORT where PORT is the port the docker container service is hooked up to.
+For communicating with service container - if the job is running in a container as well, then communication is simple and address of container can be specified as service name. But if job is not running on container, then address of service needs to specified as localhost:PORT where PORT is the port the docker container has created a connection to. 
 
 For job running on container:
 ```yaml
@@ -554,9 +554,6 @@ jobs:
   test:
     environment: testing
     runs-on: ubuntu-latest
-    container:
-      image: node:16
-      env: # environment variables needed by the image, if needed will be in documentation, (not your steps, which will be defined below)
     env:
       MONGODB_CONNECTION_PROTOCOL: mongodb
       MONGODB_CLUSTER_ADDRESS: 127.0.0.1:27017 # because job running on runner, have to specify address of container and port to connect to
@@ -574,3 +571,7 @@ jobs:
     steps:
 
 ```
+
+## Custom Actions
+Why custom actions? to simplify workflow steps - instead of writing multiple (possibly very complex) step definitios, you can build and use a single custom action. multiple steps can be grouped into a single custom action. No existing community action - existing, public actions might not solve the specific problem you have in your workflow. custom actions can contain any logic you need to solve your specific workflow problems.  
+
