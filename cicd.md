@@ -194,7 +194,7 @@ jobs:
 
 Job Artifacts - Assets outputted by a job, for example app binary, website files etc. We can upload and save artifacts created by a job, which we can then download and use manually, we can also automatically download and use them in other jobs.
 
-There is a broad variety of web hosting providers and most of them provide their own actions for uploading artifacts too them. 
+There is a broad variety of web hosting providers and most of them provide their own actions for uploading artifacts to them. 
 
 Every job gets its own runner machine, the files that are produced in the build job will not exist in the deploy job. However a github provided action called actions/download-artifact@v3 can download artifacts uploaded by actions/upload-artifact@v3 in a previous job that is specified by 'needs'.
 

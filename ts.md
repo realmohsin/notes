@@ -135,11 +135,7 @@ Our tsconfig.json file lets us change how strict the type checker is when checki
 `esModuleInterop`: true
 This flag makes it much easier to use code from both the CommonJS and the ES Modules system. This is often necessary when working with packages from NPM. It adds a small bit of code to our JavaScript output, but saves a lot of headaches.
 
-"skipLibCheck": true,
-This flag tells TypeScript not to check all of the files that we are importing from the node_modules folder so the compiler and type checker can run faster. This means we have to trust that the type definitions for the packages we import are accurate, but if you want more confidence in your types at the expense of longer compilation times, you can turn this off.
 
-"forceConsistentCasingInFileNames": true
-Some Linux-based systems have case-sensitive file systems. That means that a file named MyFile.ts can't be accessed by using import myFunction from './myFile.ts'. This option will warn you if you do that.
 
 Implicit Type Checking
 TypeScript will automatically infer the types of many of the values in your program without you having to explicitly assign them a type. This kind of inference works for all of the primitive types, like numbers and booleans. TypeScript also infers the types of object literals as well as array literals.
@@ -148,34 +144,27 @@ Contextual Type Inference
 TypeScript can also infer the types of variables based on the context where the variable was created. Usually this is because the functions and constructs surrounding the variable are typed and so inference is possible. (Usually contextual type inference can only happen with callbacks, if those callbacks are defined inline, otherwise they have to be typed if passed after being saved to a variable. This is because function definitions and declarations cannot be inferred implicitly. Inline functions can be implicitly inferred because they are assumed to be used only as that particular callback.)
 
 non-null assertion:
-
 ```typescript
 let x!: string;
 console.log(x); // undefined
 ```
-
 Non-null assertions allow us to use values before they are assigned. Usually not wanted, but for the cases where that's intended use non-null assertions.
 
 For annotating arrays, there's two syntaxes:
-
 ```typescript
 let x: string[];
 let y: Array<string>;
 ```
-
 The first variation is preferred. When using React the second syntax is not allowed.
 
 Be careful not to mix up destructuring and type annotations:
-
 ```typescript
 let { courses: orderedFood, veganOption: hasVegan } = menu;
 ```
-
 The above is destructuring, not type annotations.
 
 Restoring Type Safety from any Values
 One useful technique is putting a value with the 'any' type into a variable with a defined type. This restores TypeScript's type checking to that value. One place this might be necessary is when performing network requests.
-
 ```typescript
 async function getFruitList() {
   const response = await fetch("https://example.com/fruitList");
@@ -184,13 +173,11 @@ async function getFruitList() {
   return typeFruitList;
 }
 ```
-
 response.json() returns a promise that resolves to a value of 'any'. We can restore type checking by assigning this value to a typed variable. But we have to be extra careful we assign correctly.
 
 When annotating functions, the return value can usually be inferred, but its better to annotate explicitly because it will help you make sure the return value is of the expected type instead of letting it be assumed potentially incorrectly.
 
 When destructuring parameters and setting type annotation:
-
 ```typescript
 function getFruitName({ name }: { name: string }) {
   return name;
@@ -200,7 +187,6 @@ function getFruitName({ name }: { name: string }) {
 We only need to annotate the properties needed by the function, we can pass an object with extra properties, without needing to annotate the properties that aren't used.
 
 To annotate return value of arrow function:
-
 ```typescript
 const headsOrTails = (): boolean => {
   return Math.random() > 0.5;
@@ -208,7 +194,6 @@ const headsOrTails = (): boolean => {
 ```
 
 By definition, an async function is a function which returns a JavaScript Promise. There is a special syntax for defining the type of the value which is wrapped in a promise. We place the wrapped type in angle brackets and put Promise in front of it.
-
 ```typescript
 async function getFruitList(): Promise<string[]> {
   const response = await fetch("https://example.com/fruit");
@@ -218,7 +203,6 @@ async function getFruitList(): Promise<string[]> {
 ```
 
 To create a function type annotation, there is a special syntax:
-
 ```typescript
 function mapNumberToNumber(list: number[], callback: (item: number) => number) {
   // (parameter) callback: (item: number) => number
@@ -227,15 +211,12 @@ function mapNumberToNumber(list: number[], callback: (item: number) => number) {
 ```
 
 For optional and default parameters:
-
 ```typescript
 function logOutput(message = "hello, world", yell?: boolean) {}
 ```
-
 Parameters with default values don't need annotation, and optional parameters need to be marked with '?'.
 
 To use rest parameters:
-
 ```typescript
 function logManyOutput(...messages: string[]) {}
 ```

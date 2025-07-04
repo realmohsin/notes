@@ -15,3 +15,7 @@ Questions
 - Explain the 'include and exclude' options of a tsconfig.json file?
 - What does the 'strict' option of tsconfig.json do?
 - What is implicit type checking?
+- What is contextual type inference?
+- What is a non-null assertion?
+- How do you restore type safety to values received through I/O operations?
+- Show two ways to annotate a function.
