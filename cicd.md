@@ -575,3 +575,170 @@ jobs:
 ## Custom Actions
 Why custom actions? to simplify workflow steps - instead of writing multiple (possibly very complex) step definitios, you can build and use a single custom action. multiple steps can be grouped into a single custom action. No existing community action - existing, public actions might not solve the specific problem you have in your workflow. custom actions can contain any logic you need to solve your specific workflow problems.  
 
+3 types of custom actions
+- javascript actions - executes a javascript file, uses javascript (nodejs) + any packages of your choice, pretty straightforward if you know javascript
+- docker actions - perform any task of your choice with any language, create a dockerfile with your required configuration
+- composite actions - combine multiple workflow steps into a single action, combine run and uses, allows for reusing shared steps
+
+Composite Actions
+you can create composite actions that exist in the .github folder that can only be used locally. (To use across repositories, you need to create standalone actions, discussed later) Create the following in .github/actions/cached-deps: (file name must always be action.yml)
+```yaml
+name: 'Get & Cache Dependencies'
+description: 'Get the dependencies (via npm) and cache them.'
+inputs: # if you want your custom actions to take inputs
+  caching:
+    description: 'Whether to cache dependencies or not'
+    required: false
+    default: 'true'
+ outputs:
+  used-cache:
+    description: 'Whether cache was used.'
+    value: ${{ steps.install.outputs.cache }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache dependencies
+      if: inputs.caching == 'true'
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true' || inputs.caching != 'true'
+      run: | 
+        npm ci
+        echo "cache='${{ inputs.caching }}'" >> $GITHUB_OUTPUT
+      shell: bash # must specify in custom action if using 'run' 
+```
+
+How to use custom actions
+```yaml
+steps:
+  - name: Get code # if using custom action defined in the code (.github folder) then obviously 'Get Code' cannot be part of custom action
+    uses: actions/checkout@v3
+  - name: Load & cache dependencies
+    id: cache-deps
+    uses: ./.github/actions/cached-deps # don't need to specify file because github actions will automatically look for file named action.yml, also this is relative to root folder of project so thats why it starts with './'
+    with:
+      caching: 'false'
+  - name: Output Information
+    run: echo "Cache used? ${{ steps.cache-deps.outputs.used-cache }}"
+```
+
+Just like community actions, you can set up your custom actions to take inputs and return an output. 
+
+
+JavaScript Actions
+also needs to be in a file named action.yml
+```yaml
+# .github/actions/deploy-s3-javascript/action.yml
+name: 'Deploy to AWS S3'
+descripton: 'Deploy a static website via AWS S3'
+inputs:
+  bucket:
+    description: 'The S3 bucket name'
+    required: true
+  bucket-region:
+    description: 'The region of the S3 bucket'
+    required: false
+    default: 'us-east-1'
+  dist-folder:
+    description: 'The folder containing the deployable files'
+    required: true
+outputs:
+  website-url:
+    description: 'The URL of the deployed website'
+runs:
+  using: 'node16'
+  main: 'main.js'
+```
+```javascript
+// .github/actions/deploy-s3-javascript/main.js
+const core = require('@actions/core')
+// const github = require('@actions/github') not need for this, but useful for tapping into github apis
+const exec = require('@actions/exec')
+
+function run() {
+  const bucket = core.getInput('bucket', { required: true })
+  const bucketRegion = core.getInput('bucket-region', { required: true })
+  const distFolder = core.getInput('dist-folder', { required: true })
+
+  const s3Uri = `s3://${bucket}`
+  exec.exec(`aws s3 sync ${distFolder} ${s3Uri} --region ${bucketRegion}`) // executes command in runner, aws cli comes installed in ubuntu-latest runner
+
+  const websiteUrl = `http://${bucket}.s3-website-${bucketRegion}.amazonaws.com`
+  core.setOutput('website-url', websiteUrl);
+
+  // core.notice('Hello from my custom JavaScript Action!'); // console log to runner
+}
+
+run();
+```
+```yaml
+# using javascript custom action
+steps:
+  - name: Get Code
+    uses: actions/checkout@v3
+  - name: Get Build Artifacts
+    uses: actions/download-artifact@v3
+    with:
+      name: dist-files
+      path: ./dist
+  - name: Output Contents
+    run: ls
+  - name: Deploy Site
+    uses: ./.github/actions/deploy-s3-javascript
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    with:
+      bucket: gha-custom-action-hosting
+      dist-folder: ./dist
+      bucket-region: us-east-2
+  - name: Output Information
+    run: |
+      echo "Live URL: ${{ steps.deploy.outputs.website-url }}"
+```
+
+For javascript custom actions, you have to specify a name of javascript file. Then you have to make the directory a npm project with `npm --init` and download the following packages 
+`npm i @actions/core @actions/github @actions/exec`. Don't add a .gitignore as all the code for the javascript needs to be available. Also make sure the top level .gitignore does not affect anything here. The @actions/* packages allow you to interact with the runner environment, etc.
+
+Note to remember - when defining custom actions locally in .github, you have to get the code into the runner first.
+
+
+
+Docker Actions
+You can specify a locally defined Dockerfile to run as an action. The Dockerfile can be set up to run, for example, a local python script.
+```yaml
+name: 'Deploy to AWS S3'
+description: 'Deploy a static website via AWS S3.'
+inputs:
+  bucket:
+    description: 'The S3 bucket name'
+    required: true
+  bucket-region:
+    description: 'The region of the S3 bucket'
+    required: false
+    default: 'us-east-1'
+  dist-folder:
+    description: 'The folder containing the deployable files'
+    required: true
+outputs:
+  website-url:
+    description: 'The URL of the deployed website'
+runs:
+  using: 'docker'
+  image: 'Dockerfile' # points to file in same folder named 'Dockerfile'
+```
+```dockerfile
+FROM python:3
+
+COPY requirements.txt /requirements.txt
+
+RUN pip install -r requirements.txt
+
+COPY deployment.py /deployment.py
+
+CMD ["python", "/deployment.py"]
+```
