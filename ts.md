@@ -11,7 +11,6 @@ Personal way to start:
 
 A folder name without anything in front usually implies './' in front. once you get used to that you can leave it out.
 
-
 Epiphanies:
 One major point of using TypeScript is knowing exactly when you need to type narrow and when you don't.
 When using TypeScript without a bundler, include .js extension when importing files.
@@ -44,7 +43,6 @@ The first thing to do is to initialize a tsconfig.json file. This will tell Type
 tsc --init
 
 Sample tsconfig.json:
-
 ```json
 {
   "compilerOptions": {
@@ -236,7 +234,6 @@ When working with any kind of dynamic data, such as user input or API responses,
 You should prefer to use unknown as it will force you to narrow types before engaging in something that might throw a Type Error.
 
 For network responses, if you don't know the type of the value returned, you can use 'unknown' for type safety:
-
 ```typescript
 async function getFruitList(): unknown {
   const response = await fetch("https://example.com/fruit");
@@ -245,27 +242,23 @@ async function getFruitList(): unknown {
 }
 ```
 
-We can construct a special type definition for our object using Interfaces. Interfaces let us create a named definition of the shape of an object that we can reuse. Once we've defined our interface type, we can use it as a type annotation.
+We can construct a special type definition for our objects using Interfaces. Interfaces let us create a named definition of the shape of an object that we can reuse. Once we've defined our interface type, we can use it as a type annotation.
 
 We could extend our interface. This copies the property definitions of one interface to another:
-
 ```typescript
 interface EdibleThing {
   name: string;
   color: string;
 }
-
 interface Fruit extends EdibleThing {
   sweetness: number;
 }
-
 const apple: Fruit = { name: "apple", color: "red", sweetness: 80 };
 ```
 
 When TypeScript is checking to see if a value can be assigned to an Interface, it is going to look at each of the properties to see if the types of those properties match up. That makes it possible to put more properties on a variable than are defined by the interface. Exception is for object literals, in that case, number of properties have to match as well. (What is the point of this exception? Just a problem to be aware of I suppose like JavaScript's typeof null is 'object'?)
 
 We can designate a property as optional with ?:
-
 ```typescript
 interface Fruit {
   name: string;
@@ -273,43 +266,35 @@ interface Fruit {
   calories?: number;
 }
 ```
-
 But this would mean we have to type narrow before accessing calories, since it may not exist.
 
-Indexable Types
+Index Signatures
 There might be times when we don't know the properties that will be on an interface before we run our code, such as when we are adding properties dynamically to an object. In these cases, we can tell TypeScript to allow properties that follow a certain type signature, or index signature.
-
 ```typescript
 interface Fruit {
   [key: string]: string;
   name: string;
 }
-
 let apple: Fruit = {
   name: "Apple",
   ripeness: "overripe",
 };
-
 interface FavoriteFruitList {
   [fruitOrder: number]: string;
 }
-
 const favoriteFruit: FavoriteFruitList = [];
 favoriteFruit[1] = "Apple";
-
 const thirdPlace = 3;
 favoriteFruit[thirdPlace] = "Strawberry";
 ```
-
 Note that we can use any identifier we want for our index, it won't affect our code, but is helpful for documenting what the index type actually represents.
+
 
 TypeScript gives us two types which expand on object and array: Enums and Tuples. The purpose of both of these types is to add even more structure to our types.
 
 Enums
 We can use an Enum to create a type safe definition of named constants which we can reference elsewhere in our code.
-
 Enums are special in that they are both a type and a value.
-
 ```typescript
 enum Seasons {
   winter,
@@ -317,19 +302,15 @@ enum Seasons {
   summer,
   autumn,
 }
-
 function seasonsGreetings(season: Seasons) {
   if ((season = Seasons.winter)) return "⛄️";
   // ...
 }
-
 const greeting = seasonsGreetings(Seasons.winter);
 ```
-
 Enums act like an object, where the strings we include are the property names and their values are incrementing numbers, starting at 0.
 
 Most types are removed when TypeScript compiles code to JavaScript. Enums, on the other hand, are translated into JavaScript snippets which represent their shape and behavior. That makes Enums both a type and a value. They roughly translate to:
-
 ```typescript
 var Seasons;
 (function (Seasons) {
@@ -338,7 +319,6 @@ var Seasons;
   Seasons[(Seasons["summer"] = 2)] = "summer";
   Seasons[(Seasons["autumn"] = 3)] = "autumn";
 })(Seasons || (Seasons = {}));
-
 console.log(Seasons);
 // {
 //   '0': 'winter',
@@ -351,12 +331,10 @@ console.log(Seasons);
 //   autumn: 3
 // }
 ```
-
 If giving enum variables string values, they cannot be changed later to a string, they can only be changed to another of the other Enum values through enum reference.
 
 Tuples
 Tuples are fixed-length arrays. We can tell TypeScript how many items are in the array, and what the type of each item is.
-
 ```typescript
 function simpleUseState(
   initialState: string
@@ -382,12 +360,10 @@ type FruitList = string[];
 interface IndexedFruitList {
   [index: number]: string;
 }
-
 const fruit: FruitList = ["Apple", "Orange"];
 const otherFruitList: string[] = fruit; // This works
 const indexedFruitList: IndexedFruitList = fruit; // This also work
 ```
-
 Type aliases don't create unique types, so FruitList is equivalant to string[].
 
 We can do more interesting things with type aliases too, like self-referential types.
@@ -398,7 +374,6 @@ type StringTree = {
   left?: StringTree;
   right?: StringTree;
 };
-
 let myStringTree: StringTree = getStringTree();
 myStringTree.value; // string
 myStringTree?.left?.right?.left?.value; // string | undefined
@@ -410,21 +385,18 @@ Generally, I would use Interfaces for objects, unless they require self-referent
 
 Union Types
 Union types represent values that could be one of any number of types.
-
 ```typescript
 interface CoordinateInterface {
   x: number;
   y: number;
 }
 type CoordinateTuple = [number, number];
-
 type Coordinate = CoordinateInterface | CoordinateTuple;
 ```
 
 You'll have to do some type narrowing when using union types.
 
 Union types can be used instead of extending Interfaces (in some circumstances)
-
 ```typescript
 interface Fruit {
   name: string;
@@ -436,7 +408,6 @@ interface Vegetable {
 }
 type EdibleThing = Fruit | Vegetable;
 ```
-
 To access hasSeeds or sweetness on EdibleThing, type narrowing will need to be used, for example, with if ('hasSeeds' in obj)...
 In this case it might make more sense to use interface extension so as not to repeat 'name' property in Fruit and Vegetable interface definitions.
 
@@ -456,7 +427,6 @@ interface Vegetable {
 }
 type EdibleThing = Fruit & Vegetable;
 ```
-
 An EdibleThing type must have name, sweetness and hasSeeds.
 
 If types cannot be combined in a sensible way, the intersection becomes 'never' type.
@@ -467,7 +437,7 @@ Literal types represent exact values of JavaScript primitives.
 let fruitName: "Apple" = "Apple";
 ```
 
-This behavior is inferred automatically when we use const to declare our variables.
+This behavior is inferred automatically when we use const to declare our variables. (?)
 
 When dealing with a set of constant string values, a union of literal types can be more convenient than Enums as we will have the same type safety but without the extra hassle of accessing our values on the Enum itself.
 
@@ -481,7 +451,6 @@ type Seasons = "spring" | "summer" | "autumn" | "winter";
 
 readonly modifier
 Adding this modifier to a property makes it so you cannot mutate or make changes to the property whatsoever. You can think of this as the const variable declaration, but for object properties. You can also apply multiple layers of readonly to further limit what can be changed.
-
 ```typescript
 type readOnlyFruit = { readonly name: string };
 const apple: readOnlyFruit = { name: "Apple" };
@@ -505,24 +474,19 @@ interface Fruit {
   color: string;
   nutrition: { name: string; amount: number }[];
 }
-
 type FruitNutritionList = Fruit["nutrition"];
 ```
 
 We can even grab the type of individual items in an array. We can access a specific index, or we can use the number type to grab the type of every array value.
-
 ```typescript
 type NutritionFact = Fruit["nutrition"][0];
-
 // Alternatively
 type NutritionFact = Fruit["nutrition"][number];
 ```
-
-Not sure how this 'number' indexing works.
+Not sure how this 'number' indexing works. Answer - Using 'number' is saying 'I want the strictest type that represents all elements in this array'. If there are different types, then it will return a union type. 
 
 typeof operator
 Sometimes we might want to use the type of some runtime value to represent the type of another thing. This could be especially helpful when the type was inferred by TypeScript.
-
 ```typescript
 let rectangle = { width: 100, height: 200 };
 let rectangle2: typeof rectangle; // { width: number; height: number; }
@@ -530,21 +494,18 @@ let rectangle2: typeof rectangle; // { width: number; height: number; }
 
 keyof operator
 It can also be helpful to get the different keys which are present on a type. In reality, it's a union type of string literals, one for each property name.
-
 ```typescript
 interface Rectangle {
   width: number;
   height: number;
 }
 type RectangleProperties = keyof Rectangle; // type RectangleProperties = "width" | "height"
-
 let rectangle: Rectangle = { width: 100, height: 200 };
 const propertyName: RectangleProperties = "height";
 console.log(rectangle[propertyName]); // 200
 ```
 
 Can combine keyof and typeof:
-
 ```typescript
 let rectangle = { width: 100, height: 200 };
 type RectangleProperties = keyof typeof rectangle; // type RectangleProperties = "width" | "height"
@@ -558,19 +519,15 @@ Usually, TypeScript infers that the types of the values are primitives, like str
 An assertion is a notice to the type checker that tells it more about our program so it can check our code properly.
 
 const assertions:
-
 ```typescript
 let rectangle = { width: 100, height: 100 } as const;
-
 let rectangle2 = { width: 100, height: 100 as const };
-
 let message = "Hello" as const;
 ```
 
 (if using let with 'as const', there's limited value, right? Doesn't it just become const variable which has literal type value.)
 
 You can turn an array into a tuple by using as const:
-
 ```typescript
 const assortedItems = ["hello", 5, (fruit: Fruit) => {}] as const;
 // const assortedItems: readonly ["hello", 5, (fruit: Fruit) => void]
@@ -590,7 +547,6 @@ function stringOrArrayLength(input: { length: number }): number {
 
 Callable Interfaces
 Since functions in JavaScript are just objects, you can add properties to them. TypeScript lets you annotate these situations with callable interfaces.
-
 ```typescript
 interface IceCreamSundae {
   (toppings: string[]): void;
@@ -599,9 +555,7 @@ interface IceCreamSundae {
   cherry: boolean;
 }
 ```
-
 Usually an object must have all properties of its assigned interface, but since you can't define and add properties on a function at the same time, TypeScript gives leeway and just checks that those extra properties are assigned at some point later:
-
 ```typescript
 const sundae: IceCreamSundae = (toppings: string[]) => {};
 sundae.baseIceCream = "vanilla";
@@ -611,7 +565,6 @@ sundae.cherry = true;
 
 this parameter
 TypeScript provides a way for you to apply a type annotation to this so you can have type safety when accessing this.
-
 ```typescript
 interface IceCreamSundae {
   baseIceCream: string;
@@ -644,14 +597,12 @@ function sayAlexsNameLoud(name: unknown) {
     console.log(`Hey, ${name.toUpperCase()}`); // "Hey, ALEX"
   }
 }
-
 function sayNameLoud(name: unknown) {
   if (typeof name === "string") {
     // name is now definitely a string
     console.log(`Hey, ${name.toUpperCase()}`);
   }
 }
-
 function calculateScore(score: number | string) {
   switch (typeof score) {
     case "string":
@@ -664,20 +615,17 @@ function calculateScore(score: number | string) {
       throw new Error("Invalid type for score");
   }
 }
-
 function combineList(list: unknown): any {
   if (Array.isArray(list)) {
     list; // (parameter) list: any[]
   }
 }
-
 class Fruit {
   constructor(public name: string) {}
   eat() {
     console.log(`Mmm. ${this.name}s.`);
   }
 }
-
 function eatFruit(fruit: unknown) {
   if (fruit instanceof Fruit) {
     fruit.eat();
@@ -686,7 +634,6 @@ function eatFruit(fruit: unknown) {
 ```
 
 You can check for array using Array.isArray() but to check items of any array, you'll have to loop over and make sure each is the correct type:
-
 ```typescript
 if (Array.isArray(list)) {
     // This will filter any items which are not numbers.
@@ -694,7 +641,6 @@ if (Array.isArray(list)) {
       if (typeof item !== "number") return false;
       return true;
     });
-
     // This will transform any items into numbers, and turn `NaN`s into 0
     const mappedList: number[] = list.map((item) => {
       const numberValue = parseFloat(item);
@@ -706,7 +652,6 @@ if (Array.isArray(list)) {
 Objects are a little trickier to narrow, since they could have any combination of properties and types. The in operator can be used to determine whether a property exists on an object. We can then use the typeof operator to determine that property's type.
 
 The in operator only works to narrow union types (?), so we can't use it with unknown. Instead, we'll have to use another special type that comes with TypeScript: object.
-
 ```typescript
 interface Person {
   name: string;
@@ -719,7 +664,6 @@ function sayNameLoud(person: object | Person) {
 ```
 
 When would a function have parameter types as ('object | Person')? Doesn't make sense to me. Why wouldn't we just enforce it to be Person? If it's coming from network request or something, then it would be unknown. I suppose if we made it so it takes all sorts of objects and we want to narrow to see if it's Person, in which case the above is checking for that. That must be it - question is how do you check if an object is of a certain interface or type. Using 'in' operator is a good way, however, type safety is lost after that check. See:
-
 ```typescript
 interface Person {
   name: string;
@@ -730,10 +674,8 @@ function sayNameLoud(person: object | Person) {
     console.log(`Hey, ${person.name.toUpperCase()}`);
   }
 }
-
 sayNameLoud({ age: 27 });
 ```
-
 In the above, typescript won't throw an error. Also might not throw error if age is assumed to be string. Must check for EVERY property and then check each property's type since there's no definitive way to get TypeScript to check against Person interface if 'object' is part of union type. (if there was an instanceof equivalent for interface definitions then problem would be solved.)
 
 Handling null and undefined
@@ -744,7 +686,6 @@ Works the same as logical OR but only checks if a value is null or undefined.
 
 Non-null Assertion
 Sometimes, you just know better than the type checker. If you positively know that a particular value or property is not null or undefined, you can tell the type checker using the Non-null Assertion operator (!.):
-
 ```typescript
 const messageInputValue = document.getElementById("messageInput")!.value;
 messageInputValue; // const messageInputValue: string;
@@ -752,7 +693,6 @@ messageInputValue; // const messageInputValue: string;
 
 Assertion Signatures
 To assert to the type checker that a value has a specific type, we just append the keyword as, followed by the type we want to assert. This tells the TypeScript type checker that a certain value is in fact the type we say it is. TypeScript trusts us to know what we're doing. This is a situation where we know more than TypeScript and get to override the behavior of the type checker. Assertion signatures are safer than most methods, since the type checker will verify that the type we are asserting is at least similar to the original type. That keeps us from asserting that one type is a totally incompatible type. The type checker is even smart enough to avoid conversions between interfaces that aren't similar enough.
-
 ```typescript
 document.querySelector("form")?.addEventListener("submit", (event) => {
   const target = event.currentTarget as
@@ -761,19 +701,15 @@ document.querySelector("form")?.addEventListener("submit", (event) => {
   const email = target.email;
 });
 ```
-
 In the above, we know that the form has an email input that can be accessed with form.email. To make types work here, we are asserting that currentTarget will have an email property using EventTarget & email: HTMLInputElement.
 
 Double Assertion Signatures
 We can convince TypeScript that any value of any type has any other type. It all starts by giving a value an assertion that it is unknown, then asserting again.
-
 ```typescript
 const age = "hello" as unknown as number;
 age; // const age: number
 ```
-
 Doing the above is very dangerous as you can see, you can convince TypeScipt a string is a number. This is the most dangerous way to get around the type system, even more dangerous than any. This can be helpful when you are certain something should be a certain type and TypeScript isn't letting you convert with a single assertion signature. This is especially useful when you are working with interfaces or third-party APIs which expect parameters to be passed as a certain type. We should only convert a value's type to unknown if there is no other solution. It's much safer for us to convert to a type that is common between the two different types.
-
 ```typescript
 function buttonEventListener(
   event: string,
@@ -782,11 +718,9 @@ function buttonEventListener(
 ) {
   element.addEventListener(event, listener);
 }
-
 const anchor = document.createElement("a");
 buttonEventListener("click", () => console.log("Mouse clicked"), anchor);
 // Type Error: Argument of type 'HTMLAnchorElement' is not assignable to parameter of type 'HTMLButtonElement'.
-
 buttonEventListener(
   "click",
   () => console.log("Mouse moved"),
@@ -794,11 +728,10 @@ buttonEventListener(
 );
 // no error
 ```
-
 In the above example we are forcing TypeScript to see anchor as HTMLButtonElement because we know that won't be a problem. Double assertion works as long as the second assertion type is a subset type of the first assertion.
 
-TypeScript uses structural typing - it focuses on the shape of objects to determine whether two types are compatible. Two types with the same structure are treated as equivalent and values that match can be assigned to both. Even if different ways of describing structures are used but the structures are the same, then they're still the same:
 
+TypeScript uses structural typing - it focuses on the shape of objects to determine whether two types are compatible. Two types with the same structure are treated as equivalent and values that match can be assigned to both. Even if different ways of describing structures are used but the structures are the same, then they're still the same:
 ```typescript
 class AppleClass {
   type: "Apple";
@@ -813,31 +746,24 @@ type AppleType = {
   name: string;
 };
 ```
-
 All three are equivalent.
 
 Other programming languages, like Java and C# use a nominal type system. The word "nominal" refers to the name of the thing, which means if I were to create two classes with an identical structure, but different names, those two classes would be considered different. We can emulate nominal typing by adding a unique property to our types with a string literal type. This practice is called "branding", or "tagging". This makes it possible to discriminate between types that may have the same structure, but different purposes.
 
 You can create 'branded primitives' using assertion signatures.
-
 ```typescript
 type USD = number & { _brand: "USD" };
 type EUR = number & { _brand: "EUR" };
-
 let income: USD = 10; // Type Error: Type 'number' is not assignable to type 'USD'.
-
 let VAT = 10 as EUR;
-
 function convertToUSD(input: EUR): USD {
   return (input * 1.18) as USD;
 }
-
 let VATInUSD = convertToUSD(VAT); // let VATInUSD = USD;
 ```
 
 Discriminating Union
 As we've seen, you cannot type narrow to determine if an object is of a certain Interface. But this can be very helpful or necessary. One strategy is using Discriminating Unions, which is done by adding unique identifier in the form of an extra literal property:
-
 ```typescript
 interface Fruit {
   type: "fruit";
@@ -845,16 +771,13 @@ interface Fruit {
   color: string;
   juice: () => void;
 }
-
 interface Vegetable {
   type: "vegetable";
   name: string;
   color: string;
   steam: () => void;
 }
-
 type EdibleThing = Fruit | Vegetable;
-
 function prepareEdibleThing(food: EdibleThing) {
   if (food.type === "fruit") {
     food.juice();
@@ -864,7 +787,6 @@ function prepareEdibleThing(food: EdibleThing) {
   }
 }
 ```
-
 TypeScript will be able to detect the discriminating union property and if you narrow based on that, you can use the other properties properly.
 
 User Defined Type Guards
@@ -873,18 +795,15 @@ Type Predicate Function
 If a complicated check is required to determine a type, a user defined type guard can be used. One scenario this can be helpful is when we have interfaces from third party libraries so we can't use a discriminating union, but we still need to tell them apart.
 
 A Type Predicate Function is a function that takes at least one argument, returns a boolean, and has a type predicate return signature:
-
 ```typescript
 function isFruit(maybeFruit: Fruit | Vegetable): maybeFruit is Fruit {
   if ('sweetness' in maybeFruit && ...) return true;
   return false;
 }
-
 function isVegetable(food: any): food is Vegetable {
   if ('color' in food) return true;
   return false;
 }
-
 function isFruit(maybeFruit: unknown): maybeFruit is Fruit {
   if (
     typeof maybeFruit === "object" &&
@@ -898,14 +817,12 @@ function isFruit(maybeFruit: unknown): maybeFruit is Fruit {
   return false;
 }
 ```
-
 If we wanted to, we could use user defined type guard functions to trick the TypeScript compiler that any value is any other type. So be careful.
 
 Assertion Functions
 Assertion functions are another kind of type guard that use a different method to tell the type checker what type a value has. Assertion functions allow you to throw errors to assert a type condition.
 
 There are two kinds of assertion return signatures. The first type asserts that a boolean argument is true. We have to pass in an argument, and then we can add asserts <parameter name> as our function return signature:
-
 ```typescript
 function assertTrue(condition: boolean): asserts condition {
   if (!condition) {
@@ -918,13 +835,11 @@ maybeFruitName; // const maybeFruitName: string;
 ```
 
 The second type of assertion fuciton allows to assert that if the fuciton does not throw an error, a function argument is a specific type:
-
 ```typescript
 function assertIsFruit(food: any): asserts food is Fruit {
   if (!("sweetness" in food)) throw new Error();
 }
 ```
-
 Seems like difference between this and the type predicate function is defining based on error or not.
 
 Both Assertion Functions and Type Predicates allow us to write functions which assert or prove something about types of the values which are passed into them.
@@ -942,7 +857,6 @@ Generics represent a type that won't be defined until the type is used in our co
 These generic parameters are like variables.
 
 Add angle brackets after function name and pass a 'variable' that will represent a type.
-
 ```typescript
 function getFirstItem<T>(list: T[]): T {
   return list[0];
@@ -959,7 +873,6 @@ type Tree<T> = {
   left?: Tree<T>;
   right?: Tree<T>;
 };
-
 type StringTree = Tree<string>;
 ```
 
@@ -978,7 +891,6 @@ class FruitBasket<T extends Fruit = Apple> {
     this.fruits.pop();
   }
 }
-
 function getObjectProperty<T, K extends keyof T>(obj: T, key: K) {
   return obj[key];
 }
@@ -987,7 +899,6 @@ function getObjectProperty<T, K extends keyof T>(obj: T, key: K) {
 # Thinking in Types
 
 The TypeScript compiler takes our code and turns it into javascript code:
-
 ```typescript
 interface Fruit {
   isFruit: true;
@@ -1003,9 +914,7 @@ class FruitBasket<T extends Fruit> {
   }
 }
 ```
-
 becomes:
-
 ```javascript
 class FruitBasket {
   constructor(fruits = []) {
@@ -1021,9 +930,7 @@ class FruitBasket {
 ```
 
 TypeScript also lets us compile our code into a format that is just types. This file is often shipped with the compiled JavaScript in case an upstream developer needs access to the type definitions for their IDE or something. We can easily see this by pasting the code into TypeScript's Playground (https://www.typescriptlang.org/play/?#code/JYOwLgpgTgZghgYwgAgGJQK7DMg3gKGWWAGd0swAuMTCAbkORDgFsJKSbQBzBgX3wIANnBIk0mbACFRAawhgAPABVkEAB6QQAE3HlsAPjyMEAexCdMCMKagAKAA4YARkOAJkMSWBKVkygG0AXWQAXmRggEo8ASI4bW07Lwo-ZWiCIiIwAAtSADpk7BI8pxJspO9IhiJYtTgwO3TGLNziwp8S0wdG6uQBPiA) and choosing the ".d.ts" tab on the output panel.
-
 .d.ts of above typescript:
-
 ```typescript
 interface Fruit {
   isFruit: true;
@@ -1123,10 +1030,8 @@ TypeScript actually ships with a number of transformer types, which it calls Uti
 Conditional types let us provide a type constraint. If the constraint passes, we get one type; otherwise, we get a different type.
 
 We can create a conditional type by using the ternary syntax, with a question mark after the type constraint, followed by the "true" result, followed by a colon (:), and then the "false" result.
-
 ```typescript
 type LiteralIsStringType<T> = T extends string ? string : never;
-
 type AppleLiteralType = LiteralIsStringType<AppleLiteral>; // type AppleLiteralType = string;
 type NeverLiteralType = LiteralIsStringType<0>; // type NeverLiteralType = never;
 ```
@@ -1184,7 +1089,6 @@ type UnwrapPromise<T> = T extends Promise<infer R> ? R : T;
 
 Utility Types
 Here are how the utility types provided by TypeScript are implemented:
-
 ```typescript
 type Partial<T> = {
   [K in keyof T]?: T[K];
@@ -1229,7 +1133,6 @@ type ReturnType<T extends (...args: any) => any> = T extends (
 
 Modules
 You can export types normally alongside normal values:
-
 ```typescript
 export class Fruit {}
 export type FruitBasketType = Fruit[];
@@ -1238,7 +1141,6 @@ export const fruit: FruitBasket = [];
 ```
 
 We can then import them normally, or if we don't want to execute code from file we are importing from, we can use the type prefix:
-
 ```typescript
 import { FruitBasketType, Fruit } from "./fruitBasket.ts";
 // or
@@ -1255,12 +1157,11 @@ But output files should usually be commonjs. When compiling for the browser, you
 
 ## Namespaces
 
-Before ES Modules was standardized and included in JavaScript, TypeScript had its own form of code organization called namespaces. Each namespace that you create exist in the global environment, similar to IIFE modules. That makes it so you can access anything in any namespace from any other file in your project, but makes it difficult to examine what dependencies a specific file has.
+Before ES Modules was standardized and included in JavaScript, TypeScript had its own form of code organization called namespaces. Each namespace that you create exists in the global environment, similar to IIFE modules. That makes it so you can access anything in any namespace from any other file in your project, but makes it difficult to examine what dependencies a specific file has.
 
 You might find some situations where using namespaces could be valuable, such as creating type definitions for a third-party module.
 
 Namespaces are blocks which we create with the namespace keyword. Anything inside the block is considered part of the namespace. If we want something inside our namespace to be accessible outside our namespace, we use the export keyword to its declaration. We can export types and values from within namespaces.
-
 ```typescript
 namespace FruitBasket {
   export abstract class Fruit {
@@ -1283,7 +1184,6 @@ namespace FruitBasket {
 ```
 
 Namespaces are implemented as IIFEs when they are compiled to JavaScript:
-
 ```javascript
 var FruitBasket;
 (function (FruitBasket) {
@@ -1314,7 +1214,6 @@ namespace FruitBasket {
     name!: string;
   }
   export type FruitBasket = Fruit[];
-
   const fruitBasket: FruitBasket = [];
 }
 
@@ -1353,7 +1252,6 @@ TypeScript doesn't ship with support for Node.js APIs, but they can be added. (b
 There is an option which you can use to have TypeScript output separate files, called declaration files, which you can include with your JavaScript library. Then, any TypeScript users who use your library will still be able take advantage of the types.
 
 If we set the `declaration` property in our tsconfig.json file to true, TypeScript will output a type declaration file for all of our files alongside the files themselves. Here's what a TypeScript definition file looks like:
-
 ```typescript
 // index.d.ts
 declare class Fruit {
@@ -1373,7 +1271,6 @@ export {};
 The new declare keyword. This only exists in TypeScript, and is used any time we are creating a type definition for something that exists in a JavaScript file.
 
 Once we've generated our declaration files, we can include them in our library bundle by adding a "types" field to our package.json file. It should include a path to the type definition file relative to where package.json is located:
-
 ```json
 // package.json
 {
@@ -1393,7 +1290,6 @@ Fortunately, there is a huge repository of user-submitted types for over 7,000 N
 One of the most used type definitions is the one for Node.js. If you want to use any of Node.js's APIs, like fs or path, you'll want to install these type definitions.
 ```bash`
 npm install --save-dev @types/node
-
 ````
 If we have strict mode on, or if we are using the noImplicitAny flag in tsconfig.json, TypeScript will warn you if a package doesn't have type definitions when you try to import it.
 
@@ -1440,13 +1336,10 @@ Anything that's exported by a package file needs to have its associated type def
 export class Apple {
   name: string;
 }
-
 export interface FruitBasket {
   add(fruit: Apple): void;
 }
-
 export function eatFruit(fruitBasket: FruitBasket, time: number): void;
-
 export const fruitBasket: FruitBasket;
 export let timeToEat: number;
 ```
@@ -1460,46 +1353,35 @@ A UMD package is a package that in addition to using exports, it also attaches t
 export class Apple {
   name: string;
 }
-
 export interface FruitBasket {
   add(fruit: Apple): void;
 }
-
 export function eatFruit(fruitBasket: FruitBasket, time: number): void;
-
 export const fruitBasket: FruitBasket;
 export let timeToEat: number;
-
 export as namespace fruitBasketLib;
 ```
 
 If instead of defining type declaration files for a package in node_modules, we want to define in our project directory, we can do so. We can add a .d.ts file anywhere in our project directory with the following:
-
 ```typescript
 declare module "fruit-basket";
 ```
 
 There will be no type safety, but import error will be gone. However, you can add types:
-
 ```typescript
 declare module "fruit-basket" {
   // import { Apple } from "fruit-apple";
   // export { Apple } from "fruit-apple";
-
   export class Apple {
     name: string;
   }
-
   export interface FruitBasket {
     add(fruit: Apple): void;
     eat(time: number): void;
   }
-
   const fruitBasket: FruitBasket;
   export default fruitBasket;
-
   export function eatFruit(fruitBasket: FruitBasket, time: number): void;
-
   export let timeToEat: number;
 }
 ```
@@ -1507,28 +1389,23 @@ declare module "fruit-basket" {
 The above would be the same as exporting these types from node_modules/@types/fruit-basket/index.d.ts file. If needing to use 'export default' and potentially default exporting a function then things get a bit complicated and you can check docs for more information on using `declare module`. You'll have to utilize namespaces within the declare module block and make the function a default export but also a namespace itself.
 
 There are 3 types of libraries -
-
 - module - things are exported for consumer to use
 - umd - things are exported and attached to global object
 - global - things are just added to global object
 
 For the last library type, global, we can add types by using 'declare namespace'. Remember, namespaces are Typescript's way of creating (and therefore referencing) global objects. If our library is truly global, we can just wrap all of our definitions in a namespace:
-
 ```typescript
 // fruit-basket.d.ts
 declare namespace fruitBasketLib {
   class Apple {
     name: string;
   }
-
   interface FruitBasket {
     add(fruit: Apple): void;
     eat(time: number): void;
   }
-
   const timeToEat: number;
   const fruitBasket: FruitBasket;
-
   function eatFruit(fruitBasket: FruitBasket, time: number): void;
 }
 ```
@@ -1545,10 +1422,8 @@ declare namespace fruitBasketLib {
     add(fruit: fruitApple.Apple): void; // notice using fruitApple from global
     eat(time: number): void;
   }
-
   const timeToEat: number;
   const fruitBasket: FruitBasket;
-
   function eatFruit(fruitBasket: FruitBasket, time: number): void;
 }
 ```
@@ -1561,7 +1436,6 @@ declare namespace fruitBasketLib {
 # Advanced TypeScript Configuration
 
 tsconfig.json options
-
 ```json
 {
   "compilerOptions": {},
@@ -1570,7 +1444,6 @@ tsconfig.json options
 ```
 
 The files property is a list of paths, relative to the tsconfig.json file, to all of the files in your project. If your project is small and doesn't necessarily include any dependencies from node_modules, using the files can make TypeScript speedier. Not used often.
-
 ```json
 {
   "compilerOptions": {},
@@ -1580,7 +1453,6 @@ The files property is a list of paths, relative to the tsconfig.json file, to al
 
 By default, TypeScript will compile all .ts and .tsx files in the same directory as the tsconfig.json file. We can selectively include the files that we need using the include.
 One thing to remember is that include only tells TypeScript where to start. If one of our files imports a module from a file that is not matched by our include list, that file will still be compiled and type checked by TypeScript. (The exception is node_modules.)
-
 ```json
 {
   "compilerOptions": {},
@@ -1609,7 +1481,6 @@ You can also use the jsxFactory option to change which function is used to compi
 
 outDir
 This lets you specify where your compiled source will be placed relative to the tsconfig.json file. This includes source maps and declaration files, if applicable.
-
 ```json
 {
   "compilerOptions": {
@@ -1645,7 +1516,6 @@ paths
 TypeScript gives us one more tool we can use to control our non-relative imports. The paths setting lets us specify specific patterns to match specific modules. These patterns accept wildcard (\*) characters, so they can be pretty flexible.
 
 When using the paths setting, we need to specify a baseUrl, since all of the paths we list will be relative to the baseUrl.
-
 ```json
 {
   "compilerOptions": {
@@ -1659,12 +1529,10 @@ When using the paths setting, we need to specify a baseUrl, since all of the pat
 
 The paths setting can really upset the way ES Modules work in browsers. For one thing, all ES Module imports have to begin with a /, ./ or ../. Fortunately we can simulate that behavior with paths - "/_": ["src/_"]. (Currently not using any setup that actually uses es modules natively in browsers right?)
 
-Paths can do one more theing - connect imports from a CDN to a type declaration file.
-
+Paths can do one more thing - connect imports from a CDN to a type declaration file.
 ```typescript
 import { h } from "https://unpkg.com/preact@10.5.2/dist/preact.min.js";
 ```
-
 ```json
 {
   "compilerOptions": {
@@ -1684,7 +1552,6 @@ import { h } from "https://unpkg.com/preact@10.5.2/dist/preact.min.js";
 Project References allow us to create multiple configs for different parts of our project while still treating the project as a whole. This gives us all the benefits - fast compilation and type checking, more control over the build output, and better separation between the different parts of the project.
 
 The tools for using Project References are the option 'composite': true and "references".
-
 ```json
 // /shared/tsconfig.json
 {
@@ -1716,7 +1583,6 @@ Check documentation and online examples for how to use 'composite' and 'referenc
 There are two options we have when configuring to work with TypeScript. We can either use a TypeScript loader, or we can use the Babel loader and configure Babel to compile TypeScript code.
 
 ## ts-loader
-
 ```json
 {
   "compilerOptions": {
@@ -1730,11 +1596,9 @@ There are two options we have when configuring to work with TypeScript. We can e
   }
 }
 ```
-
 ```javascript
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-
 module.exports = {
   mode: "development",
   entry: "./src/index.ts",
@@ -1763,7 +1627,6 @@ module.exports = {
 We'll specify the entry point for our project, as well as the output bundle location. We'll tell Webpack to resolve .ts and .tsx files in addition to .js. Then we'll configure a module loader that finds any files with a .ts or .tsx extension and load them with the ts-loader module loader. This will invoke TypeScript with our tsconfig.json options for every TypeScript file that Webpack finds.
 
 It's common for Webpack projects to import non-code assets, like images and CSS. TypeScript doesn't know how to deal with these types of files, so we need to create a simple type declaration file to handle these. Here is a declaration for .png files:
-
 ```typescript
 // custom.d.ts
 declare module "*.png" {
@@ -1779,7 +1642,6 @@ If you use the baseUrl or paths settings in tsconfig.json (for creating @/ short
 
 ```javascript
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-
 module.exports = {
   ...
   resolve: {
@@ -1794,12 +1656,11 @@ Notice that the plugin is placed in the resolve.plugins section of the configura
 ## babel
 
 Babel is a compiler itself. When using with TypeScript the strategy should be to let Babel handle compilation and use TypeScript just to check types. For that reason, we can ignore many of the settings for tsconfig.json. The most important setting is noEmit, since that will stop TypeScript from compiling our code.
-
 ```json
 {
   "compilerOptions": {
     "strict": true,
-    "isolatedModules": true, // provides warnings that make it easier for external build tools like babel (isolatedModules makes sure that global variables do not exit)
+    "isolatedModules": true, // provides warnings that make it easier for external build tools like babel (isolatedModules makes sure that global variables do not exist)
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true
@@ -1809,19 +1670,16 @@ Babel is a compiler itself. When using with TypeScript the strategy should be to
 ```
 
 Use @babel/preset-typescript to strip typescript from code so that babel can further compile.
-
-````json
+```json
 {
   "presets": ["@babel/preset-env", "@babel/preset-typescript"]
 }
-``
+```
 Compile your code with `npx babel src --extensions ".ts" -d build` and type check your code with `tsc`.
-
 
 
 ## ES Module Web Development without bundler
 ES Modules makes it easier than ever to write modern JavaScript that depends on other modules without needing a bundler. Here is a possible setup:
-
 ```json
 {
   "compilerOptions": {
@@ -1841,14 +1699,13 @@ ES Modules makes it easier than ever to write modern JavaScript that depends on 
   },
   "include": ["src/**/*"]
 }
-````
+```
 
 When writing our program, we need to make sure that we include the file extension on our import statements.
 
 ## Node Development
 
 Since version 13, Node.js has had limited support for ES Modules. However, CommonJS is much more common (pun intended) in the Node ecosystem, so we'll have our compiler output CommonJS-compliant files. We can still use ES Modules in our source code, though, especially if we have esModuleInterop turned on. We'll also want to change our target field to whatever version of JavaScript our version of Node.js supports. We'll use the isolatedModules flag to make sure each of our files is a module. Finally, we use resolveJsonModule to allow us to import .json files as modules (as Node.js already supports).
-
 ```json
 {
   "compilerOptions": {
@@ -1869,7 +1726,6 @@ Since version 13, Node.js has had limited support for ES Modules. However, Commo
 We also will want to install @types/node for node APIs.
 
 If using `baseUrl` and `paths` in tsconfig.json, you should install 'tsconfig-paths' package and use it to read the tsconfig.json file. You'll need to include the tsconfig.json in production. Its usage:
-
 ```bash
 npm install --save-dev tsconfig-paths
 # then
@@ -1881,7 +1737,6 @@ npx ts-node-dev -r tsconfig-paths/register src/index.ts
 ## Library Development
 
 If you are making a library that you intend to release on NPM, there are a lot of pieces to consider. How can you make your package work with multiple module systems? How can you make sure the production bundle is as small as possible? What about adding tests and linting? TSDX is a Zero-config CLI for TypeScript package development. That means you only need to run one command, and it will configure everything for you with great defaults and the ability to adjust any setting as needed. To create a new TypeScript library, just run:
-
 ```bash
 npx tsdx create myLib
 ```
@@ -1890,10 +1745,7 @@ npx tsdx create myLib
 
 ## Recursive Conditional Types
 
-Recursive conditional types are new in TypeScript 4.1. Before, you would have to write out incredibly complicated types with strange hacks. Now, recursive conditional types are built in with automatic depth limiting. If TypeScript executes the same recursive conditional too many times, it will give you a warning.
-
-Example of recursive conditional type:
-
+Recursive conditional types are new in TypeScript 4.1. Before, you would have to write out incredibly complicated types with strange hacks. Now, recursive conditional types are built in with automatic depth limiting. If TypeScript executes the same recursive conditional too many times, it will give you a warning. Example of recursive conditional type:
 ```typescript
 type UnwrapArrayRecursive<T> = T extends (infer R)[]
   ? UnwrapArrayRecursive<R>
@@ -1911,7 +1763,6 @@ const flattened = deepFlatten([
 ## Template Literal Types
 
 Starting with TypeScript 4.1, you can interpolate string literals together. If you pass a union of strings to a template literal type, it will output a union of every combination. This is a really powerul aspect of template literal types.
-
 ```typescript
 type Seasons = "spring" | "summer" | "autumn" | "winter";
 const seasonsStartDate = {
@@ -1930,15 +1781,10 @@ type SeasonsStartDate = {
 //     winterStart: string;
 // }
 ```
-
-TypeScript automatically created an interpolation with every member of our union.
-
-Another example:
-
+TypeScript automatically created an interpolation with every member of our union. Another example:
 ```typescript
 type VerticalPositions = "top" | "middle" | "bottom";
 type HorizontalPositions = "left" | "center" | "right";
-
 type Positions = `${VerticalPositions}-${HorizontalPositions}`;
 // "top-left" | "top-center" | "top-right" | "middle-left" | "middle-center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right"
 ```
@@ -1946,7 +1792,6 @@ type Positions = `${VerticalPositions}-${HorizontalPositions}`;
 TypeScript creates string literals for every permutation of strings based on the unions that are passed in.
 
 Sometimes, we want a string that represents many values, but matches a specific pattern. We can create a type which does this using non-literal types in our type interpolation:
-
 ```typescript
 type StringDashString = `${string}-${string}`;
 
@@ -1956,7 +1801,6 @@ const incorrectPosition: StringDashString = "Some other value";
 ```
 
 With conditional types, we could hook into the type inference system to unwrap our types. We can do the same thing with template literal types. By placing the infer keyword inside a template tag, we can parse a literal value. This example uses a conditional type to pull literal values out of a string and put them into a tuple.
-
 ```typescript
 type MatchTuplePair<S extends string> = S extends `[${infer A},${infer B}]`
   ? [A, B]
@@ -1966,7 +1810,6 @@ type StringTuple = MatchTuplePair<`[hello,world]`>; // type StringTuple = ["hell
 ```
 
 Using recursive conditionals, we can create more complicated utility types that work with template literal types. For example, if we had a literal type that has whitespace on either side, we could create a trim type to remove that whitespace:
-
 ```typescript
 type WhitespaceString = "      hi there     ";
 
@@ -3112,7 +2955,7 @@ export default function useHover() {
   style={ language === selected ? { color: "rgb(187, 46, 31)" } : undefined }
 ```
 
-9. For annotating change handlers, you can use a coule of strategies, one of them is using the event types:
+9. For annotating change handlers, you can use a couple of strategies, one of them is using the event types:
 ```typescript
 const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
   setUsername(event.target.value);
