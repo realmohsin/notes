@@ -63,7 +63,86 @@ Refer to the Docker Context documentation for more details.
 ## Manage Docker as a non-root user
 The Docker daemon binds to a Unix socket, not a TCP port. By default it's the root user that owns the Unix socket, and other users can only access it using sudo. The Docker daemon always runs as the root user. If you don't want to preface the docker command with sudo, create a Unix group called docker and add users to it. When the Docker daemon starts, it creates a Unix socket accessible by members of the docker group. On some Linux distributions, the system automatically creates this group when installing Docker Engine using a package manager. In that case, there is no need for you to manually create the group.  (The docker group grants root-level privileges to the user. To run Docker without root privileges, see look online to run the Docker daemon as a non-root user (Rootless mode).)
 
+## Docker logs
+Docker provides logging drivers for collecting and viewing log data from all containers running on a host. The default logging driver, json-file, writes log data to JSON-formatted files on the host filesystem. Over time, these log files expand in size, leading to potential exhaustion of disk resources. (See: https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
 
 
 
+Image Cache - where downloaded images are stored
 
+When running docker run <image>, the very first time it will download the image from docker hub, then store it in the image cache. on subsequent 'docker run <image>' commands, docker will use the image cache and not have to download from docker hub.
+
+docker containers are possible behind the scenes using 'namespacing' and 'cgroups'. 
+namespacing - isolating resources per process (or group of processes)
+control groups (cgroups) - limit AMOUNT of resources used per process - memory, cpu usage, hd i/o, network bandwith
+
+An image is a file system snapshot + a startup command. That file system is put into containers.
+
+A container is an isolated running process with its own isolated share of hardware resources. 
+
+On mac and windows, docker is running within a linux VM, because of the need for namespacing and cgroups as features. So docker is always running in a linux OS environment.
+
+Commands
+
+- docker run <image-name>
+Example:
+docker run hello-world
+
+To override default command:
+- docker run <image-name> <command>
+Example:
+docker run busybox ls
+docker run busybox echo "hello world"
+above commands don't work with hello-world image because ls and echo executable files are not in the file system snapshot of the hello-world image.
+
+To list all running containers;
+- docker ps
+- docker ps --all // for all containers that that we ever started up
+
+To create a container:
+- docker create <image-name>
+Places image's file system snapshot into hard drive segment for container
+
+To start a container:
+- docker start -a <container-id>
+Executing the startup command in a created container
+The -a attaches the container's output to your terminal
+
+To remove all stopped (exited) containers, and image build cache:
+- docker system prune
+
+To get logs from a container:
+- docker logs <container-id>
+Get history of stdout
+
+To send SIGTERM signal to docker process:
+- docker stop <container-id>
+Give container 10 seconds to perform cleanup
+
+To send SIGKILL signal to docker process:
+- docker kill <container-id>
+Shuts down immediately
+
+To execute an additional command in a container:
+- docker exec -it <container-id> <command>
+-i flag redirects our terminal to the stdin of the command
+-t makes sure text from stdin and stdout is formatted properly
+
+To open a shell into container:
+- docker exec -it <container-id> sh
+CTRL+C, CTRL+D or type 'exit' to exit
+
+To create and start a container with opened shell:
+- docker run -it <image-name> sh
+Will not run any default command
+
+- docker build .
+
+Once you have a created container, you cannot replace the default command. If you start a container that has exited (stopped), the default command will be rerun.
+
+Every process we create in a linux environment has 3 communication channels atached to it that we refer to as - sdout, stdin and stderr. These channels are used to communicate information either into the process or out of the process. 
+
+
+# Building Custom Images Through Docker Server
+
+To create your own image you have to create a Dockerfile. The Dockerfile will be given to the docker server by teh docker client and a usable image will be created.

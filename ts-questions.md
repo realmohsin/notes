@@ -1,4 +1,4 @@
-Questions
+# TypeScript Questions
 
 - What is TypeScript?
 - What are the benefits of using TypeScript?
@@ -65,10 +65,6 @@ Questions
 - What are reference tags in Typescript?
 - What is a recursive conditional type?
 - What is a template literal type?
-- 
 
 
-A extends B ? ... : ...
-If type A is assignable to type B
 
-line 500

@@ -1837,7 +1837,6 @@ type SetFunctions<T> = {
 ## Intrinsic Utility Types
 
 TypeScript now ships with a number of intrinsic utility types. These are utilities which aren't represented by type annotations; rather, the type system modifies the type internally. Currently, there are only four intrinsic utility types, and they all relate to changing the casing of literal types - Capitalize (capitalizes first character), Uppercase (capitalizes whole string), Lowercase(lowercases whole string), Uncapitalize(uncapitalizes first char).
-
 ```typescript
 type SetFunctions<T> = {
   [P in keyof T as `set${string & Capitalize<P>}`]: (callback: (currentValue: T[P]) => T[P]) => void;
@@ -1850,8 +1849,7 @@ fruit.setName(...) // 🙌
 
 There are standards that exist which let us add comments above our function and variable declarations to document them in greater detail. The TSDoc standard is based on the existing JSDoc standard, but is entirely designed to work with TypeScript.
 
-ll TSDoc annotations start with a multi-line comment with two asterisks, like /\*\* \*/. Adding a single description is as easy as adding text inside that comment block.
-
+TSDoc annotations start with a multi-line comment with two asterisks, like /\*\* \*/. Adding a single description is as easy as adding text inside that comment block.
 ```typescript
 /** A tasty, sweet plant part that you can eat */
 type Fruit = {
@@ -1864,7 +1862,6 @@ type Fruit = {
 Now the description will show up when hovering over anywhere Fruit is used.
 
 The @param tag lets us define properties on interfaces and object types as well as parameters for functions.
-
 ```typescript
 /**
  * A tasty, sweet plant part that you can eat
@@ -1881,7 +1878,6 @@ type Fruit = {
 ```
 
 The @returns tag lets us add a description to our return value
-
 ```typescript
 /**
  * Eat a fruit
@@ -1896,7 +1892,6 @@ function eatFruit(fruit: Fruit): FruitWaste {
 ```
 
 You can add annotations to interfaces, classes, class methods, objects, even individual variables.
-
 ```typescript
 /**
  * The price in USD
@@ -1907,7 +1902,6 @@ const price = 27.5;
 There are also tags which can add even more information to your documentation. For example, @deprecated can tell users that a specific property or function shouldn't be used anymore; @example can be used to write out a full example of how to use a function; @throws lets you provide documentation about what kinds of errors a function will throw. All possible tags are available at https://tsdoc.org/.
 
 There are documentation generators which can read all of the type definitions and TSDoc comments and convert them into a complete documentation page. The tool typedoc can be installed and used to create HTML documentation:
-
 ```bash
 npm install --save-dev typedoc
 npx typedoc
@@ -1918,7 +1912,6 @@ You can install 'eslint-plugin-tsdoc' to add rules that make sure tsdoc comments
 ## Migrating from JavaScript to TypeScript
 
 You'll want to start with a permissive tsconfig.json file.
-
 ```json
 {
   "compilerOptions": {
@@ -1950,7 +1943,6 @@ Decorators are an experimental feature of TypeScript that allow you to add extra
 Since this is an experimental feature, you need to turn on the experimentalDecorators option in tsconfig.json.
 
 Class Decorator: We can attach a function to a class which will be called when that class is instantiated.
-
 ```typescript
 type Instantiable = new (...args: any[]) => any;
 
@@ -1970,7 +1962,6 @@ console.log(new Fruit("Apple")); // class Fruit {name:"Apple", edible:true}
 ```
 
 Property Decorators: We can use property decorators to add metadata or logic to a class property. This is done using property descriptors (JavaScript feature).
-
 ```typescript
 function Uppercase(target: any, key: string) {
   let val = target[key];
@@ -2002,7 +1993,6 @@ console.log(new Fruit("Apple")); // class Fruit {name:"APPLE"}
 ```
 
 Method Decorators: Method decorators work similarly to property decorators; they are a function where the first parameter is the class prototype and the second is the method name. The third property is the property descriptor for the method which can be modified directly.
-
 ```typescript
 function Loggable(target: any, key: string, descriptor: PropertyDescriptor) {
   const original = descriptor.value;
@@ -2029,13 +2019,11 @@ class Fruit {
 # ---------===== React With TypeScript =====---------
 
 React doesn't ship with TypeScript declarations; we have to install them from DefinitelyTyped:
-
 ```bash
 npm i -DE @types/react @types/react-dom
 ```
 
 tsconfig.json's jsx option set to 'react-jsx' allows you to use JSX without importing React, alongside some other benefits:
-
 ````json
 {
   "compilerOptions": {
@@ -2065,7 +2053,6 @@ By default, React.Component uses a Readonly empty object as the type of this.sta
 The React.Component constructor takes a second type parameter to represent our state interface.
 
 It's important to note that the generic parameters apply types to this.props, this.state, and this.setState, but not to the parameters of class lifecycle methods.
-
 ```typescript
 class Counter extends React.Component<CounterProps, CounterState> {
   // ...
@@ -2088,7 +2075,6 @@ class Counter extends React.Component<CounterProps, CounterState> {
 Similar to adding type annotations to regular functions.
 
 React components all have to return either a React Element or null.
-
 ```typescript
 import { ReactElement } from "react";
 
@@ -2098,7 +2084,6 @@ function HelloWorld(): ReactElement | null {
 ```
 
 Props can be annotated by giving our function parameters an annotation.
-
 ```typescript
 function Message({ message }: { message: string }): ReactElement {
   return <div>A message: {message}</div>;
@@ -2108,7 +2093,6 @@ function Message({ message }: { message: string }): ReactElement {
 If you want to explicitly annotate a function as a React component, you can use the built-in React.FunctionComponent type, or it's alias React.FC. This type includes annotations for common static properties that are added to function components, like displayName, propTypes, and defaultProps. It also includes the children prop in your prop definition, and has an explicit return type.
 
 We can use FC by annotating a variable that we assign an arrow function component. FC and FunctionComponent are generic types which accept a type representing the props.
-
 ```typescript
 import { FC } from "react";
 
@@ -2132,17 +2116,13 @@ const Message: FC<{ message: string }> = ({
 ## Components and Element Types
 
 Reminder of Basic React -
-
 - React Element - React elements are the building blocks of React applications. One might confuse elements with a more widely known concept of “components”. An element describes what you want to see on the screen. React elements are immutable.
-
 ```javascript
 const element = <h1>Hello, world</h1>;
 ```
 
 Typically, elements are not used directly, but get returned from components.
-
 - React Component - React components are small, reusable pieces of code that return a React element to be rendered to the page. The simplest version of React component is a plain JavaScript function that returns a React element:
-
 ```javascript
 function Welcome(props) {
   return <h1>Hello, {props.name}</h1>;
@@ -2150,7 +2130,6 @@ function Welcome(props) {
 ```
 
 Components can also be ES6 classes:
-
 ```javascript
 class Welcome extends React.Component {
   render() {
@@ -2162,12 +2141,10 @@ class Welcome extends React.Component {
 Components can be broken down into distinct pieces of functionality and used within other components. Components can return other components, arrays, strings and numbers (important part when thinking about typescript - React components can return other things beyond React Elements and its still valid. TypeScript might assume you are making a mistake if your component does not always return a ReactElement.). A good rule of thumb is that if a part of your UI is used several times (Button, Panel, Avatar), or is complex enough on its own (App, FeedStory, Comment), it is a good candidate to be a reusable component. Component names should also always start with a capital letter (<Wrapper/> not <wrapper/>).
 
 JSX code is transformed into React.createElement calls. React.createElement has the return type React.Element (usually named as ReactElement when importing). However, components can return something other than ReactElements like strings or array of numbers etc. If we were to try putting one of these components inside JSX block, Typescript would give us a warning:
-
 ```javascript
 function RenderString() {
   return "Hello World!";
 }
-
 function App() {
   return (
     <div>
@@ -2182,17 +2159,13 @@ function App() {
 TypeScript thinks you might be making a mistake using a function that returns a string within JSX. (React types could have accomodated allowing strings and arrays being returned as valid, but remember- the point of typescript is to help you catch mistakes you might make. So writers of React types wanted you to intentionally handle cases when you return non ReactElements in JSX. This way when you actually DO make a mistake by trying to use a function that's not meant to be a React Component, you'll get warned.)
 
 So, to let TypeScript know that we are indeed using React properly and that React allows us to have components that return strings, we have a few options. We can use a double type assertion with unknown ((x as unknown) as ReactElement), but that should only be used when we have no other better options, to give a bit more type safety we can do ((x as ReactNode) as ReactElement). ReactNode is a type built into React's type definition that represents anything that can be used as a child of a React component, including strings and arrays.
-
 ```typescript
 import { ReactNode, ReactElement } from "react";
-
 function RenderString() {
   return "Hello world!" as ReactNode as ReactElement;
 }
 ```
-
 Another way to handle the above:
-
 ```typescript
 import { Fragment } from "react";
 
@@ -2202,7 +2175,6 @@ function RenderString() {
 ```
 
 A React component is a class or function which returns a ReactElement (It cannot return ReactNode ?). Components define what props you can pass and what state can be held by the component, but the component itself doesn't hold state. It's just a template. Since you can call a function or instantiate a class multiple times, React components are intended to be used multiple times. These are components:
-
 ```javascript
 class Hello extends React.Component {
   render() {
@@ -2215,13 +2187,11 @@ const World = () => {
 ```
 
 These two component definitions, a class component and a function component, can be represented with a single type built into React's type definitions: React.ComponentType<P>, with P being the props of the component. Unsurprisingly, the type defintion for React.ComponentType<P> is just a union of a class component and function component defintion.
-
 ```typescript
 type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 ```
 
 One use case of ComponentType: When you accept another component as a prop, and render that component as an element in returned JSX:
-
 ```typescript
 function RenderComponent({ Comp }: { Comp: ComponentType }) {
   return (
@@ -2245,7 +2215,6 @@ In React, intrinsic elements represent the basic units that React uses to render
 (Note: Intrinsic elements don't really exist in React Native; instead, you import components directly from React Native that are translated to the native elements. This lesson only focuses on React DOM.)
 
 The type declarations for React come with special types which can help us work with these intrinsic elements. The React type declarations add a namespace called JSX to the global. We can access this anywhere that we are using React. This is where the type declarations for intrinsic elements comes from.
-
 ```typescript
 const MyButton = () => {
   return <button>Click Me!</button>;
@@ -2253,7 +2222,6 @@ const MyButton = () => {
 ```
 
 if you were to hover over the <button> element in this example using VS Code, you would see that it is an instance of `JSX.IntrinsicElements.button` which defines the props for that element. For example, <button> can have a type and disabled prop, but not a width prop.
-
 ```typescript
 interface IntrinsicElements {
   // ...
@@ -2328,7 +2296,6 @@ const [maybeNumberState, setMaybeNumberState] = useState<string | null>(null);
 ```
 
 When working with component composition, it's common to pass the state and state setter function as props. If we only ever intend to pass a literal value to our state setter function, then annotating that function is easy - pass in value as a parameter; return void; This can be done because this simple definition extends (in the conditional sense) the builtin type definition of setState.
-
 ```typescript
 interface UpstreamComponentProps {
   stringState: string;
@@ -2337,7 +2304,6 @@ interface UpstreamComponentProps {
 ```
 
 This gets a bit tricker if we need to use an update function with our state setter. In this case, it's probably easier to use the built-in type which React uses. The built-in type definition of setState is `Dispatch<SetStateAction<string>>`.
-
 ```typescript
 interface UpstreamComponentProps {
   stringState: string;
@@ -2352,13 +2318,11 @@ interface UpstreamComponentProps {
 If you need a bit more control over how your state is updated, or if you have several pieces of state that update in concert, useReducer can really come in handy.
 
 Quick recap on reducers. We have state, which is usually an object (although it can be any type). useReducer gives us our state and a dispatch function. We call dispatch with an action, which is also usually an object. Dispatch then calls our reducer function with our current state and our action. The results of that reducer function become our new state. If you define all these parts and they are typed properly, you don't need to add type annotations to the useReducer hook.
-
 ```typescript
 const [state, dispatch] = useReducer(shoppingReducer, []);
 ```
 
 The type of dispatch is `Dispatch<ShoppingListAction>`. ShoppingListAction will be something like:
-
 ```typescript
 export type ShoppingListAction =
   | AddAction
@@ -2373,7 +2337,6 @@ Epiphany: What can be noticed here is that the type for setState function of use
 State in React is internally handled using the reducer pattern we used to use at the application level.
 
 To annotate reducer function with potential generic type you need to pass down, as well as example of using useReducer:
-
 ```typescript
 interface DadJokeResponse {
   id: string;
@@ -2387,23 +2350,18 @@ interface FetchState<T> {
   data: T | null;
   error: Error | null;
 }
-
 interface LoadingAction {
   type: "loading";
 }
-
 interface ErrorAction {
   type: "error";
   error: Error;
 }
-
 interface SuccessAction<T> {
   type: "data";
   data: T;
 }
-
 type FetchActions<T> = LoadingAction | ErrorAction | SuccessAction<T>;
-
 function fetchReducer<T>(
   state: FetchState<T>,
   action: FetchActions<T>
@@ -2475,10 +2433,8 @@ export default function App() {
 ## useEffect, useMemo, useCallback
 
 Type Definition for useEffect:
-
 ```typescript
 function useEffect(effect: EffectCallback, deps?: DependencyList): void;
-
 type DependencyList = ReadonlyArray<any>;
 type EffectCallback = () => void | (() => void | undefined);
 ```
@@ -2488,7 +2444,6 @@ The only thing to keep in mind when using useEffect in TypeScript is that the Ef
 useLayoutEffect has the exact same type definition as useEffect.
 
 Type Definition for useMemo:
-
 ```typescript
 function useMemo<T>(factory: () => T, deps: DependencyList): T;
 ```
@@ -2498,7 +2453,6 @@ Usually T can be inferred and so you usually don't have to manually annotate.
 Dependency list for useMemo is not optional, otherwise the value returned from useMemo will be referentially different between renders, so it becomes pointless without a dependency array.
 
 Type Definition for useCallback:
-
 ```typescript
 function useCallback<T extends (...args: any[]) => any>(
   callback: T,
@@ -2513,7 +2467,6 @@ Mostly the same as useMemo except the generic type that represents the return va
 Props is always an object. This makes it really easy to annotate props with a type, since we can use any of the usual techniques for objects when writing our props annotation.
 
 Example of props being annotated:
-
 ```typescript
 interface FruitBasketProps {
   // This could be a string, but I'm using a union of strings
@@ -2523,14 +2476,12 @@ interface FruitBasketProps {
   disabled?: boolean;
   fruit: string[];
 }
-
 const FruitBasket = (props: FruitBasketProps) => {
   // ...
 };
 ```
 
 Although it is not common to do, we can use ReadOnly<Props> to make sure people don't mutate props, but its assumed people know not to mutate props anyway.
-
 ```typescript
 const FruitBasket = (props: ReadOnly<FruitBasketProps>) => {
   // ...
@@ -2538,12 +2489,10 @@ const FruitBasket = (props: ReadOnly<FruitBasketProps>) => {
 ```
 
 Indexable types can also be used, for example, to allow any props but its value must be a certain type:
-
 ```typescript
 interface ListerProps {
   [key: string]: string;
 }
-
 const Lister = (props) => {
   return (
     <ul>
@@ -2556,7 +2505,6 @@ const Lister = (props) => {
     </ul>
   );
 };
-
 <Lister item1="Hello" item2="World" />;
 ```
 
@@ -2565,7 +2513,6 @@ const Lister = (props) => {
 Event handlers are built into each intrinsic element. In fact, in React DOM, only intrinsic elements fire events.
 
 If we are passing an event handler directly to an intrinsic element, TypeScript will infer the type of the function's parameters for us.
-
 ```typescript
 <button onClick={(event) => {
   // (parameter) event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -2576,26 +2523,22 @@ TypeScript automatically knows that onClick is a mouse event and that its target
 
 If you need to write out your event handler function separately, such as if we are passing the event handler as a prop, you have a few options for adding the appropriate types.
 Option 1 (mouseover the onChange prop to figure out the type for the parameter):
-
 ```typescript
 const App = () => {
   function handleOnChange(event: React.FormEvent<HTMLInputElement>):void {
     // ...
   }
-
   return <input type="text" onChange={handleOnChange}>
 }
 ```
 
 Alternatively, you can use one of the many "EventHandler" types that are built into React's type definition, including ChangeEventHandler, MouseEventHandler, and PointerEventHandler. These are generic types that accept an element type and output a function type matching whatever event handler you need.
 Option 2:
-
 ```typescript
 const App = () => {
   const handleOnChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     // ...
   }
-
   return <input type="text" onChange={handleOnChange}>
 }
 ```
@@ -2606,7 +2549,6 @@ We don't have to annotate anything inside the function itself; our ChangeEventHa
 ## Adding extra properties with Intersection types on Events
 
 Sometimes the properties specified by the built-in event type are not complete. For instance any properties that will be dynamically added to the event object based on the specific usage. One example is form submit events. When using a form, their inputs get added as properties on the form object, with the key being the input's 'name'. But event.target.inputName won't be availabe on the builtin type because obviously typescript can't know what inputs you'll be making. So we have to tell typescript about this.
-
 ```typescript
 interface FormFields {
   email: HTMLInputElement;
@@ -2615,15 +2557,12 @@ interface FormFields {
 function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
   event.preventDefault();
   const target = event.target as typeof event.target & FormFields;
-
   const formValues = {
     email: target.email.value,
     message: target.message.value,
   };
-
   // Do whatever with the form values.
 }
-
 // form
 <form onSubmit={handleSubmit}>
   <div>
@@ -2644,13 +2583,11 @@ function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 ## Using same event handler with two different kinds of elements
 
 We might want to use the same event handler with two different kinds of elements, such as buttons and anchor tags. In this case, it might make more sense to assert that our target is a union of the two element types.
-
 ```typescript
 function handleClick(
   event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
 ) {
   const target = event.target as HTMLButtonElement | HTMLAnchorElement;
-
   // If target has an `href` property, we know it's an anchor
   if ("href" in target) {
     target.href;
@@ -2667,10 +2604,8 @@ For the children prop, the most flexible type is ReactNode, because children can
 A Render Prop is technically any prop that accepts a function that returns a ReactNode. It's used for sharing code between React Components. React Hooks solve the same problems that render props solve, so it's not used very often.
 
 If needed, render props can be annotated easily as such:
-
 ```typescript
 import { ReactNode, FC } from "react";
-
 interface MousePositions {
   x: number;
   y: number;
@@ -2685,26 +2620,21 @@ const MousePosition: FC<MousePositionProps> = ({ render, children }) => {
 ```
 
 The style prop lets us adjust the CSS of a specific intrinsic element. To annotate the style prop, you can use the React.CSSProperties type.
-
 ```typescript
 import { CSSProperties } from "react";
-
 const Button: React.FC<{ style: CSSProperties }> = ({ style, children }) => {
   return <button style={style}>{children}</button>;
 };
 ```
 
 You can use TypeScript's utility types to make it so only certain style attributes can be assigned through props.
-
 ```typescript
 type AllowedStyles = "display" | "backgroundColor";
-
 const Button: React.FC<{
   style: Pick<CSSProperties, AllowedStyles>;
 }> = ({ style, children }) => {
   return <button style={style}>{children}</button>;
 };
-
 <Button style={{ fontSize: 24 }}>Click me!</Button>;
 // Type Error: Type '{ fontSize: number; }' is not assignable to type 'Pick<CSSProperties, AllowedStyles>'
 ```
@@ -2714,20 +2644,16 @@ const Button: React.FC<{
 Many times we create simple wrappers over intrinsic elements and we want to pass props down to them.
 
 React gives us a utility type which extracts the props from an HTML element. Often, if we are creating a component that wraps an intrinsic element, we likely want to add more props that control some special behavior. We can use type widening to combine our props with the intrinsic props by either creating an intersection type with & or creating an interface that extends the element's props.
-
 ```typescript
 import { ComponentPropsWithoutRef } from "react";
-
 // Option 1
 type ButtonProps = {
   variant?: "primary" | "success" | "warning" | "danger";
 } & ComponentPropsWithoutRef<"button">;
-
 // Option 2
 interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   variant?: "primary" | "success" | "warning" | "danger";
 }
-
 const Button: React.FC<ButtonProps> = ({
   variant,
   className = "",
@@ -2738,7 +2664,6 @@ const Button: React.FC<ButtonProps> = ({
 ```
 
 ComponentPropsWithoutRef can be used with non-intrinsic components as well. When using with intrinsic components we pass it a string (see above). If we want to pull the props out of a non-intrinsic component, we just have to pass the type of that component in.
-
 ```typescript
 type ButtonComponentProps = ComponentPropsWithoutRef<typeof Button>;
 // type ButtonComponentProps = {
@@ -2766,20 +2691,16 @@ React Context lets you pass values from a parent component to any of the childre
 We create context using React.createContext. We have to pass in a default value. This is the value the context provides if it is accessed outside of a <Context.Provider> tree. The type of the entire context is inferred from the type of the default value.
 
 Often, the default value is null or undefined. If we need to set an explicit type for our context, we can pass it in as a generic type.
-
 ```typescript
 import { createContext, Dispatch, SetStateAction } from "react";
-
 interface ThemeModeInterface {
   mode: "dark" | "light";
   setMode: Dispatch<SetStateAction<"dark" | "light">>;
 }
-
 const ThemeModeContext = createContext<ThemeModeInterface | null>(null);
 ```
 
 This has one substantial downside - we have to check if the value of our context is null every time we access it, regardless of whether we are in a Provider tree or not. We can use assertions to deal with this, but one good strategy is by creating a prescribed method of accessing that particular context that checks if the context valueis actually set.
-
 ```typescript
 export const useThemeMode = () => {
   const themeMode = useContext(ThemeModeContext);
@@ -2792,14 +2713,11 @@ export const useThemeMode = () => {
 ```
 
 This is typically paired with a component that manages the context value and returns the context provider.
-
 ```typescript
 export const ThemeModeProvider: FC = ({ children }) => {
   const [mode, setMode] = useState<"dark" | "light">("light");
-
   // Memoize the context value to avoid unnecessary re-renders
   const contextValue = useMemo(() => ({ mode, setMode }), [mode, setMode]);
-
   return (
     <ThemeModeContext.Provider value={contextValue}>
       {children}
@@ -2815,11 +2733,9 @@ By only exporting the provider and the useThemeMode hook, we can ensure that an 
 Function components use refs both for holding references to DOM elements and storing bits of data that don't affect rendering.
 
 If we're collecting a reference to a DOM element, we likely want to initialize our ref with null. we need to provide a type to the generic that represents the type of the ref's contents. With strictNullChecks turned on, we'll also need to verify that our ref is set before we try to access it.
-
 ```typescript
 const Form = () => {
   const inputRef = useRef<HTMLInputElement>(null)
-
   const onClick = () => {
     if (inputRef.current) {
       inputRef.current.focus()
@@ -2830,7 +2746,6 @@ const Form = () => {
 ```
 
 Using refs for any other value, such as arbitrary strings or objects, works exactly the same as useState - whatever we pass as the initial value of the ref determines the type of the ref. If we need to override that, we can provide a type to the generic.
-
 ```typescript
 const App = () => {
   const stringRef = useRef("Hello there!");
@@ -2840,7 +2755,6 @@ const App = () => {
 ```
 
 Ref forwarding lets you pass a ref through a component to one of its children. It's not very common. When we wrap our component in React.forwardRef, we have to provide generic types for the ref itself and for the wrapped component's props. The ref type is defined first, followed by the props, even though the function parameters put the ref after the props.
-
 ```typescript
 import { forwardRef } from "react";
 const Input = forwardRef<HTMLInputElement, { disabled?: boolean }>(
@@ -2899,7 +2813,6 @@ module.exports = {
 ```
 
 4. add @babel/preset-typescript to babel
-
 ```json
 "babel": {
   "presets": [
@@ -2913,16 +2826,12 @@ module.exports = {
 6. As you change files to .ts or .tsx, there will be errors in imports of other files not turned to ts yet. These will go away when those imports are turned to .ts files. Those errors are saying they expect an associated type declaration file since a javascript module is being imported.
 
 7. Some files will not require annotations after changing extension to .ts, as everything will be inferred. For example:
-
 ```typescript
 import React from "react";
-
 export default function useHover() {
   const [hovering, setHovering] = React.useState(false);
-
   const onMouseOver = () => setHovering(true);
   const onMouseOut = () => setHovering(false);
-
   return [
     hovering,
     {
