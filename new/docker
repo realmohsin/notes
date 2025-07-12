@@ -82,11 +82,13 @@ A container is an isolated running process with its own isolated share of hardwa
 
 On mac and windows, docker is running within a linux VM, because of the need for namespacing and cgroups as features. So docker is always running in a linux OS environment.
 
-Commands
+## Commands
 
+To create and start a container:
 - docker run <image-name>
 Example:
 docker run hello-world
+use -d to run container in the background
 
 To override default command:
 - docker run <image-name> <command>
@@ -136,7 +138,34 @@ To create and start a container with opened shell:
 - docker run -it <image-name> sh
 Will not run any default command
 
+To build an image from a Dockerfile
 - docker build .
+- docker build -t <docker-username>/<project-name>:<tag>
+The . represents the build context, the place where the build files (Dockerfile) are
+Use -t to name the image
+
+To manually create an image from a container
+- docker commit -c <default-command> <container-id>
+Example: docker commit -c 'CMD ["redis-server"]' 39075252a24242s
+
+To tag (name) an image after its been created:
+- docker tag <container-id> <tag>
+- docker tag 9242020d242 realmohsin67/redis:1.0.0
+
+To run with port mapping:
+- docker run -p <host-port>:<container-port> <image-name>
+
+To run containers specified in docker-compose.yml
+- docker compose up
+Similar to docker run <image-name>
+use -d to launch all containers in background
+
+To build images then run containers specified in docker-compose.yml
+- docker compose up --build
+Similar to `docker build . && docker run <image-name>`
+
+To stop all containers from a docker-compose.yml file at once
+- docker compose down
 
 Once you have a created container, you cannot replace the default command. If you start a container that has exited (stopped), the default command will be rerun.
 
@@ -146,3 +175,72 @@ Every process we create in a linux environment has 3 communication channels atac
 # Building Custom Images Through Docker Server
 
 To create your own image you have to create a Dockerfile. The Dockerfile will be given to the docker server by teh docker client and a usable image will be created.
+```Dockerfile
+FROM alpine
+RUN apk add --update redis
+CMD ["redis-server"]
+```
+FROM is used to specify base image, which is downloaded, then a temporary container is started from base image and the RUN command is executed, and the resulting updated file system is snapshotted as a new image.
+
+NOTES: FROM copies the filesytem and default command of the base image into the custom image being created.
+
+At every step of a Dockerfile, an image is created. The image created by the final step is the final image, but every intermediate step runs a temporary container to create an intermediate image. These intermediate images are saved in a cache to be reused during future builds. So if you change your Dockerfile the image does not have to be rebuilt from scratch everytime. 
+
+## Image Tag
+Naming an image can be called 'tagging an image', but at the same time, the 'tag' of an image is just what's after the ':' in the conventionally naming pattern. So tag is the version of an image, but can mean other thing as well?
+
+
+## Manually create an Image from a container
+You can manually build an image from running containers. For example, to manually build the image the above Dockerfile builds, you can do the following:
+```bash
+docker run -it alpine sh
+apk add --update redis
+
+# new terminal window
+docker ps # to get the container id of the running alpine container
+docker commit -c 'CMD ["redis-server"]' 3095724242a24 # create image with given default command
+```
+
+NOTE: When you don't specify a tag for an image, the 'latest' tag is used. This can cause problems later when the version of the image changes.
+
+alpine versions of images are the most lightweight, with just the necessary packages installed. Example node:14-alpine just has node, npm and other basic packages only
+
+## To create image using local files
+```Dockerfile
+FROM node:14-alpine
+WORKDIR /usr/app
+COPY ./ ./
+RUN npm install
+CMD ["redis-server"]
+```
+By default, no traffic that is coming into your computer or into your localhost network is routed into the container. The container has its own isolated set of ports that can receive traffic. To have traffic coming into the computer routed to the container, we need to setup an explicit port mapping. This is only for incoming requests. By default, containers can make outgoing requests on their own.
+
+WORKDIR not only affects subsequent commands in the Dockerfile, but also affects 'docker exec' commands run manually.
+
+When making a change to files that you want to copy over, when rebuilding image, that step AND EVERY STEP AFTER IT will have to be redone without using cache. To make sure npm install does not trigger again unnecessarily, and makes use of cached intermediate image, you can do the following:
+```Dockerfile   
+FROM node:14-alpine
+WORKDIR /usr/app
+COPY ./package-json ./
+RUN npm install
+COPY ./ ./
+CMD ["redis-server"]
+```
+
+## Docker Compose
+docker compose is a separate CLI that gets installed along with Docker. It's used to start up multiple docker containers at the same time. Automates some of hte long-winded arguments we were passing to 'docker run'.
+
+docker-compose.yml is used to specify commands.
+```yaml
+version: '3'
+services:
+  redis-server:
+    image: 'redis'
+  node-app:
+    build: .
+    ports:
+      - "4001:8081"
+```
+Just by defining containers in docker-compose.yml the containers will be set up to be on the same network. They can communicate with each other without having to set up ports between the two.
+
+if process exits with code 0, it signifies an intentional exit. Any other code signifies something went wrong.
