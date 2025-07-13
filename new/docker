@@ -82,6 +82,10 @@ A container is an isolated running process with its own isolated share of hardwa
 
 On mac and windows, docker is running within a linux VM, because of the need for namespacing and cgroups as features. So docker is always running in a linux OS environment.
 
+Once you have a created container, you cannot replace the default command. If you start a container that has exited (stopped), the default command will be rerun.
+
+Every process we create in a linux environment has 3 communication channels atached to it that we refer to as - sdout, stdin and stderr. These channels are used to communicate information either into the process or out of the process. 
+
 ## Commands
 
 To create and start a container:
@@ -90,12 +94,14 @@ Example:
 docker run hello-world
 use -d to run container in the background
 
+
 To override default command:
 - docker run <image-name> <command>
 Example:
 docker run busybox ls
 docker run busybox echo "hello world"
 above commands don't work with hello-world image because ls and echo executable files are not in the file system snapshot of the hello-world image.
+use -it to connect host keyboard to stdin (automatically sends stdout from container to host)
 
 To list all running containers;
 - docker ps
@@ -143,6 +149,7 @@ To build an image from a Dockerfile
 - docker build -t <docker-username>/<project-name>:<tag>
 The . represents the build context, the place where the build files (Dockerfile) are
 Use -t to name the image
+use -f to specify Dockerfile name if different, such as Dockerfile.dev
 
 To manually create an image from a container
 - docker commit -c <default-command> <container-id>
@@ -154,6 +161,11 @@ To tag (name) an image after its been created:
 
 To run with port mapping:
 - docker run -p <host-port>:<container-port> <image-name>
+
+To set up volumes:
+- docker run -v <container-directory> -v <host-directory>:<container-directory>
+directories with no mapping (no :) will use its own files (this is used for override purposes)
+Example: docker run -p 3000:3000 -v /frontend/node_modules -v $(pwd):/frontend 30241e24141
 
 To run containers specified in docker-compose.yml
 - docker compose up
@@ -167,9 +179,12 @@ Similar to `docker build . && docker run <image-name>`
 To stop all containers from a docker-compose.yml file at once
 - docker compose down
 
-Once you have a created container, you cannot replace the default command. If you start a container that has exited (stopped), the default command will be rerun.
+To see status of containers from docker-compose.yml file of current directory:
+- docker compose ps
 
-Every process we create in a linux environment has 3 communication channels atached to it that we refer to as - sdout, stdin and stderr. These channels are used to communicate information either into the process or out of the process. 
+To attach to the stdin, stdout and stderr of the primary process in that container
+- docker attach <container-id>
+
 
 
 # Building Custom Images Through Docker Server
@@ -237,6 +252,7 @@ services:
   redis-server:
     image: 'redis'
   node-app:
+    restart: always
     build: .
     ports:
       - "4001:8081"
@@ -244,3 +260,40 @@ services:
 Just by defining containers in docker-compose.yml the containers will be set up to be on the same network. They can communicate with each other without having to set up ports between the two.
 
 if process exits with code 0, it signifies an intentional exit. Any other code signifies something went wrong.
+
+Containers can be given a restart policy to restart when the main process crashes. The restart policies are - 'no', 'always', 'on-failure', 'unless-stopped'. (When using 'no' it has to be wrapped in quotes, but the other options do not, because in yml 'no' by itself means false, so to use the string 'no' you have to use quotes.)
+
+
+## Docker Volumes
+
+Docker volumes is a way to keep data outside of a container while being able to reference it. 
+```yaml
+version: "3"
+services:
+  frontend-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - /frontend/node_modules
+      - .:/frontend
+  frontend-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /frontend/node_modules
+      - .:/frontend
+    command: ["npm", "test"]
+```
+docker-compose.yml is useful not just for setting up networking and running multiple containers, but even for a single container it can be helpful as a shortcut instead of using docker run with many options.
+
+Docker volumes is helpful in using docker during development.
+
+For running tests in development, you can run one-off command with docker exec in a separate terminal, use -it (pass stdin) to be able to rerun jest test suite. But running docker exec with container id everytime is not ideal, so making a separate container for just tests is possible, as shown above, with default command replaced with 'npm test'.
+
+`docker compose up` will launch all containers and show stdout of all containers at once at host stdout, with no default ability to provide stdin to any container. CTRL-C is only thing that is accepted (because you're sending that signal (SIGINT) to docker client first and docker-client forwards that to foreground process of container). docker run does the same thing, by default, sends stdout to host stdout. When running in the background, this default behavior is not done, which is what it means to run in the background, also with no ability to CTRL-C from host. 
+
+(Your default command's process becomes PID 1 in a container. Usually PID 1 is init, the mother of all processes. But because containers are not full OS'es, they don't actually have init process.) However, if your command is 'npm run test', npm is the PID 1, and the test script (jest ...) is another process started by npm. The consequence of this is, unless you directly execute 'npm test' with either 'docker run -it <image-name> npm test' or with 'docker exec -it <container-id> npm test', then you will not be able to interact with jest through host stdin. So if you run a container with docker-compose.yml with npm run test as command, you cannot easily access jest through stdin, because just the stdout is sent to host and because PID 1 is npm not jest, you cannot 'attach' to the main process with expected results. You would need to attach to a different process which is not easily doable with docker options available.

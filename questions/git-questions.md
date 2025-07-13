@@ -4,7 +4,7 @@
 2. Why is Git the most popular version control system?
 3. What are the main Git configuration options, how are they applied and how do you change them?
 4. What happens when you initialize git in a project with `git init`?
-5. What are some of the contents of the hidden .git/ folder? 
+5. What are some of the contents of the hidden .git/ folder?  
 6. How are file versions stored in Git?
 7. What is a tree object in the context of Git?
 8. What is a commit object in Git?

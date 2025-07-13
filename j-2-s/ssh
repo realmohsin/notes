@@ -131,7 +131,8 @@ Answers:
 17. -
 
 
-Daily Task: In a password-based ubuntu droplet in digital ocean, change the ssh authentication method to use rsa keys for identity instead of passwords. Do this for the root user and another regular user. Set up a firewall using ufw that only allows ssh connections. 
+
+Task: In a password-based ubuntu droplet in digital ocean, change the ssh authentication method to use rsa keys for identity instead of passwords. Do this for the root user and another regular user. Set up a firewall using ufw that only allows ssh connections. 
 
 Task Steps:
 1. Delete digital ocean rsa keys from .ssh/ folder.
