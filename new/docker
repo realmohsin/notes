@@ -3,16 +3,16 @@ Why use Docker? Docker makes it really easy to install and run software without 
 What is Docker? Docker is a platform or ecosystem around creating and running containers. Docker can be referring to Docker Client, Docker Server, Docker Machine, Docker Images, Docker Hub, or Docker Compose.
 
 Image - Single file with all the deps and config required to run a program.
-Container - Instance of an image. Runs a program with it's own isolated set of hardware resources. 
+Container - Instance of an image. Runs a program with it's own isolated set of hardware resources.
 
-Docker Client - Tool taht we are going to issue commands to.
+Docker Client - Tool that we are going to issue commands to.
 Docker Server (Docker Daemon) - Tool that is responsible for creating images, running containers, etc
 
-If you use ufw, be aware that when you expose container ports using docker, these ports bypass your firewall rules. For more info, check https://docs.docker.com/engine/network/packet-filtering-firewalls/#docker-and-ufw. 
+If you use ufw, be aware that when you expose container ports using docker, these ports bypass your firewall rules. For more info, check https://docs.docker.com/engine/network/packet-filtering-firewalls/#docker-and-ufw.
 
-Installing Docker depends on environment. There are some restrictions such has Docker Desktop cannot be installed on OSes in a VM because 'Docker Desktop does not work with nested virtualization'.  
+Installing Docker depends on environment. There are some restrictions such has Docker Desktop cannot be installed on OSes in a VM because 'Docker Desktop does not work with nested virtualization'.
 
-Docker Desktop on Linux runs a Virtual Machine (VM) which creates and uses a custom docker context, 'desktop-linux', on startup. 
+Docker Desktop on Linux runs a Virtual Machine (VM) which creates and uses a custom docker context, 'desktop-linux', on startup.
 
 Docker Desktop for Linux provides a user-friendly graphical interface that simplifies the management of containers and services. It includes Docker Engine as this is the core technology that powers Docker containers. Docker Desktop for Linux also comes with additional features like Docker Scout and Docker Extensions.
 
@@ -24,10 +24,13 @@ While it's possible to run both Docker Desktop and Docker Engine simultaneously,
 We generally recommend stopping the Docker Engine while you're using Docker Desktop to prevent the Docker Engine from consuming resources and to prevent conflicts as described above.
 
 Use the following command to stop the Docker Engine service:
+
 ```bash
 $ sudo systemctl stop docker docker.socket containerd
 ```
+
 Depending on your installation, the Docker Engine may be configured to automatically start as a system service when your machine starts. Use the following command to disable the Docker Engine service, and to prevent it from starting automatically:
+
 ```bash
 $ sudo systemctl disable docker docker.socket containerd
 ```
@@ -37,14 +40,17 @@ The Docker CLI can be used to interact with multiple Docker Engines. For example
 
 When installing Docker Desktop, a dedicated "desktop-linux" context is created to interact with Docker Desktop. On startup, Docker Desktop automatically sets its own context (desktop-linux) as the current context. This means that subsequent Docker CLI commands target Docker Desktop. On shutdown, Docker Desktop resets the current context to the default context.
 
-Use the docker context ls command to view what contexts are available on your machine. The current context is indicated with an asterisk (*).
+Use the docker context ls command to view what contexts are available on your machine. The current context is indicated with an asterisk (\*).
+
 ```bash
 $ docker context ls
 NAME            DESCRIPTION                               DOCKER ENDPOINT                                  ...
 default *       Current DOCKER_HOST based configuration   unix:///var/run/docker.sock                      ...
-desktop-linux                                             unix:///home/<user>/.docker/desktop/docker.sock  ...        
+desktop-linux                                             unix:///home/<user>/.docker/desktop/docker.sock  ...
 ```
+
 If you have both Docker Desktop and Docker Engine installed on the same machine, you can run the docker context use command to switch between the Docker Desktop and Docker Engine contexts. For example, use the "default" context to interact with the Docker Engine:
+
 ```bash
 $ docker context use default
 default
@@ -52,6 +58,7 @@ Current context is now "default"
 ```
 
 And use the desktop-linux context to interact with Docker Desktop:
+
 ```bash
 $ docker context use desktop-linux
 desktop-linux
@@ -59,153 +66,177 @@ Current context is now "desktop-linux"
 Refer to the Docker Context documentation for more details.
 ```
 
-
 ## Manage Docker as a non-root user
-The Docker daemon binds to a Unix socket, not a TCP port. By default it's the root user that owns the Unix socket, and other users can only access it using sudo. The Docker daemon always runs as the root user. If you don't want to preface the docker command with sudo, create a Unix group called docker and add users to it. When the Docker daemon starts, it creates a Unix socket accessible by members of the docker group. On some Linux distributions, the system automatically creates this group when installing Docker Engine using a package manager. In that case, there is no need for you to manually create the group.  (The docker group grants root-level privileges to the user. To run Docker without root privileges, see look online to run the Docker daemon as a non-root user (Rootless mode).)
+
+The Docker daemon binds to a Unix socket, not a TCP port. By default it's the root user that owns the Unix socket, and other users can only access it using sudo. The Docker daemon always runs as the root user. If you don't want to preface the docker command with sudo, create a Unix group called docker and add users to it. When the Docker daemon starts, it creates a Unix socket accessible by members of the docker group. On some Linux distributions, the system automatically creates this group when installing Docker Engine using a package manager. In that case, there is no need for you to manually create the group. (The docker group grants root-level privileges to the user. To run Docker without root privileges, see look online to run the Docker daemon as a non-root user (Rootless mode).)
 
 ## Docker logs
+
 Docker provides logging drivers for collecting and viewing log data from all containers running on a host. The default logging driver, json-file, writes log data to JSON-formatted files on the host filesystem. Over time, these log files expand in size, leading to potential exhaustion of disk resources. (See: https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-
-
 
 Image Cache - where downloaded images are stored
 
 When running docker run <image>, the very first time it will download the image from docker hub, then store it in the image cache. on subsequent 'docker run <image>' commands, docker will use the image cache and not have to download from docker hub.
 
-docker containers are possible behind the scenes using 'namespacing' and 'cgroups'. 
+docker containers are possible behind the scenes using 'namespacing' and 'cgroups'.
 namespacing - isolating resources per process (or group of processes)
 control groups (cgroups) - limit AMOUNT of resources used per process - memory, cpu usage, hd i/o, network bandwith
 
 An image is a file system snapshot + a startup command. That file system is put into containers.
 
-A container is an isolated running process with its own isolated share of hardware resources. 
+A container is an isolated running process with its own isolated share of hardware resources.
 
 On mac and windows, docker is running within a linux VM, because of the need for namespacing and cgroups as features. So docker is always running in a linux OS environment.
 
 Once you have a created container, you cannot replace the default command. If you start a container that has exited (stopped), the default command will be rerun.
 
-Every process we create in a linux environment has 3 communication channels atached to it that we refer to as - sdout, stdin and stderr. These channels are used to communicate information either into the process or out of the process. 
+Every process we create in a linux environment has 3 communication channels atached to it that we refer to as - sdout, stdin and stderr. These channels are used to communicate information either into the process or out of the process.
 
 ## Commands
 
 To create and start a container:
-- docker run <image-name>
-Example:
-docker run hello-world
-use -d to run container in the background
 
+- docker run <image-name>
+  Example:
+  docker run hello-world
+  use -d to run container in the background
 
 To override default command:
+
 - docker run <image-name> <command>
-Example:
-docker run busybox ls
-docker run busybox echo "hello world"
-above commands don't work with hello-world image because ls and echo executable files are not in the file system snapshot of the hello-world image.
-use -it to connect host keyboard to stdin (automatically sends stdout from container to host)
+  Example:
+  docker run busybox ls
+  docker run busybox echo "hello world"
+  above commands don't work with hello-world image because ls and echo executable files are not in the file system snapshot of the hello-world image.
+  use -it to connect host keyboard to stdin (automatically sends stdout from container to host)
 
 To list all running containers;
+
 - docker ps
 - docker ps --all // for all containers that that we ever started up
 
 To create a container:
+
 - docker create <image-name>
-Places image's file system snapshot into hard drive segment for container
+  Places image's file system snapshot into hard drive segment for container
 
 To start a container:
+
 - docker start -a <container-id>
-Executing the startup command in a created container
-The -a attaches the container's output to your terminal
+  Executing the startup command in a created container
+  The -a attaches the container's output to your terminal
 
 To remove all stopped (exited) containers, and image build cache:
+
 - docker system prune
 
 To get logs from a container:
+
 - docker logs <container-id>
-Get history of stdout
+  Get history of stdout
 
 To send SIGTERM signal to docker process:
+
 - docker stop <container-id>
-Give container 10 seconds to perform cleanup
+  Give container 10 seconds to perform cleanup
 
 To send SIGKILL signal to docker process:
+
 - docker kill <container-id>
-Shuts down immediately
+  Shuts down immediately
 
 To execute an additional command in a container:
+
 - docker exec -it <container-id> <command>
--i flag redirects our terminal to the stdin of the command
--t makes sure text from stdin and stdout is formatted properly
+  -i flag redirects our terminal to the stdin of the command
+  -t makes sure text from stdin and stdout is formatted properly
 
 To open a shell into container:
+
 - docker exec -it <container-id> sh
-CTRL+C, CTRL+D or type 'exit' to exit
+  CTRL+C, CTRL+D or type 'exit' to exit
 
 To create and start a container with opened shell:
+
 - docker run -it <image-name> sh
-Will not run any default command
+  Will not run any default command
 
 To build an image from a Dockerfile
+
 - docker build .
 - docker build -t <docker-username>/<project-name>:<tag>
-The . represents the build context, the place where the build files (Dockerfile) are
-Use -t to name the image
-use -f to specify Dockerfile name if different, such as Dockerfile.dev
+  The . represents the build context, the place where the build files (Dockerfile) are
+  Use -t to name the image
+  use -f to specify Dockerfile name if different, such as Dockerfile.dev
 
 To manually create an image from a container
+
 - docker commit -c <default-command> <container-id>
-Example: docker commit -c 'CMD ["redis-server"]' 39075252a24242s
+  Example: docker commit -c 'CMD ["redis-server"]' 39075252a24242s
 
 To tag (name) an image after its been created:
+
 - docker tag <container-id> <tag>
 - docker tag 9242020d242 realmohsin67/redis:1.0.0
 
 To run with port mapping:
+
 - docker run -p <host-port>:<container-port> <image-name>
 
 To set up volumes:
+
 - docker run -v <container-directory> -v <host-directory>:<container-directory>
-directories with no mapping (no :) will use its own files (this is used for override purposes)
-Example: docker run -p 3000:3000 -v /frontend/node_modules -v $(pwd):/frontend 30241e24141
+  directories with no mapping (no :) will use its own files (this is used for override purposes)
+  Example: docker run -p 3000:3000 -v /frontend/node_modules -v $(pwd):/frontend 30241e24141
 
 To run containers specified in docker-compose.yml
+
 - docker compose up
-Similar to docker run <image-name>
-use -d to launch all containers in background
+  Similar to docker run <image-name>
+  use -d to launch all containers in background
 
 To build images then run containers specified in docker-compose.yml
+
 - docker compose up --build
-Similar to `docker build . && docker run <image-name>`
+  Similar to `docker build . && docker run <image-name>`
 
 To stop all containers from a docker-compose.yml file at once
+
 - docker compose down
 
 To see status of containers from docker-compose.yml file of current directory:
+
 - docker compose ps
 
 To attach to the stdin, stdout and stderr of the primary process in that container
+
 - docker attach <container-id>
 
-
+To run docker compose with custom named file:
+- docker-compose -f docker-compose-dev.yml up --build
 
 # Building Custom Images Through Docker Server
 
 To create your own image you have to create a Dockerfile. The Dockerfile will be given to the docker server by teh docker client and a usable image will be created.
+
 ```Dockerfile
 FROM alpine
 RUN apk add --update redis
 CMD ["redis-server"]
 ```
+
 FROM is used to specify base image, which is downloaded, then a temporary container is started from base image and the RUN command is executed, and the resulting updated file system is snapshotted as a new image.
 
 NOTES: FROM copies the filesytem and default command of the base image into the custom image being created.
 
-At every step of a Dockerfile, an image is created. The image created by the final step is the final image, but every intermediate step runs a temporary container to create an intermediate image. These intermediate images are saved in a cache to be reused during future builds. So if you change your Dockerfile the image does not have to be rebuilt from scratch everytime. 
+At every step of a Dockerfile, an image is created. The image created by the final step is the final image, but every intermediate step runs a temporary container to create an intermediate image. These intermediate images are saved in a cache to be reused during future builds. So if you change your Dockerfile the image does not have to be rebuilt from scratch everytime.
 
 ## Image Tag
+
 Naming an image can be called 'tagging an image', but at the same time, the 'tag' of an image is just what's after the ':' in the conventionally naming pattern. So tag is the version of an image, but can mean other thing as well?
 
-
 ## Manually create an Image from a container
+
 You can manually build an image from running containers. For example, to manually build the image the above Dockerfile builds, you can do the following:
 ```bash
 docker run -it alpine sh
@@ -221,6 +252,7 @@ NOTE: When you don't specify a tag for an image, the 'latest' tag is used. This 
 alpine versions of images are the most lightweight, with just the necessary packages installed. Example node:14-alpine just has node, npm and other basic packages only
 
 ## To create image using local files
+
 ```Dockerfile
 FROM node:14-alpine
 WORKDIR /usr/app
@@ -228,12 +260,14 @@ COPY ./ ./
 RUN npm install
 CMD ["redis-server"]
 ```
+
 By default, no traffic that is coming into your computer or into your localhost network is routed into the container. The container has its own isolated set of ports that can receive traffic. To have traffic coming into the computer routed to the container, we need to setup an explicit port mapping. This is only for incoming requests. By default, containers can make outgoing requests on their own.
 
 WORKDIR not only affects subsequent commands in the Dockerfile, but also affects 'docker exec' commands run manually.
 
 When making a change to files that you want to copy over, when rebuilding image, that step AND EVERY STEP AFTER IT will have to be redone without using cache. To make sure npm install does not trigger again unnecessarily, and makes use of cached intermediate image, you can do the following:
-```Dockerfile   
+
+```Dockerfile
 FROM node:14-alpine
 WORKDIR /usr/app
 COPY ./package-json ./
@@ -243,20 +277,23 @@ CMD ["redis-server"]
 ```
 
 ## Docker Compose
+
 docker compose is a separate CLI that gets installed along with Docker. It's used to start up multiple docker containers at the same time. Automates some of hte long-winded arguments we were passing to 'docker run'.
 
 docker-compose.yml is used to specify commands.
+
 ```yaml
-version: '3'
+version: "3"
 services:
   redis-server:
-    image: 'redis'
+    image: "redis"
   node-app:
     restart: always
     build: .
     ports:
       - "4001:8081"
 ```
+
 Just by defining containers in docker-compose.yml the containers will be set up to be on the same network. They can communicate with each other without having to set up ports between the two.
 
 if process exits with code 0, it signifies an intentional exit. Any other code signifies something went wrong.
@@ -265,8 +302,7 @@ Containers can be given a restart policy to restart when the main process crashe
 
 
 ## Docker Volumes
-
-Docker volumes is a way to keep data outside of a container while being able to reference it. 
+Docker volumes is a way to keep data outside of a container while being able to reference it.
 ```yaml
 version: "3"
 services:
@@ -288,12 +324,261 @@ services:
       - .:/frontend
     command: ["npm", "test"]
 ```
+
 docker-compose.yml is useful not just for setting up networking and running multiple containers, but even for a single container it can be helpful as a shortcut instead of using docker run with many options.
 
 Docker volumes is helpful in using docker during development.
 
 For running tests in development, you can run one-off command with docker exec in a separate terminal, use -it (pass stdin) to be able to rerun jest test suite. But running docker exec with container id everytime is not ideal, so making a separate container for just tests is possible, as shown above, with default command replaced with 'npm test'.
 
-`docker compose up` will launch all containers and show stdout of all containers at once at host stdout, with no default ability to provide stdin to any container. CTRL-C is only thing that is accepted (because you're sending that signal (SIGINT) to docker client first and docker-client forwards that to foreground process of container). docker run does the same thing, by default, sends stdout to host stdout. When running in the background, this default behavior is not done, which is what it means to run in the background, also with no ability to CTRL-C from host. 
+`docker compose up` will launch all containers and show stdout of all containers at once at host stdout, with no default ability to provide stdin to any container. CTRL-C is only thing that is accepted (because you're sending that signal (SIGINT) to docker client first and docker-client forwards that to foreground process of container). docker run does the same thing, by default, sends stdout to host stdout. When running in the background, this default behavior is not done, which is what it means to run in the background, also with no ability to CTRL-C from host.
 
 (Your default command's process becomes PID 1 in a container. Usually PID 1 is init, the mother of all processes. But because containers are not full OS'es, they don't actually have init process.) However, if your command is 'npm run test', npm is the PID 1, and the test script (jest ...) is another process started by npm. The consequence of this is, unless you directly execute 'npm test' with either 'docker run -it <image-name> npm test' or with 'docker exec -it <container-id> npm test', then you will not be able to interact with jest through host stdin. So if you run a container with docker-compose.yml with npm run test as command, you cannot easily access jest through stdin, because just the stdout is sent to host and because PID 1 is npm not jest, you cannot 'attach' to the main process with expected results. You would need to attach to a different process which is not easily doable with docker options available.
+
+
+## Multi Step Docker Builds
+
+Each step in the process of building a Docker image (each command in Docker file) craetes a new layer, which is cached. You can actually use a different base image for some steps to create the final image, which we call multi-step docker builds. Example:
+```Dockerfile
+FROM node:18.20.8-alpine3.21 AS builder
+WORKDIR '/frontend'
+COPY package.json .
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx
+EXPOSE 80
+COPY --from=builder /frontend/build /usr/share/nginx/html
+```
+
+The EXPOSE keyword does not actually do anything. It's just metadata for developers to see and recognize that port 80 needs to be mapped to a host port. However, some services make use of it, like in AWS Elastic Beanstalk, it uses that step to perform the necessary port mapping (probably by appending -p 80:80 when runs docker run)
+
+## Travis CI
+Travis CI can be used to automate testing and deploying on the cloud when we push code to github.
+
+(The below is not the most optimal setup for deploying to AWS, because it requires building of images by aws. The optimal way is to upload built images to dockerhub, then tell aws to download already built images. For that check further below.)
+```yaml
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t realmohsin67/frontend-dev -f Dockerfile.dev .
+script:
+  - docker run -e CI=true realmohsin67/frontend-dev npm test
+deploy:
+  provider: elasticbeanstalk
+  region: us-east-1
+  app: frontend #  project name, prolly should be more specific than just frontend when using for real
+  env: Frontend-env
+  bucket_name: elasticbeanstalk-us-east-1-123456789012 # top level folder that gets reused by other elasticbeanstalk apps
+  bucket_path: frontend # name the sub-folder in the bucket for this app
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+```
+When using Travis CI, in the scripts section, if command return status code (process exit code ?) is anything other than 0, travis will assume the step failed. So process exit code is important. Normally the 'npm test' script is a running process, but for CI we need it to just run tests and exit, that's why we pass CI=true env variable to jest, and so jest knows to run tests once and exit.
+
+If everything passes, it means all scripts in the script section exited with status code 0.
+
+
+## Another more complex example
+6 container project
+```yaml
+version: "3"
+services:
+  postgres:
+    image: postgres:10.5
+  redis:
+    image: redis:6.2
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - 3000:80
+    depends_on:
+      - api
+      - client
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /fib-api/node_modules
+      - ./api:/fib-api
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /fib-client/node_modules
+      - ./client:/fib-client
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /fib-worker/node_modules
+      - ./worker:/fib-worker
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+```
+```nginx
+upstream client {
+    server client:3000; 
+}
+
+upstream api {
+    server api:5000;
+}
+
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://client;
+    }
+
+    location /sockjs-node  {
+        proxy_pass http://client;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+    }
+
+    location /api {
+        rewrite /api/(.*) /$1 break;
+        proxy_pass http://api;
+    }
+}
+```
+The above default.conf was copied to /etc/nginx/conf.d/default.conf. Important thing to note, the words 'api' and 'client' was enough to specify the container network address. 
+
+When passing environment variables, there's two syntaxes:
+- variableName=value   - sets a variable in the container at runtime
+- variableName  - sets a variable in the container at runtime, value is taken from outside environment
+
+Anytime you make a docker compose file, the different service names are essentially used as a domain of sorts and you can refer to them to access the service that is hosted.
+
+We can expect crashes when running docker compose for the first time, since services like redis might take a long time to setup when being built, and other services expect redis to be rdy, which it might not be. Initial nginx crashes are also possible, that's why we have 'restart: always'.
+
+
+## Optimal Production deployment flow with Travis CI and AWS 
+
+Push code to Github -> Travis automatically pulls repo --> Travis builds a test image, tests code --> Travis builds prod images --> travis pushes built prod images to Docker Hub --> Travis pushes project to AWS EB --> EB pulls images from Docker Hub, deploys
+
+Travis config file for optimal deployment to aws for complex project:
+```yaml
+sudo: required
+language: generic
+services:
+  - docker
+before_install:
+  - docker build -t realmohsin67/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true realmohsin67/react-test npm test
+after_success:
+  - docker build -t realmohsin67/fib-calc-client ./client
+  - docker build -t realmohsin67/fib-calc-nginx ./nginx
+  - docker build -t realmohsin67/fib-calc-api ./api
+  - docker build -t realmohsin67/fib-calc-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push realmohsin67/fib-calc-client
+  - docker push realmohsin67/fib-calc-nginx
+  - docker push realmohsin67/fib-calc-api
+  - docker push realmohsin67/fib-calc-worker
+deploy:
+  provider: elasticbeanstalk
+  region: us-east-1
+  app: fib-calc
+  env: FibCalc-env
+  bucket_name: elasticbeanstalk-us-east-1-123456789012 # S3 bucket is where raw files are uploaded to that elasticbeanstalk will use
+  bucket_path: fib-calc
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+
+```
+
+Remember, docker-compose is great for development, and helps not having to run 'docker run' multiple times with lots of complicated command line arguments and flags. It helps establish relationships between containers, etc. In production, when we can use Dockerrun.aws.json to tell aws elastic beanstalk the information a docker-compose file would. But main difference is, docker-compse is more about explain how to build an image, but Dockerrun.aws.json will be more about containers, how to start them and the relationships between them, from the images it downloads.
+
+Behind the scenes, AWS Elastic Beanstalk actually uses Amazon Elastic Container Service (ECS). ECS uses 'task definition' files to tell it how to run one single container. To write the Dockerrun.aws.json file, which wants you to write 'Container Definitions', what they really mean are the 'task definitions' for ECS, so find the docs for that if needed.
+
+NOTE: Recently however, if using Amazon Linux 2023 Platform, you don't need Dockerrun.aws.json, instead you can have a production docker-compose.yml that does things in a certain way:
+```yaml
+version: "3"
+services:
+  nginx:
+    image: "realmohsin67/fib-calc-nginx"
+    mem_limit: 128m
+    hostname: nginx
+    ports:
+      - "80:80"
+  api:
+    image: "realmohsin67/fib-calc-api"
+    mem_limit: 128m
+    hostname: api
+    environment:
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+      - PGUSER=$PGUSER
+      - PGHOST=$PGHOST
+      - PGDATABASE=$PGDATABASE
+      - PGPASSWORD=$PGPASSWORD
+      - PGPORT=$PGPORT
+  client:
+    image: "realmohsin67/fib-calc-client"
+    mem_limit: 128m
+    hostname: client
+
+  worker:
+    image: "realmohsin67/fib-calc-worker"
+    mem_limit: 128m
+    hostname: worker
+    environment:
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+```
+
+In production, its better to use managed data service providers instead of our own redis and postgres containers.
+For redis, using AWS Elastic Cache (aws's managed redis) and for postgres, using AWS Relational Database Service (RDS) gives the follwoing benefits:
+- automatically creates and maintains instances for you
+- super easy to scale
+- built in logging + maintenance
+- probably better security than what we can do
+- easier to migrate off of Elastic Beanstalk with
+- For AWS RDS - automated backups and rollbacks <-- big benefit
+
+When using AWS, you initially create your services in a certain region you selected. You get a VPC per region, or Virtual Private Cloud. A VPC is its own private network, so that any instance or service you create is isolated to just your account. A VPC is also used to implement a lot of security rules, especially how services you create connect with each other.
+
+To get our services to connect to each other, we need to create what's called a security group. Security group is a fancy term for 'firewall rule'. Firewall rules describe what different services or different sources of internet traffic can connect to different services running inside your VPC. 
+
+The security group created for Elastic Beanstalk instance was - 'Allow any incoming traffic on Port 80 from any IP in the world'. A restrictive SecurityGroup example - 'Allow traffic on Port 3010 from IP 172.0.40.2'.
+
+For our complex fib-calc setup we need to create a connection between EB instance, RDS and EC (redis). We're going to create a new SecurityGroup that says - 'Allow any traffic from any other AWS service that has this security group'. 
+
+Creating and applying security groups can be done through AWS dashboard.
+
+To access AWS programatically from travis, we need to create an IAM user, which is an identity with a specific set of permissions. (we can name it like fib-calc-deployer, nice meaninful name!)
+
+
+## Kubernetes
+
+Kubernetes is a system for running many different containers over multiple different machines. Useful when needing to run many different containers with different images. 
+
+A cluster is a master and one or more nodes. A node is virtual machine or a physical computer used to run different sets of containers.
+
+If you just need to create lots of nodes with the same set of containers, then elastic beanstalk will do that naturally, and kubernetes is not needed. We want to use it when we expect to have an application that consists of many different types of containers, running in different quantities on multiple different computers.
