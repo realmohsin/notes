@@ -164,7 +164,7 @@ To create and start a container with opened shell:
 To build an image from a Dockerfile
 
 - docker build .
-- docker build -t <docker-username>/<project-name>:<tag>
+- docker build -t <docker-username>/<project-name>:<tag> .
   The . represents the build context, the place where the build files (Dockerfile) are
   Use -t to name the image
   use -f to specify Dockerfile name if different, such as Dockerfile.dev
@@ -579,6 +579,170 @@ To access AWS programatically from travis, we need to create an IAM user, which 
 
 Kubernetes is a system for running many different containers over multiple different machines. Useful when needing to run many different containers with different images. 
 
-A cluster is a master and one or more nodes. A node is virtual machine or a physical computer used to run different sets of containers.
+A cluster is one or more nodes with a master program that controls them. A node is virtual machine or a physical computer used to run different sets of containers.
 
 If you just need to create lots of nodes with the same set of containers, then elastic beanstalk will do that naturally, and kubernetes is not needed. We want to use it when we expect to have an application that consists of many different types of containers, running in different quantities on multiple different computers.
+
+In development, we use minikube to setup a small kubernetes cluster on your local machine. In production, we have the option of using managed solutions like AWS EKS - Amazon Elastic Container Service for Kubernetes, and GKE - Google Cloud Kubernetes Engine, which will create clusters for you and manage the low level details surrounding security etc. Alternatively you can make your own cluster. 
+
+minikube will make a virtual machine for the cluster. kubectl will be used to manage the containers in the node (virtual machine created by minikube).
+
+install minikube and kubectl using chatgpt. 
+
+Normally, Minikube sets up a Kubernetes cluster by creating a dedicated VM and running Kubernetes components (like kubelet, API server) inside it. With the Docker driver: Minikube skips creating a VM. It runs the Kubernetes cluster's nodes as containers on your local Docker engine. This approach is often called "container-based Minikube."
+
+Kubernetes expects all images to already be built. There will be one config file per 'object' we want to create. We have to manually set up all networking. 
+
+Kubernetes does not use images that we buid and tag on our local machine, we need to first push the image to a registry accessible by our cluster (like Docker Hub)
+
+
+For kubernetes, we need to write config files describing the containers we want:
+```yaml
+apiVersion: v1 # specifies set of object we can make and use
+kind: Pod # type of object we want to make
+metadata:
+  name: client-pod # for logging and ability to reference it
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client # for logging and ability to reference it
+      image: realmohsin67/fib-calc-client:1.0.0
+      ports:
+        - containerPort: 3000 # what port to expose to outside world (based on source code of image, we are listening on port 3000 in the app)
+```
+
+```yaml
+apiVersion: v1 # specifies set of object we can make and use
+kind: Service # type of object we want to make
+metadata:
+  name: client-node-port
+spec:
+  type: NodePort # Service subtype specified
+  ports:
+    - port: 3050 # the port other pods in node needs to use to access the pods referred to by selector
+      targetPort: 3000 # the port inside of selected pods that we want to open traffic to
+      nodePort: 31515 # the port on the node that connects to selected pods, by convention should be between 30000-32767
+  selector:
+    component: web # label-selector system for referring to the above pod
+```
+We will feed these two config files to kubectl which will create objects out of them. Object refers to kubernetes entities. Objects serve different purposes - running a container, monitoring a container, setting up networking, etc.
+
+Example Object Types:
+- StatefulSet
+- ReplicaController
+- Pod - used to run a container
+- Service - set up networking
+
+## Pod
+A pod is created inside a node. A pod is a grouping of containers that have a common purpose or must be running together (like a database + its logger + its backup manager). In kubernetes you cannot create a naked container, every container must be inside a pod. 
+
+## Service
+A service is an object that sets up networking in a kubernetes cluster. 
+There are 4 subtypes of Service:
+- ClusterIP - Used to provide access to other pods running inside the cluster
+- NodePort - To expose a container to the outside world (only good for dev purposes)
+- LoadBalancer
+- Ingress
+
+Diagram of network traffic in a node:
+kube-proxy(first thing responsible for handling traffic inside node) --> service (nodeport) --> Pod
+
+Label - Selector System - used for referencing entities (labels allow for referencing many things at once). Labels are key-value pairs like 'component=web'. they can be anything.
+
+Services uses selectors to refer to pods with certain labels.
+
+The NodePort Service is mainly used for development and allows mapping of container port to node port, so we can send traffic to node port through browser, which will reach pod/container.
+
+The nodePort created by NodePort Service is not referring to localhost, but instead the ip created for the node by minikube.
+
+## Kubernetes commands
+
+To get ip of node created by minikube:
+- minikube ip
+
+To change the current configuration of our cluster, using a config file:
+- kubectl apply -f <filename>
+
+To print status of k8s objects:
+- kubectl get <object>
+- kubectl get pods
+- kubectl get services
+
+To get detailedd info about an object:
+- kubectl describe <object-type> <object-name>
+- kubectl describe pod <pod-name>
+
+To remove an object:
+- kubectl delete -f <config-file>
+
+
+## Master and declarative deployment
+On Master, there are 3 or 4 different programs, that control your entire kubernetes cluster. One of htem is kube-apiserver (or we can visualize them all being this one).
+Master uses the config files fed to it to create a state that it is responsible for maintaining, Master is constantly polling its nodes to make sure the state is preserved. If config files say to have 4 instances of so-and-so image up, and we manually stop a container on one of the nodes, Master will be made aware of this and restart or remake the container to make sure there is 4 up at all times. 
+
+When using Kubernetes, we alwasy interact with Master, we shouldn't reach out to the nodes individually.
+
+We declaratively give Master a set of responsibilities, and Master is constantly workign to make sure that set of responsibilities is fulfilled.
+
+Important points:
+- Kubernetes is a system to deploy containerized apps
+- Nodes are individual machines (or vms) that run containers (in pods)
+- Masters are machines or vm's, with a set of programs to manage nodes
+- Kubernetes does not build our images, it gets them from somewhere else.
+- Kubernetes(the master) decides where to run a container (but we can override if needed) 
+- To deploy something, we update the desired state of the master with a config file
+- The master works constantly to meet the desired state
+
+Kubernetes allows declarative deployments as well as imperative ways of doing things. You will always have the option to do things imperatively via kubectl, but we should strive to take advantage of doing things declaratively. That is the advantage of kubernetes - being able to do things declaratively. Whenever possible we want our config files to be reflective of the state we want, and when we want to change something, we should change the config file to reflect our new state and let kubernetes handle making the change from old state to new state. 
+
+When declaratively updating a config file, if the name and type of object is the same as one that is running, instead of recreating it will update that object. So if you update the config file of a pod to use a different image, as long as you don't change the name of the pod, the pod will be imperatively modified instead of torn down.
+
+NOte about deletion: One exception to declaratively changing state is deletion. There's no easy way to declaratively remove a type of pod through config files. So its ok to imperatively delete such as with kubectl delete -f <config-file>
+
+When declaratively making changes to pods, you'll notice you can't change some options after first deployment with kubectl apply. (Reason for this not explained exactly.) However, in production and in serious development, Pod object is rarely used. It's used for very simple demonstration type scenarios. Instead of Pod, we use Deployments which is a very related object for serious development and production. Update: Deployment creates Pod under the hood and thats abstracted away.
+
+Deployment object - Maintains a set of of identical pods (but could be just 1), ensuring that they have the correct config and that the right number exists. (We can change any config element after deployment and it will be responsible for making sure new state is reached.)
+
+
+## Pod object vs Deployment object
+Pod 
+- runs a single set of containers
+- good for one-off dev purposes
+- rarely used directly in production
+
+Deployment
+- runs a set of identical pods (one ore more)
+- monitors the state of each pod, updating as necessary
+- good for dev
+- good for production
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1 # number of pods to create
+  selector:
+    matchLabels:
+      component: web # Deployment creates Pods using template below, and needs to know which label to use as identity
+  template: # similar to what we specified in Pod object, just basics of whats needed, Deployment uses this to create Pod object under the hood
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: realmohsin67/fib-calc-client:1.0.0
+          ports:
+            - containerPort: 3000
+
+```
+
+Every pod gets its own IP address, but we dont use it because pods can get torn down and new ones can be spun up.  Instead we use Service objects to target all pods that have a certain label and route traffic to them.
+
+NOTE: When changing config of deployment, for example changing the port, it doesn't modify the pods, but recreates them. I suppose this is because we don't name the pods directly anymore, Deployment names them.
+
+
+How to get pods to use updated image from dockerhub. 
