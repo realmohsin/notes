@@ -16,7 +16,7 @@ Data Transfer Optimizations
   - minimize images
     - pick the right file format and compress
     - reduce png with TinyPNG, reduce JPG with JPEG-optimzer, always lower jpeg quality (30-60%)
-    - lower the resolution (size) to the match the size with which it will be displayed
+    - lower the resolution (size) to the match the size it will be displayed
     - provide different sized images for different device widths (using media queries)
     - use cdns like imgix
     - remove image metadata (www.verexif.com)
@@ -25,37 +25,7 @@ Data Transfer Optimizations
 for perfect optimization - identify what data is needed for initial app use, what is 'above the fold', and send just that data, then during downtime, anticipate user action, and prefetch data for just those anticipated actions.
 
 
-Frontend Processing
-Rendering path - the sequence of steps taken by the browser to render the screen. 
-1. Constructing the DOM from the HTML
-2. Constructing the CSSOM from the CSS
-3. Applying any JavaScript that alters the DOM or CSSOM.
-4. Constructing the 'render tree' from the DOM and CSSOM. (DOMContentLoaded event?)
-5. Perform style and layout operations on the page to see what elements fit where.
-6. Handle painting the pixels and drawing the screen (Load event?)
-
-
-
-
-The initial render invokes this process, but as more resources that affect the page's rendering become available, the browser will re-run this process—or maybe just parts of it—to update what the user sees. The steps taken before the very first render is called the 'critical rendering path'. 
-
-The browser will only need to wait for the following before the initial render:
-- Part of the html
-- render-blocking css in the <head> element
-- render-blocking javascript in the <head> element
-
-For the initial render, the browser will not wait for all of the html, fonts, images, non-render-blocking javascript and non-render-blocking css. The browser expects to fill in fonts and images in subsequent page rerenders, but this can mean that areas of blank space can appear in the initial render. If sufficient space is not reserved for content as it streams in, (like when image dimensions are not provided in the HTML), the page's layout will shift. That shifting is now a user experience metric called Cumulative Layout Shift, and is used by Google in ranking webpages.
-
-One thing to note about non-rendering-blocking javascript (or css), they will still block rendering of html below the elements that load them. Perhaps they are called non-rendering-blocking simply because they don't block the painting of html that are above the elements that load them. 
-
-Optimizing the critical rendering path involves reducing the time to receive the first bytes of HTML (Time to First Byte metric) and reducing the impact of render-blocking resources (css and javascript in the head, and above the fold or till the point of html you want in the initial render).
-
-While optimizing critical rendering path is being concerned about the initial render, what's also important is, maybe even more so, is the contentful rendering path - path to First Contentful Paint (FCP) or path to Largest Contentful Paint (LCP), which is when the full content appears on the screen, the fonts, images, etc.
-
-
-
-
-
+The Rendering Path
 1. Constructing the DOM
 2. Constructing the CSSOM
 3. Applying changes to the DOM and CSSOM from JavaScript
@@ -65,7 +35,7 @@ While optimizing critical rendering path is being concerned about the initial re
 
 The above process occurs for rendering the screen as resources specificed in the HTML are downloading.
 
-The particular steps of this process occurring for the first render is called the 'critical rendering path'. The first render does not wait for all the html, fonts and images to finish downloading. Renders and re-renders happen as these resources are downloaded. There are two resources, however, that are render-blocking,  css and javascript, where the browser DOES wait for them to finish downloading and being applied before continuing the render process.
+The particular steps of this process occurring for the first render is called the 'critical rendering path'. The first render does not wait for all the html, fonts and images to finish downloading. Renders and re-renders happen as these resources are downloaded. There are two resources, however, that are render-blocking,  css and synchronous javascript, where the browser DOES wait for them to finish downloading and being applied before continuing the render process.
 
 Optimizing the 'critical rendering path' or time-to-first browser render, is known to be a worthy performance optimizaiton. To optimize the critical rendering path, a few things are important to understand - css is rendering blocking, javascript is rendering blocking AND parser blocking, and all other resources are neither. With these things in mind, and a few other considerations, the following are some of the best practices for optimizing time to first render:
 - Optimizing time-to-first-byte (TTFB) of HTML, which involves having a fast server and avoiding page redirects.
@@ -120,7 +90,6 @@ Task: Create a simple website with raw html, css and javascript that demonstrate
 - optimal placement of async, deferred, and normal scripts in the html
 - code split along routes and either lazy load or prefetch the javascript for other routes
 - prefetch html and css for other routes using link
-
 
 
 come back to lecture 147 for react optimizations
