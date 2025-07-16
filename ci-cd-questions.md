@@ -1,0 +1,18 @@
+- What is Continuous Integration?
+- What is Continuous Delivery?
+- What is GitHub Actions?
+- What are workflows?
+- What are jobs?
+- What is a runner?
+- What is a step?
+- What is an action?
+- What are events in GitHub Actions? What are event activity types and event filters? 
+- What are community Actions?
+- What are context objects?
+- What are artifacts? What can you do with artifacts created by jobs?
+- What are the community actions 'actions/upload-artifact@v3' and 'actions/download-artifact@v3' for?
+- What does the 'needs' keyword do?
+- What is a job output? How do you create an output for a job?
+- How is caching helpful for running jobs and how can it be done?
+- How do you set environment variables in Github Actions?
+- 
