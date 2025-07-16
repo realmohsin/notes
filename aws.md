@@ -75,6 +75,16 @@ unofficial categories:
 - cloud management
 - migration & edge computing
 - analytics & data ingestion
-- machine learning & artifical intelligence
+- machine learning & artifical intelligence (not on exam)
 - developer tools
-- business applications
+- business applications (not on exam)
+
+
+# Accessing and Using AWS Services
+
+3 Ways to Access AWS
+- the management console - graphical UI
+- AWS command line interface (CLI) - command-driven access
+- AWS software development kit (SDK) - programmatic access, infrastructure as code
+
+The 3 ways to access AWS, behind the scenes, all send http requests to an API - the API aws has that controls everything. 
