@@ -8,7 +8,7 @@ continuous delivery - publishing new versions of an app or package after new cod
 
 github actions can also help with automating code & repository management
 
-workflows, jobs, steps
+workflows, jobs, steps 
 
 You can add workflows to github repositories. Workflows include one or more jobs. Jobs contain one or more steps that will be executed in the order they are specified. 
 
@@ -688,7 +688,7 @@ steps:
   - name: Output Contents
     run: ls
   - name: Deploy Site
-    uses: ./.github/actions/deploy-s3-javascript
+    uses: ./.github/actions/deploy-s3-javascript # relative path to action.yml, can be docker action too (see below)
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -711,6 +711,7 @@ Note to remember - when defining custom actions locally in .github, you have to 
 Docker Actions
 You can specify a locally defined Dockerfile to run as an action. The Dockerfile can be set up to run, for example, a local python script.
 ```yaml
+# action.yml
 name: 'Deploy to AWS S3'
 description: 'Deploy a static website via AWS S3.'
 inputs:
@@ -741,4 +742,98 @@ RUN pip install -r requirements.txt
 COPY deployment.py /deployment.py
 
 CMD ["python", "/deployment.py"]
+```
+
+
+Github Actions takes the inputs to a custom docker action and makes them available as environment variables in the runner. The environment variables made available are named `INPUT_` + the name of the input. For example, if you have an input named `bucket`, the environment variable will be named `INPUT_BUCKET`. To set output, if the docker container will run python, use print('::set-output name=website-url::{website_url}') which will be picked up as step output. (There's also probably a github actions python package you can download to set output)
+
+
+You can store your actions in separate repositories and share them with others. To use a custom action in another repository, reference the repository like this: my-account/my-action@v1. 
+You can publish your custom action to the GitHub Marketplace to share it with others. 
+
+
+# Security & Permissions
+Three topics for Security Concerns
+- script injection
+  - A value, set outside a workflow, is used in a workflow
+  - example: Issue title used in a workflow shell command
+  - Workflow / command behavior could be changed
+- malicious third-party actions
+  - actions can perform any logic, including potentially malicious logic
+  - example: a third-party action that reads and exports your secrets
+  - only use trusted actions and inspect code of unknown / untrusted authors
+- permission issues
+  - consider avoiding overly permissive permissions
+  - example: only allow checking out code (read-only)
+  - github actions supports fine-grained permissions control
+
+
+## Script Injection
+To avoid script injection attacks, don't set variables to user input within a script or command. One workaround would be to use the 'env' keyword in the workflow file to set user input to environment variables, and then use those environment variables in the script, instead of using user input directly in the script.
+
+## Malicious Third-Party Actions
+Only use trusted actions by verified creators.
+
+## Permissions
+You can add the 'permissions' key to a job or workflow to limit the permissions that the job has. 
+```yaml
+jobs:
+  assign-label:
+    permissions:
+      issues: write
+```
+
+There is a special GITHUB_TOKEN secret that is available to all workflows, even though you don't have to define it. It is so you can send it to the GitHub API in HTTP requests to perform actions from a runner. 
+```yaml
+run: |
+  curl -X POST \
+  --url https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels \
+  -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+  -H "Content-Type: application/json" \
+```
+Prmissions are actually encoded into the GITHUB_TOKEN. 
+
+Under the hood, many actions from marketplace use GITHUB_TOKEN.
+
+By default, if you don't set permissions, you have read and write access to (almost) all resources. To change default to read only, you can change option in repository settings.
+Repository settings also has options for limiting workflows from creating and approving pull requests and what types of actions are allowed.
+
+## Third-Party Permissions & OpenID Connect
+In previous examples, we used an AWS access key ID and secret access key to authenticate with AWS. This might not be the best practice always, as there is some surface area for secret exposure, and unnessary permissions. 
+
+You can use OpenID Connect to authenticate with AWS. You have to create an IAM user and select OpenID Connect. Then provide the id from github, and you'll have an OpenID identity that is connected to a IAM user, which you can then use to set roles and policies as you would in AWS. You'll then request permissions from AWS using a custom action from AWS.
+
+(Not sure why the secret access key method is not the same here. Am i not using the access key of the IAM user? or is it that IAM users don't have access keys, only root users do? )
+
+```yaml
+jobs: 
+  deploy:
+    permissions:
+      id-token: write # need this as by default its read only, and its needed for aws-actions/configure-aws-credentials, (id-token refers to secrets.GITHUB_TOKEN, i think, which is what you need to set in https requests to github api. double check this)
+      contents: read
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+      - name: Get Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+          path: ./dist
+      - name: Output Contents
+        run: ls
+      - name: Get AWS Credentials
+        uses: aws-actions/configure-aws-credentials
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/MyGitHubRole # get arn from AWS dashboard
+          aws-region: us-east-1
+      - name: Deploy to S3
+        id: deploy
+        uses: ./github/actions/deploy-s3-docker
+        with:
+          bucket: my-bucket
+          dist-folder: ./dist
+      - name: Output Information
+        run: echo "Live URL: ${{ steps.deploy.outputs.website-url }}"
 ```

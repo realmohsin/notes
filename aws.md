@@ -196,3 +196,97 @@ With subnets, you can control whether an instance is connected to the internet o
 A public subnet becomes public when an Internet Gateway is added to it. When building a VPC, you can choose to add an Internet Gateway, and then connect certain subnets to that gateway. A private subnet  does not have access to an internet gateway and so its instances can only talk to each other and other instances in the VPC, but not to the internet. 
 
 If you want internet connectivity for downloading only with no incoming requests being able to reach an instance, you can set up an NAT gateway (Network Access Translation), which can give private subnet instances indirect internet access only for outgoing requests. They have no publically visible IP address. (One good reason to want outgoing requests is for downloading patches of installed programs to update them.)
+
+You start with one default VPC per region. VPC is a regional construct. REgions matter for most AWS services. 
+
+When making a new VPC you'll have to specify - # of AZs, # of public subnets, # of private subnets, NAT gateways, VPC endpoints.
+
+Route tables - Tell AWS how to forward incoming network requests whether its a request sent from an instance inside the VPC to another instance, or if they are incoming from the internet.
+
+Network Connections - Internet Gateway
+NAT Gateway costs money, are not part of free tier.
+VPC Endpoint - can help reduce NAT gateway charges adn improve security by accessing S3 directly from the VPC. 
+
+
+## CIDR IP ranges
+ 
+An IP address is a 32 bit number. IP addresses are unique so that they can reach the right machine.
+
+You might want to create ranges of IP address for example inside a VPC, where you only need instances to communicate with each other.
+
+172.31.0.0/16 --> specifies a range, says that 16 bits are fixed so the range is 172.31.0.0 - 172.31.255.255
+
+When we specify a CIDR IP range for a VPC it means all instances inside that VPC will receive internal, private IP addresses in that range. 172.x.x.x is reserved for private networks, by convention.
+
+0.0.0.0/0 means 0 bits are fixed, so it just says all possible IP addresses.
+
+The point of using 172.x.x.x and a range for private IP addresses is so we don't use valuable public IP addresses as there are only so many unique combinations and we need them for the world.
+
+Elastic IP
+When you make a public EC2 instance a rare, public IP address is automatically assigned by the subnet to it, however, that public IP address will change the next time you restart your instance, or when its started after being stopped. This can be inconvenient. For a stable IP address, you can use Elastic IP addresses, which are IP addresses given to you by AWS that you can assign and manage yourself.
+
+Elastic IP's cost money and you can only hae a few per region and per account.
+
+Elastic IP's however, might not be needed because domain name mappings can be changed when an underlying IP address changes and end customer will not notice. (Come back to this topic to explain more.)
+
+SecurityGroup
+You can create and save custom SecurityGroups. SecurityGroups are firewall rules that control inbound and/or outbound traffic. Many times you want unlimited outbound traffic, but restrict inbound traffic. There are premade SecurityGroups you can choose from, or you can make your own. Note: You can restrict IPs with SecuirtyGroups. 
+
+## Network Access Control List (NACL)
+
+NACL's are about controlling requests, but here, you don't control requests that reach a single instance, as you do with SecurityGroups, but requests that reach an entire subnet. They apply to all instances in a subnet. NACL, like SecurityGroups, have inbound and outbound rules. 
+
+AWS recommends using SecurityGroups over NACLs.
+
+
+## Security Group vs Network ACL vs Private/Public Subnets
+SecurityGroup 
+- Firewall for a single EC2 instance
+- Checks incoming / outgoing requests and conditionally blocks or allows them
+- Stateful - Responses are always allowed (if the request passed)
+- Multiple instances can have different SecurityGroups
+- SecurityGroups can be re-used for multiple instances
+
+Network ACL
+- Firewall for entire subnets
+- Checks incoming / outgoing requests and conditionally blocks or allows them
+- Stateless - Requests and responses are decoupled
+- One NACL can be associated with multiple subnets
+
+Private / Public Subnets
+- Defines technical connectivity
+- No internet access without internet gateway (incoming + outgoing) or NAT gateway (outgoing)
+- Does not control any requests or responses
+- Multiple instances can be in the same subnet
+
+
+## VPC Peering & Transit Gateways
+
+VPC Peering is a technology or a feature offered by AWS for connecting two VPCs. If you have more than two VPCs to connect, AWS gives you another service or feature called Transit Gateways, which you can setup to connect multiple VPCs.
+
+
+## Private Connections via PrivateLink & VPC Endpoints
+
+Normally, when one AWS service wants to communicate with another AWS service, it will use the public internet to do so. Therefore, you would need internet connectivity, which might mean you cannot take advantage of selective usage of internet or NAT gateways for protection. If you don't need internet connectivity, except for say, connecting to AWS S3, then instead of turning on internet connectivity, you can use AWS PrivateLink. When using this feature, you can send requests to other AWS services without requiring internet connectivity because you use the internal AWS network. You can do this by setting up so called VPC Endpoints.
+
+
+## Managing Cloud Networks via VPCs Summary
+
+VPCs
+- Your own network in the cloud (for grouping EC2 instances)
+- A VPC contains at least two subnets & one route table
+- Subnets can be 'public' or 'private'
+- Route table settings control subnet 'visibility'
+
+Network Management
+- Every VPC has an IP CIDR block assigned (range of IPs)
+- Subnets get parts of the VPC CIDR block assigned
+- EC2 instances receive auto-assigned public and private IPs
+- Elastic IPs can be used for fixed IP addresses
+- VPC peering or transit gateways can connect VPCs
+
+Request Management
+- Internet gateways allow for two-way internet access
+- NAT gateways enable outgoing internet requests
+- NACLs allow or deny requests on subnet-level (however, AWS recommends Request management on the instance level using SecurityGroups)
+- Endpoints (PrivateLink) connect AWS services to VPCs

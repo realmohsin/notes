@@ -142,7 +142,7 @@ keybindings.json -
 { "key": ".", "command": "" } // add this for npmintellisense + pathintellisense extensions - https://github.com/ChristianKohler/NpmIntellisense/issues/12
 
 ## regex crash course
-
+```md
 . - matches any single character
 ^ - matches the start of a line
 $ - matches the end of a line
@@ -151,3 +151,94 @@ $ - matches the end of a line
 [A-Z] - matches characters in a range
 * - repeat previous expression 0 or more times
 \ - escape meta-characters
+```
+
+
+## svgs
+
+the "real" width and height of an svg is set by the internals.
+the height and width of the outside svg element represents size of the 'window' over the real
+svg's size.
+if given a viewBox attribute, that together with the width and height scales the window and underlying coordinate system.
+
+the above mechanics are not completely necessary to understand.  For webdev we primarly just need to take an svg and be able to size it correctly and change it's color based on some state.
+
+Ways to use svgs in react - https://blog.logrocket.com/how-to-use-svgs-react/ 
+Use the above resource and after you learn webpack, understand the various methods and the corresponding plugins/loaders and configurations needed
+
+arguably the best way to use svg's in react is by treating them as components. (this is similar to just inlining svgs). You can wrap the svg manually in a react component function, or make this workflow easier by using SVGR through webpack. SVGR transforms svg's into react components for you, stripping unnecessary metadata. See https://react-svgr.com/docs/webpack/ for how to implement in webpack project.
+
+Note: The following had to be done in Uptycs repo to import svgs - 
+import { ReactComponent as TotalAssetsIcon } from "../../total-assets-icon.svg"
+^ while in the svgr-webpack docs it shows you can use default export with no ReactComponent needing to be specified. Need to look into this more.
+
+Going back to solving our two main concerns - sizing it as we need it, and changing color possibly based on state. To do this with component strategy - ensure that the viewBox by itself captures the entire svg. Then set the width and height of the svg element to both be 100%, then set fill attributes inside to be 'currentColor'. Now with that in place, you can change the size and color of the container of the svg and to affect the svg.
+
+Performance concern? Using svg's through image elements might be better performance because it will be loaded separately through an API call, whereas using svg's as a react component means it will be inlined in the html. Right? Maybe small SVG's above the fold should be inlined, but larger ones below the fold should in image elements? How would lazy loading work? Can that be a thing here?
+
+
+## http
+
+All http requests go to port 80 of the target web server, by default. All https requests go to port 443 of the target web server, by default.
+
+# DigitalOcean
+
+1. Log into dashboard at cloud.digitalocean.com. Click Create > Droplets. Chose New York, Datacenter 1 NYC1, Ubuntu 24.10 x64, Droplet Type Basic, Regular SSD, $4/month. Choose SSH Key as Authentication Method, paste in public key from .ssh/ folder using `cat ~/.ssh/id_rsa.pub`. Name the droplet and click Create Droplet.
+
+2. Log in as root user through SSH by `ssh root@remote_server_IP`. Accept warning about host authenticity. Create new user using `adduser realmohsin`. Choose password Moh.., provide name, then skip rest of options. Give user sudo privileges using `usermod -aG sudo realmohsin`.
+
+3. Set up firewall using ufw to make sure only connections to certain services are allowed. Applications can register their profiles with ufw upon installation. The ssh daemon has registered profile as OpenSSH, check this using `ufw app list`. Allow SSH connections in firewall using `ufw allow OpenSSH`. Enable the firewall using `ufw enable`. Make sure it's been enabled using `ufw status`. The firewall is now blocking all connections except SSH. To allow new traffic, see https://www.digitalocean.com/community/tutorials/ufw-essentials-common-firewall-rules-and-commands.
+
+4. Allow external access for the regular user created in step 2, by running `rsync --archive --chown=realmohsin:realmohsin ~/.ssh /home/realmohsin`. Exit the session by typing 'exit'. Log into server as new user by running `ssh realmohsin@remote_server_IP`.
+
+
+
+## linux
+- os 
+- unix, linux
+- kernel
+- shell, terminal, bash, git-bash
+- unix/linux's command line commands vs other OS's
+- man pages for commands
+- point of confusion - sometimes (creating in vm) root user is disabled and non-root user must be created,
+other times (digital ocean) root user is only user initially created and has a password
+- ufw - uncomplicated firewall - included by default within Ubuntu distros, upon installation, applications that rely on network communications will typically set up a ufw profile
+
+- hashing
+- mapping an infinite set to a finite set
+- can verify somebody has something without needing them to send that exact thing to you
+- can check if something, like file contents, has changed or not
+
+- ssh (secure shell) 
+- OpenSSH - ssh daemon (listens on port 22 by default), ssh client
+- two ways to connect (to remote server) - password (of a user on remote server) or ssh key
+- ssh keys - private and public
+- ssh-keygen - command to generate keys in ~/.ssh/id_rsa and ~/.ssh/id_rsa.pub
+- ~/.ssh/authorized_key - where public keys go (during server creation?) in user home directory
+- public key will be asked for by many services like github to establish secure connection
+- ssh username@remote_host - to connect to remote server
+- ssh-agent - service that auto types your private key's passphrase (not necessary)
+- typing 'exit' disconnects ssh connection to remote server
+
+- remote server setup (create server with ssh public key, connect, create superuser, enable firewall, allow SSH connection with new superuser)
+- (digitalocean) choose physical destination, choose hardware specs, choose OS, provide public ssh key, get back created server's IP
+- (digitalocean) for Ubuntu, only root user created on server creation (but in vm root user disabled and custom user created?)
+- ssh root@ip_address to connect for first time
+- first time accept warning about host authenticity to add server to known hosts
+- best practice not to use root, so create new user, then give sudo privileges to that user
+- adduser username - to create new user, process will ask to setup password, etc
+- usermod -aG sudo username - give user superuser, sudo privileges
+- enable ufw firewall (important: allow OpenSSH)  
+- ufw app list, ufw allow OpenSSH, ufw enable, ufw status (ufw will block all connections except SSH)
+- make sure you can SSH into the newly created user account directly
+- since public key is already in the root account's home directory, we can copy that file and directory structure to our new user account's home directory
+- rsync --archive --chown=username:username ~/.ssh /home/username (rsync copies files with the correct ownership and permissions), now client machine can connect to remote server as newly created user
+
+- dns
+
+- nextjs
+- npx create-next-app@latest
+
+
+(https://www.digitalocean.com/community/tutorials/ufw-essentials-common-firewall-rules-and-commands)
+https://linuxjourney.com/

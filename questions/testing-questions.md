@@ -1,0 +1,50 @@
+Testing Questions
+
+- What is testing?
+- What is automated testing?
+- What is a test runner?
+- What is an assertion library?
+- What is mocking?
+- What does it mean that tests are deterministic?
+- What is monkey-patching? Give an example of it.
+- What is jest?
+- What is the 'expect' function and what library does it come from?
+- What does it mean to spy on function calls?
+- What is jest.fn and jest.spyOn used for?
+- What is module mocking? Give an example of it using Jest.
+- What is __mocks__ directory for and how is it used?
+- How can you test the DOM on the server?
+- What is DOM Testing Library?
+- What do the following libraries do: @testing-library/react, @testing-library/user-event, @testing-library/dom, jest, jsdom?
+- What are matchers in Jest?
+- How do you test async code using Jest? What is the 'done' function?
+- How do you test code that uses third-party modules?
+- Give a summary of how mocking modules, mocking function calls, and spying on function calls are used in testing. 
+- In what context or environment does Jest run tests in? Can it be changed? 
+- Jest runs using node, but node does not support 'import' statements natively. Does this mean we need to use 'require' instead of 'import' in tests?
+- How does Jest handle css imports in tests?
+- What is snapshot testing? What are the benefits? How does it work?
+- What is the jest.config.js file used for? What can be done with it?
+- What is test coverage? How do you measure it?
+- What are aria roles? How are they relevant to testing?
+- What is an accessible name? How can you manually assign an accessible name, if needed?
+- Explain the query function system in React Testing Library. Give some examples.
+- What is the act function?
+- What does it mean if you're getting an act warning?
+- How do you solve act warnings? (part of hte answer is that if you're getting act warning from child components, you can mock them out, but if you're getting lots of act warnings from various places, you should probably be testing more granularly, and what you're probably doing wrong is meant more for end-to-end testing.)
+- How do you handle data fetching in tests?
+- What is the order of execution in test files?
+- How do you debug tests?
+- What is Cypress?
+- What is end-to-end testing?
+- How does testing work in Cypress? What environment does it run in? 
+- What is the best practice way to select elements in Cypress?
+- What are some things to keep in mind when writing tests in Cypress?
+- What is a stub?
+- What are fixtures in Cypress?
+- How should you handle data fetching in Cypress? (talk about intercepting requests & test databases)
+- What is the cypress.config.js file used for? Give an example of something important that can be done with it?
+- What is .then used for in Cypress? (Talk about compilation.)
+
+
+(Use story of caching causeing testing problems)

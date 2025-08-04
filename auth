@@ -218,3 +218,18 @@ Instead of storing the userId in the cookie, the managed sessions pattern stores
 
 Resend is a good option for sending emails for authentication flow. To test and develop authentication flows with email, you can use msw to mock out email service so you don't make real requests or send real emails.
 
+
+## OAuth
+
+Before OAuth, third party applications asked users for the username/password of the other service they needed to connect on the user's behalf. This is obviously not ideal. So, public APIs (services third party applications frequently want to connect to on the behalf of users), each implemented their own way of allowing access to third party apps without the third pary app need to know the user's username/password. 
+
+Eventually people came together to create a common strtegy for allowing third party access, and they called this strategy or the OAuth 1.0 standard. However, OAuth 1.0 had a few flaws - it was very complicated and it required using API keys in a way that wasn't very safe in mobile phones.
+
+The need for OAuth increases with the need or desire to have Single Sign On, where you want a single user database for multiple application, like being able to use google drive, gmail with a single google username/password. Right now we're talkign about first-party apps. But its important to understand their needs and how they solved it, because benefit for third party apps must occur in the context of their decisions. 
+
+So when saying the term 'Single Sign On', in the context of third party apps, what you're saying is you want your app to be a part of the user's Single Sign On experience. 
+
+What OAuth does at a high level, is require that every application sends the user out to the oauth server to login there and then redirects them back to app so that the app can get tokens and the key thing here is the redirect step. It means the user actually leaves the application and types in their password at the OAuth server instead of ever giving their password to the application. 
+
+
+

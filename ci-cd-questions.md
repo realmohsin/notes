@@ -1,6 +1,7 @@
 - What is Continuous Integration?
 - What is Continuous Delivery?
 - What is GitHub Actions?
+- What are YAML files?
 - What are workflows?
 - What are jobs?
 - What is a runner?

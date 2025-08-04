@@ -25,26 +25,21 @@ Then we need a test runner, which will run the assertions and report back the re
 The test runner just runs the function you give it. You are expected to write the function in such a way that you get a result that you want to test. Then you make assertions about the result. The test runner will simply run the function you give it. Then it will write out to the console which of your assertions raised an error.
 
 # Mocking
-
 You need to use mocks when you do not want to or cannot use something exactly in a test. For example, there is no reason to test external APIs and it might be expensive to call them unncessarily in tests. So you might want to mock the data fetching calls and just test your portion of the code given a certain api response. Mocking also makes our tests deterministic.
 
 monkey-patching - temporarily overriding an object or function at runtime and then reassigning it back to its original value after tests.
 
 Example of monkey patching fully manually:
-
 ```javascript
 const originalGetWinner = utils.getWinner;
 utils.getWinner = (p1, p2) => p1;
-
 const winner = thumbWar("Kent C. Dodds", "Ken Wheeler");
 assert.strictEqual(winner, "Kent C. Dodds");
-
 // cleanup
 utils.getWinner = originalGetWinner;
 ```
 
 ## jest.fn
-
 jest.fn creates a mock function and creating it with jest.fn allows you to make assertions about how the function is called. This is because jest will keep track of this information for you. You can make assertions like -
 utils.getWinner = jest.fn((p1, p2) => p1)
 expect(utils.getWinner).toHaveBeenCalledTimes(2)
@@ -52,39 +47,28 @@ expect(utils.getWinner).toHaveBeenCalledWith('Kent C Dodds', 'Ken Wheeler')
 
 In review, fundamentally, the jest.fn function accepts an implementation and returns a function that calls that implementation with all of those arguments.
 
-It also keeps track of all the arguments that it's called with so that we can assert how that function is called, allowing us to catch issues in our integration with the function.
-
-Example of using jest.fn:
-
+It also keeps track of all the arguments that it's called with so that we can assert how that function is called, allowing us to catch issues in our integration with the function. Example of using jest.fn:
 ```javascript
 const originalGetWinner = utils.getWinner;
 utils.getWinner = jest.fn((p1, p2) => p1);
-
 expect(utils.getWinner).toHaveBeenCalledTimes(2);
-
 // cleanup
 utils.getWinner = originalGetWinner;
 ```
 
 # jest.spyOn
-
 To not have to manually cleanup, we can use jest.spyOn which takes an object and a prop. It is responsible for tracking the original value. Then it provides a mockRestore function which we can use to restore the originalValue to that object.
-
 ```javascript
 jest.spyOn(utils, "getWinner"); // replaces with mock function that has methods .mockImplementation, .mockRestore etc
 utils.getWinner.mockImplementation((p1, p2) => p1); // tell the mock function what to call
-
 expect(utils.getWinner).toHaveBeenCalledTimes(2);
-
 utils.getWinner.mockRestore(); // tell the mock function to replace itself with the original value
 ```
 
 ## jest.mock
-
 jest.spyOn is still monkey-patching. Monkey-patching works well with commonjs but not so well with es modules, because an ESModule export does not allow monkey-patching on exports (?). Instead we have to mock the entire module so when our test subject requires the file they get our mocked version instead.
 
-example of mocked module:
-
+Example of mocked module:
 ```javascript
 const thumbWar = require("../thumb-war");
 const utilsMock = require("../utils");
@@ -98,7 +82,6 @@ jest.mock("../utils", () => {
 test("returns winner", () => {
   expect(winner).toBe("dan");
   expect(utils.getWinner).toHaveBeenCalledTimes(2);
-
   utilsMock.getWinner.mockReset(); // here most likely it resets the call count and other meta information, it does not un-mock anything, since its not necessary
 });
 ```
@@ -106,7 +89,6 @@ test("returns winner", () => {
 We can put this jest.mock call anywhere, and Jest will ensure that our mock is used when the thumb-war file requires the utils module. Before Jest runs the above code, it moves the jest.mock call to the top of the file to ensure that mock is in place before any of our modules are loaded.
 
 The way jest.mock works is by manipulating the module system internals. To make jest.mock from scratch we would need to use the internal features of node's require. It would look something like this:
-
 ```javascript
 const utilsPath = require.resolve("../utils");
 require.cache[utilsPath] = {
@@ -123,29 +105,22 @@ delete require.cache[utilsPath];
 ```
 
 # mock directory
-
 Often you’ll want to mock the same file throughout all the tests in your codebase. You can make a shared mock file in Jests's **mocks** directory which Jest can load for us automatically. In the directory, make the file the same name as the file you want to mock. Then inside mock out the portion that needs mocking, example:
-
 ```javascript
 module.exports = {
   getWinner: jest.fn((p1, p2) => p1),
 };
 ```
-
 Then in the test file, you can use jest.mock without the second argument -
-
 ```javascript
 jest.mock("../utils");
 const thumbWar = require("../thumb-war");
 const utils = require("../utils");
-
 utils.getWinner.mockReset();
 ```
 
 ## DOM Testing Library
-
 DOM Testing Library can be used with any library or framework (like react) as long as that library renders to a DOM. There are specialized forms of DOM Testing Library like 'react-testing-library', however, the base DOM Testing Library can be used as well. Example:
-
 ```javascript
 import "@testing-library/jest-dom/extend-expect"; // most likely creates a global document object (DOM) for us to use
 import React from "react";
@@ -197,8 +172,8 @@ test("renders a counter", () => {
   cleanup();
 });
 ```
-
 React binds all event handlers to the body, so we need to append any container we render with ReactDOM to the body. Then we should cleanup by unmounting the component along some other things perhaps.
+
 
 ## Testing Intro
 
@@ -216,13 +191,11 @@ In jest documentation it says 'Jest can be used in projects that use webpack'. W
 In npm init jest@latest it asks - Which provider should be used to instrument code for coverage? options are v8 and babel. What does this mean exactly?
 
 ## Matchers
-
 Jest uses "matchers" to let you test values in different ways. The simplest way to test a value is with exact equality. expect().toBe(). expect() returns a 'expection object' .toBe is a matcher. When jest runs, it tracks failing matchers so that it can print out nice error messages for you.
 
 toBe uses Object.is to test exact equality.
 
-If you want to check the value (shape?) of an object, use toEqual;
-
+If you want to check the value (shape?) of an object, use toEqual:
 ```javascript
 test("object assignment", () => {
   const data = { one: 1 };
@@ -230,11 +203,9 @@ test("object assignment", () => {
   expect(data).toEqual({ one: 1, two: 2 });
 });
 ```
-
 toEqual ignores object keys with undefined. To take these into account use toStrictEqual instead.
 
 You can test for the opposite of a matcher using .not:
-
 ```javascript
 test("adding positive numbers is not zero", () => {
   for (let a = 1; a < 10; a++) {
@@ -245,16 +216,14 @@ test("adding positive numbers is not zero", () => {
 });
 ```
 
-In tests, you sometimes need to distinguish between undefined, null, and false, but you sometimes do not want to treat these differently. Jest contains helpers that let you be explicit about what you want.
-
-toBeNull matches only null
-toBeUndefined matches only undefined
-toBeDefined is the opposite of toBeUndefined
-toBeTruthy matches anything that an if statement treats as true
-toBeFalsy matches anything that an if statement treats as false
+In tests, you sometimes need to distinguish between undefined, null, and false, but you sometimes do not want to treat these differently. Jest contains helpers that let you be explicit about what you want:
+- toBeNull matches only null
+- toBeUndefined matches only undefined
+- toBeDefined is the opposite of toBeUndefined
+- toBeTruthy matches anything that an if statement treats as true
+- toBeFalsy matches anything that an if statement treats as false
 
 Number matchers include:
-
 ```javascript
 test("two plus two", () => {
   const value = 2 + 2;
@@ -262,12 +231,10 @@ test("two plus two", () => {
   expect(value).toBeGreaterThanOrEqual(3.5);
   expect(value).toBeLessThan(5);
   expect(value).toBeLessThanOrEqual(4.5);
-
   // toBe and toEqual are equivalent for numbers
   expect(value).toBe(4);
   expect(value).toEqual(4);
 });
-
 test("adding floating point numbers", () => {
   const value = 0.1 + 0.2;
   //expect(value).toBe(0.3);           This won't work because of rounding error
@@ -276,19 +243,16 @@ test("adding floating point numbers", () => {
 ```
 
 String matchers include:
-
 ```javascript
 test("there is no I in team", () => {
   expect("team").not.toMatch(/I/);
 });
-
 test('but there is a "stop" in Christoph', () => {
   expect("Christoph").toMatch(/stop/);
 });
 ```
 
 Array and iterable matchers include:
-
 ```javascript
 const shoppingList = [
   "diapers",
@@ -297,7 +261,6 @@ const shoppingList = [
   "paper towels",
   "milk",
 ];
-
 test("the shopping list has milk on it", () => {
   expect(shoppingList).toContain("milk");
   expect(new Set(shoppingList)).toContain("milk");
@@ -307,9 +270,7 @@ test("the shopping list has milk on it", () => {
 If you want to test whether a particular function throws an error when its called, use expect(() => compileAndroidCode()).toThrow().
 
 Jest docs say - Return a promise from your test, and Jest will wait for that promise to resolve. If the promise is rejected, the test will fail. If the promise resolves, you can further test the resolved value using matchers.
-
 For example:
-
 ```javascript
 test("the data is peanut butter", () => {
   return fetchData().then((data) => {
@@ -317,9 +278,7 @@ test("the data is peanut butter", () => {
   });
 });
 ```
-
 With async / await syntax:
-
 ```javascript
 test("the data is peanut butter", async () => {
   const data = await fetchData();
@@ -330,7 +289,6 @@ test("the data is peanut butter", async () => {
 Presumably, you don't need to return anything, because all async funcs return a promise by default, and if any promise rejects within the func, the returned promises ends up with rejection state.
 
 Look into this later:
-
 ```javascript
 test("the fetch fails with an error", async () => {
   expect.assertions(1);
@@ -342,19 +300,16 @@ test("the fetch fails with an error", async () => {
 });
 ```
 
-If you expect a promise to be rejected, use the .catch method. Make sure to add expect.assertions to verify that a certain number of assertions are called. Otherwise, a fulfilled promise would not fail the test.:
-
+If you expect a promise to be rejected, use the .catch method. Make sure to add expect.assertions to verify that a certain number of assertions are called. Otherwise, a fulfilled promise would not fail the test:
 ```javascript
 test("the fetch fails with an error", () => {
   expect.assertions(1);
   return fetchData().catch((error) => expect(error).toMatch("error"));
 });
 ```
-
 Look into the above later. why is expect.assertions(1) needed? whats going on exactly? The returned promise is rejected, so the test should fail automatically, and so expect.assertions is needed? but what does it do exactly.
 
-if using callbacks, you need to be careful because Jest tests complete once they reach end of their execution. This means the assertion must go off before the exeuction of the parent test function ends. To get around this when using callbacks, use the 'done' function provided to tests.
-
+If using callbacks, you need to be careful because Jest tests complete once they reach end of their execution. This means the assertion must go off before the exeuction of the parent test function ends. To get around this when using callbacks, use the 'done' function provided to tests.
 ```javascript
 test("the data is peanut butter", (done) => {
   function callback(error, data) {
@@ -373,35 +328,30 @@ test("the data is peanut butter", (done) => {
   fetchData(callback);
 });
 ```
-
 If done is never called then the test will fail. If it's called with error, test will fail.
+
 
 ## Setup And Teardown
 
 describe blocks are a way to organize and/or group tests.
 
 If you have some work you need to do repeatedly for many tests, you can use beforeEach and afterEach hooks. Example:
-
 ```javascript
 beforeEach(() => {
   initializeCityDatabase();
 });
-
 afterEach(() => {
   clearCityDatabase();
 });
-
 test("city database has Vienna", () => {
   expect(isCity("Vienna")).toBeTruthy();
 });
-
 test("city database has San Juan", () => {
   expect(isCity("San Juan")).toBeTruthy();
 });
 ```
 
 beforeEach and afterEach can handle asynchronous code in the same ways that tests can handle asynchronous code - they can either take a done parameter or return a promise -
-
 ```javascript
 beforeEach(() => {
   return initializeCityDatabase();
@@ -409,9 +359,7 @@ beforeEach(() => {
 ```
 
 If the promise resolves we know it successed otherwise it failed.
-
 For one-time setup:
-
 ```javascript
 beforeAll(() => {
   return initializeCityDatabase();
@@ -425,7 +373,6 @@ afterAll(() => {
 beforeAll and afterAll are useful for asynchronous one-time setup because writing it at the top of the file would be difficult if its asynchronous. (But not impossible right? Maybe would require IIFE?)
 
 You can scope setups using describe blocks:
-
 ```javascript
 // Applies to all tests in this file
 beforeEach(() => {
@@ -453,21 +400,18 @@ The top level beforeEach is executed before the beforeEach inside the describe b
 Because Jest runs the tests asynchronously, its better to use before and after handlers instead of doing setup inside the file or inside describe blocks.
 
 If a test is failing, one of the first things to check should be whether the test is failing when it's the only test that runs. To run only one test with Jest, temporarily change that test command to a test.only:
-
 ```javascript
 test.only("this will be the only test that runs", () => {
   expect(true).toBe(false);
 });
-
 test("this test will not run", () => {
   expect("A").toBe("A");
 });
 ```
-
 If you have a test that often fails when it's run as part of a larger suite, but doesn't fail when you run it alone, it's a good bet that something from a different test is interfering with this one. You can often fix this by clearing some shared state with beforeEach. If you're not sure whether some shared state is being modified, you can also try a beforeEach that logs data.
 
-# Mock Functions
 
+# Mock Functions
 There are two ways to mock functions: Either by creating a mock function to use in test code, or writing a manual mock to override a module dependency.
 
 We can use a mock function the then inspect the mock's state to ensure the callback is invoked as expected.
@@ -477,38 +421,31 @@ All mock functions have this special .mock property, which is where data about h
 mockCallback.mock.calls is an array or arrays. The outer array items represent each time the function was called, the inner array items are the arguments the mock was called with. mockCallback.mock.results is an array with the return values of each call.
 
 Mock functions can also be used to inject test values into your code during a test:
-
 ```javascript
 const myMock = jest.fn();
 console.log(myMock());
 // > undefined
-
 myMock.mockReturnValueOnce(10).mockReturnValueOnce("x").mockReturnValue(true);
-
 console.log(myMock(), myMock(), myMock(), myMock());
 // > 10, 'x', true, true
 ```
-
 Try to avoid the temptation to implement logic inside functions that are not directly being tested. No need to make a complicated mock function, if instead you can have the mock return a series of values that you want with .mockReturnValueOnce().
+
 
 ## mocking modules
 
 If we want to test:
-
 ```javascript
 import axios from "axios";
-
 class Users {
   static all() {
     return axios.get("/users.json").then((resp) => resp.data);
   }
 }
-
 export default Users;
 ```
 
 We can mock the axios module so we dont hit the api:
-
 ```javascript
 import axios from "axios";
 import Users from "./users";
@@ -535,22 +472,17 @@ Question: I thought jest.mock(path) without the second argument specifying what 
 
 Portions of a module can be mocked while keeping the rest of the module the same:
 Module to mock:
-
 ```javascript
 export const foo = "foo";
 export const bar = () => "bar";
 export default () => "baz";
 ```
-
 In test:
-
 ```javascript
 //test.js
 import defaultExport, { bar, foo } from "../foo-bar-baz";
-
 jest.mock("../foo-bar-baz", () => {
   const originalModule = jest.requireActual("../foo-bar-baz");
-
   //Mock the default export and named export 'foo'
   return {
     __esModule: true,
@@ -564,7 +496,6 @@ test("should do a partial mock", () => {
   const defaultExportResult = defaultExport();
   expect(defaultExportResult).toBe("mocked baz");
   expect(defaultExport).toHaveBeenCalled();
-
   expect(foo).toBe("mocked foo");
   expect(bar()).toBe("bar");
 });
@@ -573,20 +504,16 @@ test("should do a partial mock", () => {
 Still, there are cases where its useful to go beyond the ability to specify return values and full-on replace the implementation of a mock function. This can be done with jest.fn or mockImplemention or mockImplementationOnce.
 
 With jest.fn:
-
 ```javascript
 const myMockFn = jest.fn((cb) => cb(null, true));
-
 myMockFn((err, val) => console.log(val));
 // > true
 ```
 
 The mockImplementation method is useful when you need to define the default implementation of a mock function that is created from another module:
-
 ```javascript
 jest.mock("../foo"); // this happens automatically with automocking
 const foo = require("../foo");
-
 // foo is a mock function
 foo.mockImplementation(() => 42);
 foo();
@@ -594,22 +521,18 @@ foo();
 ```
 
 When you need to recreate a complex behavior of a mock function such that multiple function calls produce different results, use the mockImplementationOnce method:
-
 ```javascript
 const myMockFn = jest
   .fn()
   .mockImplementationOnce((cb) => cb(null, true))
   .mockImplementationOnce((cb) => cb(null, false));
-
 myMockFn((err, val) => console.log(val));
 // > true
-
 myMockFn((err, val) => console.log(val));
 // > false
 ```
 
 When the mocked function runs out of implementations defined with mockImplementationOnce, it will execute the default implementation set with jest.fn (if it is defined):
-
 ```javascript
 const myMockFn = jest
   .fn(() => "default")
@@ -621,17 +544,13 @@ console.log(myMockFn(), myMockFn(), myMockFn(), myMockFn());
 ```
 
 In order to make it less demanding to assert how mock functions have been called, we've added some custom matcher functions for you:
-
 ```javascript
 // The mock function was called at least once
 expect(mockFunc).toHaveBeenCalled();
-
 // The mock function was called at least once with the specified args
 expect(mockFunc).toHaveBeenCalledWith(arg1, arg2);
-
 // The last call to the mock function was called with the specified args
 expect(mockFunc).toHaveBeenLastCalledWith(arg1, arg2);
-
 // All calls and the name of the mock is written as a snapshot
 expect(mockFunc).toMatchSnapshot();
 ```
@@ -645,7 +564,6 @@ Jest automatically sets process.env.NODE_ENV to 'test' when it runs. (The babel 
 In summary, you need babel to compile es modules in jest tests.
 
 Jest simulates a browser environment in node using a module called JS DOM. Jest test environments actually have window global object at all times, unless you specify to jest that your test env should be node only. To signify this you can run `npm run test -- --env=node`. Instead of having to specify in command you can specify environment in `jest.config.js` file -
-
 ```javascript
 module.exports = {
   testEnvironment: "jest-environment-node", // no window in environment
@@ -654,15 +572,11 @@ module.exports = {
 ```
 
 ## css
-
 Its' uncommon to test css. When jest encounters a css import we need to tell it whats going on since that is unexpected. It's expecting only commonjs (see above for esmodules - we can have babel config that Jest will run our test code through before executing if we want to use esmodules.) So for css modules, we need to create a mock and then stub out the actual css module. (Remember that importing css modules into js files is only possible due to webpack and its css-loader and style-loader.) What we can do is use the moduleNameMapper config option in jest.config.js to map css modules to a different file. We'll create file mock in a test folder named style-mock.js -
-
 ```javascript
 module.exports = {};
 ```
-
 And in jest.config.js:
-
 ```javascript
 module.exports = {
   // testEnvironment: 'jest-environment-node',
@@ -676,7 +590,6 @@ module.exports = {
 We have webpack configured to handle CSS files with the CSS-loader and the style-loader. Webpack is managing this for our application and we simply needed to make Jest manage the same thing for our tests. So now whenever a css file import is encountered in test files, './test/style-mock.js' is being imported instead which is just an empty object. This means components don't get to pull in styles in test, but that should be fine as styles are not usually tested.
 
 Even though styles are not tested, it would be nice if classnames were still attached. But if .module.css files get stubbed out we wont see classes appear in test environment. We can fix that by using a package called 'identity-obj-proxy'. This will return a object that returns the string version of any key thats accessed on it. So 'obj.hello' will return 'hello'. This means when using css modules and we assign classnames like styles.classNameHere, the component will have 'classNameHere' as the class. To do this:
-
 ```javascript
 module.exports = {
   // testEnvironment: 'jest-environment-node',
@@ -697,7 +610,6 @@ With snapshot tests we can make a change and check the impact of our change. If 
 For snapshots, you can use expect().toMatchSnapshot() and this will create a snapshot and save it to file under **snapshots** folder. To save the snapshot inline, you can use expect().toMatchInlineSnapshot()
 
 Jest has built in capability of snapshotting and serializing DOM nodes. You can use:
-
 ```javascript
 import { render } from "@testing-library/react";
 import React from "react";
@@ -730,7 +642,6 @@ When taking snapshot of a component styled with emotion, you'll get classnames t
 Part of the power of snapshots is the ability to provide custom serializers. If using css-in-js library its useful to use this serializer.
 
 If you're using webpack to resolve modules a certain way, for example, making it so modules in a certain folder can be imported like node_modules - import package from 'package', without relative path specified, then you need to make sure Jest does the same thing. This is why for many of the things you can do in Webpack, there are equivalent changes you can make in `jest.config.js`. Add 'moduleDirectories' to specify folders whose modules can be imported as packages:
-
 ```javascript
 module.exports = {
   // testEnvironment: 'jest-environment-node',
@@ -745,13 +656,10 @@ module.exports = {
 ```
 
 Often you’ll have some setup that you want to run before your tests start. If you have a file or module you need to run at the start of every test file then you can use 'setupFilesAfterEnv' option in jest.config.js. One usecase would be if we wanted to extend expect to have more dom-friendly assertions we can install '@testing-library/jest-dom'. Then we can import and run a file from that package at the start of our test so that expect is extended, and we can use expect(component).toHaveTextContent('hello'),like this:
-
 ```javascript
 import "@testing-library/jest-dom/extend-expect";
 ```
-
 However, instead of importing this at the start of every file, we can add the 'setupFilesAfterEnv' option:
-
 ```javascript
 module.exports = {
   // testEnvironment: 'jest-environment-node',
@@ -767,7 +675,6 @@ module.exports = {
 ```
 
 When testing individual react components, we may need them to exist within the top-level state providers and routers of the app. One strategy for doing this might be to have react-testing-library's render function to automatically wrap our components with the providers. We can decide to actually export all of react-testing-library from one of our files and modify the functions like render before exporting them. For doing this we might want that file to be imported like a node_module for simplicity. We already saw we can do this with the moduleDirectories option of Jest. However, when eslint sees this, it will raise an error because of a rule that sees a module not resolving. To fix this we need eslint to understand that Jest is setting up addition moduleDirectories for tests. To tell eslint that it should take into account Jest's moduleDirectories option in jest.config.js, we need to install 'eslint-import-resolver-jest'. Then in .eslintrc.js:
-
 ```javascript
 module.exports = {
   extends: [
@@ -799,27 +706,25 @@ module.exports = {
   ],
 };
 ```
+The above is saying, use node's setting to resolve imports, but in src files use webpack's config for linting import statements, and for test files, use jest's config for linting import statements.
 
-The above is saying, use node's setting to resolve imports, but in src files use webpack's config for linting import statements, and for test files, use jest's config for linting import statements
 
 ## watch mode
-
 Jest has watch mode that will run tests whenever a file changes. While in watch mode there are options to rerun tests, rerun specific tests, update snapshots interactively, etc. Watch mode can be run in a script like "test:watch": "jest --watch".
 
-## debugger
 
+## debugger
 You can open the jest process in a debugger. Here is a script for that:
 "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --watch",
 This will stop the process at line of code where 'debugger' is written.
 The --runInBand option makes Jest run all its test in one process so we can step through everything.
 We can open the debugger with Chrome dev tools.
 
-## Test Coverage
 
+## Test Coverage
 Jest comes with code coverage reporting built-into the framework. You need to add option to script - "test": "jest --coverage", this will output a coverage report, and also create a directory called coverage, which will have the coverage details in html that can be served and opened in the browser.
 
 To tell Jest which files to collect coverage data from, otherwise Jest will check external test utility files which will have 100% coverage because they are run all the time, which will mess up our statistics.
-
 ```javascript
 module.exports = {
   testEnvironment: "jest-environment-jsdom",
@@ -840,7 +745,6 @@ module.exports = {
 ```
 
 Jest knows what parts of code has been tested or not by using a babel plugin called babel-plugin-istanbul under the hood. To disable checking certain parts of code that are not important and so do not need to be tested you can used inline comments -
-
 ```javascript
 /* istanbul ignore next */
 if (match) {
@@ -850,7 +754,6 @@ if (match) {
 The 4 entities of code babel-plugin-istanbul checks for coverage are statements, branches (in if blocks etc), functions, and lines.
 
 You can set coverage thresholds to make sure additional tests don't lower repository's coverage percentages. Use:
-
 ```javascript
 const path = require("path");
 
@@ -885,13 +788,11 @@ module.exports = {
   },
 };
 ```
-
 In the above, the global thresholds are set, and separately the thresholds for an important file are set. This way this file cannot be updated or changed without the given coverage thresholds being met.
 
 When using CI, look into codecov.io for generating a history of coverage reports during CI/CD.
 
 In CI, we don't want to start tests in watch mode, but locally we normally want to run the tests in watch mode. To have flexible scripts we can use package 'is-ci-cli'. Then you can use something like:
-
 ```javascript
 "test": "is-ci \"test:coverage\" \"test:watch\"",
 ```
@@ -907,7 +808,6 @@ React Testing Library and Jest: The Complete Guide
 @testing-library/react offers simpler abstraction for mounting react components to a DOM, instead of using ReactDOM.render().
 
 libraries
-
 - @testing-library/react - Uses ReactDOM to render a component for testing
 - @testing-library/user-event - Helps simulate user input like typing and clicking
 - @testing-library/dom - Helps find elements that are rendered by our components
@@ -919,7 +819,6 @@ Jest finds all files in the src folder that ends with .spec.js or .test.js or in
 Queries - A super important part of testing is finding the elements that our component has created. The React Testing Library Query System is a collection of about 48 functions that are used to find elements.
 
 Partial list of important queries:
-
 - screen.getByRole() - very important
 - screen.getAllByRole() - very important
 - screen.queryByRole()
@@ -933,11 +832,10 @@ Partial list of important queries:
 - screen.getByLabelText()
 
 Aria Roles -
-
 - Aria Roles clarify the purpose of an HTML element
 - Traditionally used by screen readers - software to help people understand the content on the screen
 - Many HTML elements have an 'implicit' or automatically assigned role
-- Elements can be assigned manually assigned a role. Even trained engineers do this incorrectly.
+- Elements can be manually assigned a role. Even trained engineers do this incorrectly.
 
 Some ARIA roles assigned automatically to HTML elements
 'heading' - h1 h2 h3 h4 h5 h6
@@ -950,7 +848,6 @@ This entire role system is the primary and preferred way of finding elements.
 
 Matchers (second part of an assertion)
 Matchers from Jest
-
 - expect().toHaveLength() - makes sure the value is an array with a particular length
 - expect().toEqual() - makes sure the value equals another value (I believe non-strict equality?)
 - expect().toContain() - makes sure an array contains a value or make sure a string contains another string
@@ -958,7 +855,6 @@ Matchers from Jest
 - expect(mock).toHaveBeenCalled() - makes sure a mock function (required) has been called
 
 Matchers from React Testing Library (jest-dom extends expect function)
-
 - expect(element).toBeInTheDocument() - Makes sure element is present on the page
 - expect(element).toBeEnabled() - Makes sure element (like an input) is not disabled
 - expect(element).toHaveClass() - Makes sure element has a class name
@@ -966,7 +862,7 @@ Matchers from React Testing Library (jest-dom extends expect function)
 - expect(element).toHaveValue() - Makes sure input, select, or textarea has a value
 
 we use .getByRole if we expect to find exactly one element, if it finds 0 or more than 1, it will throw an error
-
+ 
 Simulating user events:
 user.click(element); - Simulates clicking on the provided element
 user.keyboard('asdf'); - Simulates typing 'asdf'
@@ -977,7 +873,6 @@ await user.click(nameInput)
 await user.keyboard('jane')
 
 Mock Functions -
-
 - In English, 'mock' can mean 'not real'
 - Fake function that doesn't do anything
 - Records whenever it gets called, and the arguments it was called with
@@ -999,7 +894,6 @@ screen.logTestingPlaygroundURL()
 Then from the console, go to the link. In there find the element you need to highlight, manually give it a large border so that you can click it. Click it to get the suggested way to query for it. use the singular verion if expecting one and only one, otherwise use the plural version (..AllBy..)
 
 Don't obsess over getting the right query. When ways to find elements with the preferred 'role' approach doesn't work, there are two escape hatches -
-
 - data-testid - add an attribute to the html element data-testid="users" and then use screen.getByTestId('users')
 - container.querySelector()
 
@@ -1016,7 +910,6 @@ quirk:
 getByRole('cell', { name: /jane/i }); - it seems the 'name' option is flexible based on the precise query on what it refers to, here it refers to the text context.
 
 To test simple existence:
-
 ```javascript
 for (let user of users) {
   const name = screen.getByRole("cell", { name: user.name });
@@ -1052,17 +945,15 @@ screen.debug() in a test allows you print the current html of the component to t
 In the above notes, there was confusion about 'name' option of getByRole. Now it's made clear - it refers to the 'accessible name' of an element. The accessible name of an element depends on certain things. If an element has text content, usually that is the accessible name. For inputs with labels, the label text is usually the accessible name. It most likely corresponds to the name most visible on the screen for an element. Usually preferrable to use regex for getting by accessible name.
 
 If a component does not have an accessible name, for example a button with an svg icon, then you can give it an accessible name using aria-label attribute. Example:
-
 ```javascript
 <button aria-label="sign in">
   <svg />
 </button>
 ```
-
 Notice aria-label is not camelCased in jsx, this is not an error. aria-label intentionally violates camelCase convention for JSX.
 
-### Summary of ARIA and roles:
 
+### Summary of ARIA and roles:
 Selecting elements based upon their role is the preferred way of testing elements with React Testing Library. We use role selectors instead of more classic ways of finding elements, like CSS selectors.
 
 ARIA (Accessible Rich Internet Applications) is a set of attributes that can be added to HTML elements to help make web applications more accessible to users with disabilities. These attributes provide additional information about the purpose and behavior of an element, which can be used by assistive technologies such as screen readers to improve the user experience.
@@ -1070,7 +961,6 @@ ARIA (Accessible Rich Internet Applications) is a set of attributes that can be 
 Even though these ARIA roles are an additional topic to memorize, we engineers use them because they allow us to write more flexible tests. In many cases it doesn't matter if an element is presenting text in an `h1` element or an `h3` element. By finding elements based on their role, we can make small changes to a component and not break its respective test. Some engineers do not care for this flexibility. If you don't wish to use ARIA roles, you can always fall back to using standard CSS selectors.
 
 Cheatsheet of common html elements and their roles:
-
 ```javascript
 <div>
   <a href="/">link</a>
@@ -1100,29 +990,28 @@ If you're working with a void element (like a `br` or an `img`), or if you're wo
 
 A common component that does not have a role (?) is the form element. Add aria-label to forms to target them with ByRole selectors. 
 
-Don't be afraid to add accessible names to component so you can target them with getByRole.
+Don't be afraid to add accessible names to components so you can target them with getByRole.
+
 
 ### Query Functions
-
 All query functions are accessed through the `screen` object in a test. These query functions _always_ begin with one of the following names: `getBy`, `getAllBy`, `queryBy`, `queryAllBy`, `findBy`, `findAllBy`.
 
 These names indicate the following:
-
 1. Whether the function will return an element or an array of elements
 2. What happens if the function finds 0, 1, or > 1 of the targeted element
 3. Whether the function runs instantly (synchronously) or looks for an element over a span of time (asynchronously)
 
 Looking for a Single Element?
-0 matchs 1 match >1 match Notes
-getBy Throws error Element Throws error
-queryBy null Element Throws error
-findBy Throws error Element Throws error Looks for an element over the span of 1 second
+            0 matchs          1 match         >1 match          Notes
+getBy       Throws error      Element         Throws error
+queryBy     null              Element         Throws error
+findBy      Throws error      Element         Throws error      Looks for an element over the span of 1 second
 
 Looking for a Multiple Element?
-0 matchs 1 match >1 match Notes
-getAllBy Throws error []Element []Element
-queryAllBy [] []Element []Element
-findAllBy Throws error []Element []Element Looks for elements over the span of 1 second
+            0 matchs          1 match         >1 match          Notes
+getAllBy    Throws error      []Element       []Element
+queryAllBy  []                []Element       []Element
+findAllBy   Throws error      []Element       []Element         Looks for elements over the span of 1 second
 
 When to use each:
 Goal of test
@@ -1131,16 +1020,14 @@ Prove an element does not exist queryBy, queryAllBy
 Make sure an element eventually exists findBy, findAllBy
 
 Favor using getBy, getAllBy to prove an element exists. Here is common way to test for existence:
-
 ```javascript
 const email = screen.getByRole("cell", { name: user.email });
-expect(name).toBeInTheDocument();
+expect(email).toBeInTheDocument();
 ```
 
 You'll notice that the assertion is not needed because .getByRole will throw an error if the element is not in document, so no need to add assertion that will throw error if element is not in document. However, it is still good practice to include the assertion.
 
 Favor queryBy when proving an element does not exist. Here is common way to test for non-existence:
-
 ```javascript
 const element = screen.queryByRole("textbox");
 expect(element).not.toBeInTheDocument();
@@ -1170,17 +1057,15 @@ getByText(value) if value is a string, it will check the entire text against the
 Matchers help make sure that a value is what we expect it to be. Jest comes with many matchers and @testing-library/jest-dom has many for the DOM specifically.
 
 # 3 difficult aspects of testing
-
 - module mocks
 - navigation
 - 'act'
 
 Testing usually requires you to have a deep understanding of the libraries your project uses. Some of these libraries don't like to be used in a test environment.
 
-The Link component from react-router requires a context provider. So if that is not set up in the test environment, then error will be thrown when trying to render a component that has a Link. You can react-router's use MemoryRouter for testing purposes.
+The Link component from react-router requires a context provider. So if that is not set up in the test environment, then error will be thrown when trying to render a component that has a Link. You can use react-router's  MemoryRouter for testing purposes.
 
 If you are doing data fetching inside an useEffect, you will run into act() warnings. You need to understand 3-4 different topics to understand these warnings -
-
 - unexpected state updates in tests are bad
 - the act function defines a window in time where state updates can (and should) occur
 - react testing library uses 'act' behind the scenes for you
@@ -1189,7 +1074,6 @@ If you are doing data fetching inside an useEffect, you will run into act() warn
 Act is a function implemented by react-dom that defines a window in time where state updates can and should occur.
 
 Test written without RTL (to better understand act):
-
 ```javascript
 import { render } from 'react-dom';
 import { act } from 'react-dom/test-utils';
@@ -1216,7 +1100,6 @@ act is used to wait for all pending async functions (and theyre resultant re-ren
 act warning means our state might have updated when we weren't ready for it, (perhaps after our tests already ran).
 
 React Testing Library calls act for you -
-
 - screen.findBy.. (polls within 1 second)
 - screen.findAllBy.. (polls within 1 second)
 - waitFor (waits for 1 second)
@@ -1227,7 +1110,6 @@ React Testing Library calls act for you -
 Act warnings will tell you that code that causes React state updates should be wrapped into act(). But when using React Testing Library, you want to use the above tools instead (since they call act underneath the hood for you).
 
 Options for Solving Act Warnings
-
 1. Use a 'findBy' or 'findAllBy' to detect when the component has finished its data fetching
 2. Use an 'act' to control when the data-fetching request gets resolved. More on this later.
 3. Use a module mock to avoid rendering the troublesome component
@@ -1235,7 +1117,9 @@ Options for Solving Act Warnings
 
 Anytime you have an useEffect function that contains any kind of async code and after the promise gets resolved, we update some state, we are almost alwasy going to see an act warning.
 
-Use 'findBy' to wait for an element that will asynchronously be rendered later on. You might need to do this at the beginning of a test to wait for something that needs to appear, even though that is not what you're testing, otherwise initial state updates and rerenders will happen outside of act. In some cases that might be fine for your test, but you still want to have all state actions and rerenders occur within act by convention. (It might be necessary too to be honest.) To help figure out what you need to wait for you can do the following:
+Use 'findBy' to wait for an element that will asynchronously be rendered later on. You might need to do this at the beginning of a test to wait for something that needs to appear, even though that is not what you're testing, otherwise initial state updates and rerenders will happen outside of act. This is important to understand - you need to 'findBy' the thing whose appearance means state updates and async activity are done. 
+
+In some cases it might be fine for state updates and rerenders to happen outside of act, but you still want to have all state actions and rerenders occur within act by convention. (It might be necessary too to be honest.) To help figure out what you need to wait for you can do the following:
 ```javascript
 test("", async () => {
   renderComponent();
@@ -1396,17 +1280,240 @@ export function createServer(handlerConfig) {
     })
   })
   const server = setupServer(...handlers);
-
   beforeAll(() => {
     server.listen();
   });
-
   afterEach(() => {
     server.resetHandlers();
   });
-
    afterAll(() => {
     server.close();
    });
 }
 ```
+
+## Order of Execution
+Code in a test file is not executed start to finish. The tests are collected and stored in state as they are encountered, then after everything else outside of test funtions are executed (we've reached bottom of file), then tests and relevant hooks (beforeAll, etc) are executed. So code written between two test functions are not executed between those test function calls. To organize code and tests, we can use the describe function to group tests together. describe blocks scope beforeAll, beforeEach, afterAll, to their child tests.
+
+
+## Debugging Tests
+Options for debugging tests:
+1. Use test.only or describe.only to limit the number of tests executed
+2. Set up a debugger
+3. Classic console.logs
+
+Be aware of caching when using third party code, (or even your own code!). Even if you mock out responses of data fetching functions, if there is a caching mechanism in front of it, you will get cached response which can lead to unexpected behavior. Getting cached responses on subsequent tests is a major source of bugs and headache.  
+
+
+## Cypress
+Cypress is a JavaScript based Test Automation Tool & Framework. Cypress can be used for End-to-End tests as well as Component tests. 
+
+E2E testing is for testing complete application flows, whereas Component Tests are for testing individual UI elements. There is also Unit Testing, which is for testing small individual building blocks of an application, like an individual function.
+
+After installing cypress, you can use it with the command `npx cypress open`, which will open a desktop application that launches its own browser (you can pick chrome, edge, firefox, etc). The browser it launches is wrapped in a testing application that runs the tests found in the /cypress/e2e folder, in xxx.cy.js files.
+Example Cypress Test Suite and Test:
+```javascript
+/// <reference types="Cypress" />
+// add the above reference tag to get auto-completion for cy 
+describe('tasks page', () => {
+  it('should render the main image', () => {
+    cy.visit('http://localhost:5173/')
+    cy.get('.main-header img') // takes CSS selector, will get ALL matching elements, implicit assertion
+    cy.get('.main-header').find('img') // proper chaining, don't chain .get with another .get, .find only works after .get
+  })
+  it('should display the page title', () => {
+    cy.visit('http://localhost:5173/');
+    cy.get('h1').should('have.length', 1) // explicit assertion
+    cy.get('h1').contains('My Cypress Course Tasks')
+    // cy.contains('My Cypress Course Tasks') for finding element with particular text anywhere in the page
+  })
+})
+```
+
+.get gets ALL matching elements, will be array if there are multiple
+
+Implicit vs Explicit
+.get implicitly asserts for existence, so explicit assertions with .should are not always necessary.
+
+cy.get().get() does not work as one would expect, second .get() searches whole page. use .get().find() instead. .find made for chaining, can only be used after .get chain.
+
+.click() to simulate click. By default, clicks center of element. If something is in the way of the element, click() will fail, unless you pass a force: true flag.
+
+Each test runs in isolation in fresh environment.
+
+## Setup & Adding Tests
+npm install cypress
+npx cypress open
+Store tests (it()) in suites (describe())
+
+## Adding Steps / Commands
+Use the cy object to define the executable steps. 
+Commands and queries can be chained.
+
+## Selecting Elements
+Select elements via CSS with queries - get() + find() 
+Select by text via contains()
+
+## Simulating User Interaction
+Use actions like click() or type()
+
+## Assertions
+Many queries have built-in (implicit) assertions like get()
+You can add explicit assertions via .should()
+Add as many assertions as needed to test different flow states.
+
+
+## Selecting Elements - The Best Practice Way
+
+The best practice way for selecting elements is adding a custom attribute data-cy="something-something" to an element then using `cy.get('[data-cy="something-something"]'). Similar to id attribute it can be used to uniquely target elements. This attribute is only for testing purposes.
+
+You can chain assertions after queries.
+
+You can alias element or elements gotten from a query so you can reuse, like a variable. saving to a variable directly does not give you access to the element itself, but a wrapper object. Best practice is to use alias with .as(). 
+
+To access the underlying element(s), you can use the .then method on queries. It gives you a callback you can run with the element passed to you as parameter.
+
+The then() method can be chained after other Cypress queries to get direct access to the "subjects" of those queries. For example, the subject of get('form') would be the selected form element(s). Therefore, the concrete value received by the function passed to then() depends on the query before then(). When receiving an element (e.g., as it's the case for get('form').then(el => ...)), you can inspect that element inside of the function passed to then(). you actually get a "wrapper object" around the DOM element(s) that was / were selected.  you can also get (even more) direct access to the actual DOM element(s) via el[0] (for the first selected element), el[1] (for the second selected element, if available) etc.
+
+You can simulate special key presses like so:
+```javascript
+cy.get('[data-cy="contact-input-email"]').type("john.doe@example.com{enter}");
+```
+
+## Time for Assertion
+By default, 4 seconds is given for each assertion to see if condition is met.
+
+blur means when an input loses focus. can be simulated with .blur(). Use focus() first before blur to maintain pointer status.
+
+The application opened by npx cypress open is called Cypress Studio.
+
+`npx cypress run` executes tests in headless mode, without showing you UI, just running the tests and giving you results. It then gives you videos of tests (and screenshots if failed test) in the cypress directory.
+
+Sometimes tests can fail in headless mode that passed in studio mode. This is usually not because of actual test failures, but likely selecting bugs, try using different selectors especially if not using the data-cy attribute. .then can also be an issue. Prefer .should whenever possible.
+
+you can use cy.screenshot() to take on-demand screenshots.
+
+.should((el) => {}) works like .then and can be used in headless mode, you can write mocha/chai assertions inside.
+
+## Selecting Elements
+Prefer the data-cy attribute selector
+It's less error-prone than other selectors
+
+## Use Aliases
+Re-use query results via aliases
+Create and use aliases via as('name') & '@name'
+
+## Get Element Access
+Use then() for more direct element access
+Use should(() => {}) if then() fails in headless mode
+
+## Different Assertion Approaches
+should() vs expect()
+Some should()s yield new subjects for chaining (need to see docs)
+
+
+
+You can use the cypress.config.js file to change configuration settings globally for all tests. If you only want to change config settings for a particular test suite or test you can pass an object as second argument to describe or it with config values.
+
+# Timeouts
+For every command Cypress waits X seconds to see if it succeeds.
+
+You can specify browser to headless mode like this - `npx cypress run --browser chrome`, and also specify in config
+
+# Custom Commands and Queries
+custom command - shortcuts for more complex command chains
+custom query - synchronous, chainable, retriable commands
+
+
+All the testing code you write in .cy.js files are run in the browser to test the application. If you need to run things in node, maybe after the fact, then set up event listeners in the cypress.config.js file in setupNodeEvents.
+
+
+
+## Cypress Configuration
+Global & local (test or suite specific)
+Set timeout values, browsers, baseUrl & more
+
+## Hooks
+before(), beforeEach() etc..
+Test preparation or cleanup
+
+## Custom Commands & Queries
+Outsource shared logic & command combinations
+Don't overuse these features
+
+## Tasks
+Allow you to run code outside of the browser
+Example: Seed database, store data in files...
+
+
+# Stub
+A stub is a replacement for an existing function / method.
+
+
+Note: the .then method is used to gain direct access to elements or the subject its targetting, because all cypress commands written in tests are compiled into something else before actualy being run in the browser later on.
+
+you can use .get to get more than just dom element. you can get reference to stubbed functions so you can assert that they were called, etc
+
+Fixtures
+Fixtures are bits of json data that are shared across tests.
+
+Spies
+A listener that's attached to a function / method, used for evaluating / asserting function calls, does not change or replace the function (unlike stubs)
+
+Manipulating the Clock
+You can actually speed up time during testing, so that you don't have to wait the exact amount of time a user would wait inbetween actions. So if you hav set interval or set timeout, you can speed things up by using cy.clock and cy.tick.
+
+
+## Stubs and Spies
+Stubs: Replace existing methods
+Spies: Add listeners to existing methods
+
+## Fixtures
+Store dummy testing data in central place
+Access via fixture() and use in your tests
+
+## Manipulating the Clock
+Use cy.clock() to manipulate the clock
+Then use cy.tick() to advance time
+
+
+# Using databases
+Your tests should not test production or development databases. You should make a testing database.  
+
+Use dotenv-cli library to use different .env files to help with using the right database for the right environment.
+
+To ensure test isolation, we should seed test database before each test.
+
+We can use interceptors so we don't have to send actual http requests in tests. 
+
+## Dealing with Network Requests
+### Allow
+Let the website do its requests
+Potential Problem: Database is hit with test data
+Solution: Use a separate testing database
+
+### Intercept
+Intercept + spy: Request passes & you can spy on it
+Intercept + stub: Request is blocked & stub response is used
+
+### Trigger Manually
+Test API endpoints from inside your tests directly
+Ideal for API testing or for decoupling frontend & backend
+
+
+
+## Network Requests
+Can be intercepted (and blocked)
+Manually trigger requests for API testing
+
+## Test Database
+Should be used when hitting the database
+Ensures test isolation & avoids breaking live data
+
+## Authentication
+Nothing special in general
+Custom commands simplify your auth-dependent tests
+
+
+Visit https://github.com/cypress-io/cypress-realworld-app for a real world example of a cypress test suite.
+

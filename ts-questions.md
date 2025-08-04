@@ -20,7 +20,7 @@
 - Show two ways to annotate a function. Use an async function that includes optional, default and rest parameters.
 - What is the difference between 'any' and 'unknown'?
 - What is an Interface? Show an example of an Interface that showcases some of its features like extending, optional properties and index signatures.
-- What are enums? 
+- What are enums?
 - What are tuples?
 - What does the `void` type represent?
 - What does the `never` type represent? Give an example of where it can be used.
@@ -32,7 +32,7 @@
 - What does the readonly modifier do?
 - What are indexed access types? Give an example.
 - What is the typeof operator?
-- What is the keyof operator? 
+- What is the keyof operator?
 - Give an example of using typeof and keyof operators together in a meaningful way.
 - What is function overloading?
 - How do you annotate the 'this' variable in methods?
@@ -55,9 +55,9 @@
 - What happens when you pass in a Union type into a conditional type?
 - What is conditional type inference? What is it used for? What are the rules surrounding the 'infer' keyword? (Answer: infer cannot be used outside of a conditional type, the infer keyword is specifically designed to work inside the true branch of a conditional type. Using it is like saying - “If T matches a certain pattern, extract part of it and give it a name.)
 - What are Utility Types?
-- Recreate the following built in Utilty Types - Partial, Required, Readonly, Record, Exclude, Extract, Pick, Omit, NonNullable, Paramters and ReturnType. 
+- Recreate the following built in Utilty Types - Partial, Required, Readonly, Record, Exclude, Extract, Pick, Omit, NonNullable, Paramters and ReturnType.
 - How do you export and import types from files?
-- What are namespaces? 
+- What are namespaces?
 - How do you enable / disable global type definitions for Javascript features and environments, such as Array and Document etc?
 - What is the Definitely Typed project?
 - What is the 'declare' keyword in Typescript used for?
@@ -66,5 +66,10 @@
 - What is a recursive conditional type?
 - What is a template literal type?
 
-
+Type inference does not work with Object.keys and Array.includes(). The type of what Object.keys returns is always string[], even if the keys are of a narrower type. Using Array.includes will not cause typescript to iiinfer that the type of the element is type ofof elements in the array. You have to use a type guard like:
+`````typescript
+  // Type guard to check if category is a valid ICategory
+  const isValidCategory = (cat: string | undefined): cat is ICategory =>
+    cat !== undefined && (categories as string[]).includes(cat);
+`````
 

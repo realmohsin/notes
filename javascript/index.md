@@ -14,7 +14,6 @@ Manual: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference
 Tutorial: https://javascript.info/
 
 
-
 Absolute Path Usage:
 ```html
 <script src="/script.js"></script>
