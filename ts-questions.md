@@ -66,7 +66,7 @@
 - What is a recursive conditional type?
 - What is a template literal type?
 
-Type inference does not work with Object.keys and Array.includes(). The type of what Object.keys returns is always string[], even if the keys are of a narrower type. Using Array.includes will not cause typescript to iiinfer that the type of the element is type ofof elements in the array. You have to use a type guard like:
+Type inference does not work with Object.keys and Array.includes(). The type of what Object.keys returns is always string[], even if the keys are of a narrower type. Using Array.includes will not cause typescript to infer that the type of the element is type ofof elements in the array. You have to use a type guard like:
 `````typescript
   // Type guard to check if category is a valid ICategory
   const isValidCategory = (cat: string | undefined): cat is ICategory =>

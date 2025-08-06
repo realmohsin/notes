@@ -1,5 +1,5 @@
 Cookies -
-THe idea is to have a mini database that can allow our servers to be a little more stateless, and allow our browsers to manage some state. 
+The idea is to have a mini database that can allow our servers to be a little more stateless, and allow our browsers to manage some state. 
 
 Its the most secure mechanism we have for authentication.
 

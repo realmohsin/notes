@@ -35,6 +35,9 @@
 33. What are the rules or limitations for how nesting can happen between server and client components? What are the best practices around this?
 34. What can you do if you need to nest a server component in a client component? Give some examples of situations where you might want to do this.
 
+What is the benefit of server side rendering?
+How does SEO factor into the SSR vs CSR discussion?
+
 - If your NextJs application is working in development, but in production it seems like mutations are not updating data, what could be the issue? (In development, every route is dynamically rendered, but in production...finish answer)
 - What does serializable mean?
 - How do you flash cookies in NextJs?
