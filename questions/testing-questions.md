@@ -12,7 +12,7 @@ Testing Questions
 - What does it mean to spy on function calls?
 - What is jest.fn and jest.spyOn used for?
 - What is module mocking? Give an example of it using Jest.
-- What is __mocks__ directory for and how is it used?
+- What is __mocks__ directory for and how is it u sed?
 - How can you test the DOM on the server?
 - What is DOM Testing Library?
 - What do the following libraries do: @testing-library/react, @testing-library/user-event, @testing-library/dom, jest, jsdom?
@@ -45,6 +45,8 @@ Testing Questions
 - How should you handle data fetching in Cypress? (talk about intercepting requests & test databases)
 - What is the cypress.config.js file used for? Give an example of something important that can be done with it?
 - What is .then used for in Cypress? (Talk about compilation.)
-
-
+- What is test driven development (TDD)?
+- What is a unit test?
+- Waht is an integration test?
+- What is a mock? What is a stub? What is a spy?
 (Use story of caching causeing testing problems)

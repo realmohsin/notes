@@ -3,6 +3,7 @@
 1. What is TypeScript?
 2. What are the benefits of using TypeScript?
 3. What does it mean that JavaScript is dynamically typed?
+4. What does it mean that JavaScript is weakly typed?
 4. What is a type error?
 5. What is type safety?
 6. What is a static analysis tool?
