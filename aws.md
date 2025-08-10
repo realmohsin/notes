@@ -1,5 +1,8 @@
-# AWS
+# Notes while getting on AWS
+Turned on IAM Identity Center which was formerly known as AWS Single Sign On. Seems to jst be an addition to the normal IAM service - the additionn being the ability to bring on outside identity providers to create IAM users that can be used in AWS.
 
+
+# AWS
 AWS is a cloud computing services provider. 
 
 Cloud computing is the on-demand delivery of IT resources over the Internet with pay-as-you-go pricing.  
@@ -290,3 +293,68 @@ Request Management
 - NAT gateways enable outgoing internet requests
 - NACLs allow or deny requests on subnet-level (however, AWS recommends Request management on the instance level using SecurityGroups)
 - Endpoints (PrivateLink) connect AWS services to VPCs
+
+
+
+# Dynamic Scaling & Load Balancing
+
+There is a max capacity of incoming requests that can be handled and that is dictated by the underlying hardware. But when using AWS, you can adjust the capacity you have dynamically. 
+
+EC2 Auto Scaling - Service which can be used to automatically add or remove EC2 instances based on conditions. Ennsures sufficient capacity at all times, without over-provisioning. In Auto Scaling Groups, you can create a launnch template that will define the connfiguration for the instances that will be created.
+
+Elastic Load Balancer (ELB) - Service to distribute load (eg, incoming requests) evenly across available instannces. Ensures that all available instances are utilized equally. (Consists of Application Load Balancer and Network Load Balancer)
+
+Application Load Balancer (ALB) - Feature-rich, broad variety of request forwarding connditions & rules, Capable of SSL termination, Can reduce app complexity, --> Use for (most) HTTP apps
+
+Network Load Balancer (NLB) - Very lean, limited connfiguration options, fixed IP address, perfect for non-HTTP apps, --> Use for non-HTTP apps
+
+- Elasticity, Scalability, & High Availability
+    - Workloads don't necessarily have even load patterns
+    - Too little or too much capacity cann be a big problem
+    - Being able to scale instantly & automatically is important
+    - Load should also be distributed evenly to avoid downtimes
+Auto Scaling
+    - Automatically add / remove instances
+    - Set clear rules and min/max requirements
+    - Instannce count is adjusted to incoming laod based on rules
+    - Use launnch templates & VPC / subnet settings
+Elastic Load Balancer
+    - ALB & NLB can be used for distributing traffic evenly
+    - Define target groups (in VPCs / Subnets) and forwarding rules
+    - ALB is perfect for HTTP traffic (and feature-rich)
+    - NLB is great for other network traffic
+
+
+
+# File Storage with EBS, EFS & S3
+Files gennerated by web applications - user uploads, generated invoices, trannsformed images, etc...
+File archivinng - Accounnting files, legal documentns, vacation images, 
+
+There are different kinds of file storage
+- Block Storage - Ann unformatted hard drive, Format and structure before using, create custom structure & store any files. Attach a virtual hard drive to a server. EBS service exists for this, can only be attached to EC2 instances.
+
+- Object Storage - No information about underlying system, Store & retrieve files of any kind of size as needed, No (real) custom structure can be created - Store files without caring about the underlying system - S3 service exists for this
+
+- File System - A (network) file system, A pre-formatted - configured file system, create custom structure & store any files. - Get a virtual file system without anny mannual setup - EFS, FSx service exists for this
+
+## EBS - Elastic Block Storage
+Hard drives, attached to EC2 instances - Multiple volumes can be attached to a single instance
+Can be formatted & structured as needed - via the commannd line (or code), from inside the instance
+Only available to EC2 instances
+Different types
+    - SSD vs HDD
+    - Optimized for different workloads & tasks
+Elastic Volumes
+    - If needed, volumes cann scale dynnamically
+    - extra feature - must be enabled / managed
+Snapshots
+    - EC2 instance data & state can be saved
+    - Restore snapshots onn nenw EC2 instances
+Multi Attach
+    - Attach volumes to multiple EC2 instances
+    - Supported on some instances
+
+All EC2 instances have some base storage - contains operating system, base software, etc... This can be an EC2 Instance Store which is an alternative to EBS-backed storage. EC2 Instance Store is the harddrive which is part of the machinne / rack in the data center. EBS-backed storage is a managed EBS Volume. Even though EBS-backed is more frequently used now, EC2 Instance Store is still available and can be used, and this is decided at the AMI level. You'll notice whenn selecting AMI, the text 'Root device type: ebs'. This means the root device is an EBS volume. 
+
+## EFS - Elastic File System
+

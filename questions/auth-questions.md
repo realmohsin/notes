@@ -1,0 +1,3 @@
+- What is an advanntage of storing sessions in a database, as opposed to only storing them in cookies?
+- Historically, what is the difference between cookie-based authentication and token-based authentication? And why should it really be called stateful vs stateless authentication?
+- What is a JWT?

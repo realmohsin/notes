@@ -1,11 +1,8 @@
 monolithic server - A monolith contains the routing, middlewares, business logic, and database access to implement ALL features of an app. 
-
 microservice - A microservice contains the routing, middlewares, business logic and database access to implement just ONE feature of an app.
 
 The biggest challenge of microservices is data management between services. 
-
 Each service gets its own database. Services will never reach into another services database. This pattern is called Database-Per-Service. 
-
 We want each service to run independently of other services.
 
 
@@ -25,3 +22,4 @@ One strategy for how to create services is to have a service for each resource, 
 
 # Microfrontend
 Microfrontend - Divides a monolithic app into multiple, smaller apps. Each smaller app is responsible for a distinct feature of the product. Benefits include - multiple engineering teams can work in isolation. Each smaller app is easier to understand and make changes to. 
+

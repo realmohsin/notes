@@ -575,3 +575,26 @@ In new project when initializing with:
 `npx prisma init --db --output ./generated/prisma`
 I was asked to authenticate using either google or github. I chose github, from which my email was extracted. Then a schema.prisma file was created and a database url was created and put in .env file. THen in my console.prisma.com i found the created project even though the account was not created using github auth. I'm guessing prisma postgres console accounts are unique by email and whether i picked github or google, all they wouldve looked for was email and either make new acct or add to existing acct with given email. 
 
+
+
+# Redis
+
+Redis is a NoSQL, in memory, database. (Accessing memory is much faster than accessing disk.) Used for short-lived data. It's often used with sessions or webpage hit counts. Redis is a key-value store, but it can also be used as a cache, a message broker, a pub/sub system, and more. 
+
+Basic commands:
+```bash
+SET name "John Doe"
+GET name
+EXISTS name
+DEL name
+MSET name "John Doe" age 30
+MGET name age	
+```
+
+Redis handles 5 main data types:
+- String
+- Hash - maps between string fields and string values (can be thought of as a JavaScript object)
+- List - Linked-List Data Structure
+- Set - Unordered collection of unique strings
+- Sorted Set - Unordered collection of unique strings with associated scores
+

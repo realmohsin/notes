@@ -3,7 +3,7 @@ The idea is to have a mini database that can allow our servers to be a little mo
 
 Its the most secure mechanism we have for authentication.
 
-Cookies vs local storage 
+Cookies vs local storage    
 you want to use cookies for anything that involves the initial render of your application if your rendering on the server. Also local storage is worse for security.
 
 
@@ -188,7 +188,7 @@ With client-side JavaScript, you simply create a timer and so long as the user i
 Depending on the application, this may not be necessary or desired, but for highly sensitive applications, it's a good idea.
 
 
-## Protecing Routes 
+## Protecting Routes 
 
 redirect from login and signup pages if already logged in.
 guard authenticated routes

@@ -1,7 +1,7 @@
 image - single file with all the deps and config required to run a program
 - more accurately an image is file system snapshot, and a specific startup command
 container - instance of an image, runs a program, with its own isolated set of hardware resources
-- a set of processes that have a grouping of resources specifically assigned to it. basically its using operating system features - namespacing and cgroups to isolate and limit resources to certain processes. the kernel checks what process is making a system call and directs it to a specific portion of the hardddrive, ram, cpu or network
+- a set of processes that have a grouping of resources specifically assigned to it. basically its using operating system features - namespacing and cgroups to isolate and limit resources to certain processes. the kernel checks what process is making a system call and directs it to a specific portion of the harddrive, ram, cpu or network
 
 docker for windows/mac
 docker client (docker cli) - tool that we are going to issue commands to
@@ -57,7 +57,3 @@ SIGTERM hardware signal sent to primary process inside that container. SIGTERM i
 
 docker kill <container-id>
 SIGKILL hardware signal sent to primary process inside that container. SIGKILL tells a process to immediately stop without doing anything else.
-
-
-
-
