@@ -1,5 +1,4 @@
 # Questions
-
 - What is Git?
 - Why is Git the most popular version control system?
 - What are the main Git configuration options, how are they applied and how do you change them?
@@ -24,9 +23,11 @@
 - What is cherry-picking?
   ...
 
-# Daily Task
 
+
+# Daily Task
 Create a git repository, set the user name to "Real Mohsin" globally, set the user email to "real@realmohsin.com" locally, show all config settings and what file they are set in, show just the user name and user email settings, make a commit on master, create a repository on GitHub, add remote repository, push master to remote repository without setting upstream of local master branch, create branches and commits to show a rebase, a squashed merge, and a cherry-pick, all with merge conflicts. output to stdout how a file looked like at a previous commit. Make a change to a file and show the diff of the change you made and what the file looked like at last commit. Show the diff of a file between latest commit and an older commit. restore the file to what it looked like at last commit. Then change the file to look like what it was at a previous older commit. commit the change.  Remove the last commit from history. Undo this and go back to deleted commit. Delete the commit again. make 3 commits. change history to squash these 3 commits into one commit with all their changes plus one additional change.
+
 
 # Commands To Memorize
 
@@ -56,34 +57,28 @@ To create a local version of a git repository hosted online
 git clone <remote-address> <local-directory-name>
 Implicitly adds the remote address as a remote named 'origin'
 
+
 ## Making Commits
-
 To check status of working directory
-
 - git status
 
 To track or stage a file (for all files use '.'):
-
 - git add <filename-or-directory>
   Also used to mark merge-conflicted files as resolved and ready to be commited.
 
 To untrack or unstage a file (for all files use '.'):
-
 - git restore --staged <filename>
 
 To commit with a commit message
-
 - git commit -m "commit-message"
   To add (long) commit message using editor, use git commit without any arguments.
 
 To view commits of current branch in reverse chronological order
-
 - git log
   To view commits in a condensed format use --oneline option.
 
 
 ## Branches
-
 To create new branch on current checked-out commit
 - git branch <branch-name>
 
@@ -106,8 +101,8 @@ To track remote branch
 git branch --set-upstream-to=<origin>/<branchname>
 Sets current checked-out branch to track the remote-tracking branch specified.
 
-## Merging, Rebasing, Cherrypicking
 
+## Merging, Rebasing, Cherrypicking
 To merge a branch with new commits into checked-out older branch
 
 - git merge <branch-with-new-commits>
@@ -384,6 +379,7 @@ Read
 
 - https://nvie.com/posts/a-successful-git-branching-model/#feature-branches
 - https://docs.github.com/en/get-started/using-github/github-flow
+
 
 ## Hooks
 

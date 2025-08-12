@@ -120,14 +120,11 @@ To use nginx's built in web server, set location block's try_files value to $uri
 example of server block for simple static file serving with nginx's web server:
 server {
 server_name realmohsin.io www.realmohsin.io;
-
         root /var/www/realmohsin.io;
         index index.html;
-
         location / {
                 try_files $uri $uri/ =404;
         }
-
 }
 
 example of reverse proxy to port 3000:
@@ -151,6 +148,5 @@ benefits of reverse proxy:
 - reverse proxy can load balance by distributing requests across multiple web servers
 - can be in charge of ssl encryption and 301 redirecting http requests to https so that the main server does not have to deal with that load
 - monitoring can be set up on the reverse proxy
-
 
 'upstream' server refers to servers behind nginx.

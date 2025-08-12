@@ -1,0 +1,1 @@
+What is GraphQL? What are the advantages and disadvantages of using it?

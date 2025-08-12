@@ -356,5 +356,348 @@ Multi Attach
 
 All EC2 instances have some base storage - contains operating system, base software, etc... This can be an EC2 Instance Store which is an alternative to EBS-backed storage. EC2 Instance Store is the harddrive which is part of the machinne / rack in the data center. EBS-backed storage is a managed EBS Volume. Even though EBS-backed is more frequently used now, EC2 Instance Store is still available and can be used, and this is decided at the AMI level. You'll notice whenn selecting AMI, the text 'Root device type: ebs'. This means the root device is an EBS volume. 
 
-## EFS - Elastic File System
 
+## EFS - Elastic File System
+Scalable, pre-formatted file systems, where we don't have to or want to worry about the underlying hardware configuration. Can be structured as needed - via the command linne or code. Can be attached & accessed to /from multiple services, not just EC2 instances. 
+
+Difference between EFS & EBS
+EBS - Unnformatted hard drive, less automatic scaling, more manual work, multi-attach is possible but not the focus, ec2-exclusive (onnly for ec2 insntannces)
+EFS - Pre-formatted file system, scales automatically, multi-attach is a core feature, Can be used with multiple services                
+
+EFS is a regional service, you have to create them per region and they are only available for services in that region. EFS also has security groups because they are themselves somewhat separate entities.
+
+FSx Lustre - Sometimes ann alternative to EFS, for high-performannce file access workloads, but no feature equality
+
+## Summary of File Storage Services
+
+File Storage Services
+    - Store application, user, businness or personanl files
+    - Different kinds of storage: hard drives, file systems, objects
+    - EBS, EFS, FSx Lustre & S3 are AWS's main storage services
+EBS
+    - Attachable block storage (unnformatted hard drives)
+    - Format, structure & use mannually
+    - For EC2 instances only
+    - Extra features: Snapshots, elastic volumes, multi-attach
+EFS
+    - Attachable pre-configured file system
+    - Built for (dynamic) scalability & multi-access
+    - For multiple AWS Services
+    - FSx Luster for high-performance file access tasks
+
+EBS is a perfect sservice if you need a harddrive, but if you don't want to deal with formatting a harddrive, of if you don't want to decide how much space you need, EFS can be a great alternative.
+
+
+
+# Object Storage with S3 (Simple Storage Service)
+Understanding Object Storage
+- Focus on the file, not the underlying system
+- Store any kind of file with (almost) any kind of size
+
+Main difference between S3 and EBS / EFS is that it is completely standalone, does not have to be attached to EC2 or other AWS service. It can be accessed from anywhere - you can upload (and delete or read) via console, CLI, HTTP API, SDK, etc.
+
+Buckets - Files are organized in buckets ('folders'), can't have nested buckets
+
+S3 does not provide a file system where you could create subfolders, instead all files are stored in buckets. You can create as many buckets as needed. No need to specify a size, buckets will scale as needed. Buckets are regional (can matter for latency reasons as well as legal reasons.) Bucket name must be unique across all of AWS. 
+
+S3 is a flat structure, no directories, prefixes help with organizing files. There is a detailed permissions system - control bucket and file level access. Via Bucket Policies (recommended) or ACLs (not recommended). Bucket Policies are similar to IAM policies.
+
+Can be public or private.
+
+
+## Storage Classes
+Frequent Access
+ - accessed very frequently (eg, every seconds / minute)
+ - instant access required
+-> highest flexibility but no cost savings
+
+Infrequent Access
+- accessed infrequently (eg, time to time)
+- instant access possible
+-> Cost savings but retrieval cost
+
+Archive
+- almost never accessed
+- instant access not always possible
+-> High cost savings but less flexibility
+^ Archive services include - S3 Glacier Instant Retrieval, S3 Glacier Flexible Retrieval, S3 Glacier Deep Archive
+
+S3 Intelligent Tiering
+- automatically move files to the most cost-effective storage class based on access patterns
+
+
+## S3 Advanced Features
+- Versioning - store multiple versions of the same object
+- Lifecycle Management - Transition files between storage classes
+- Inventory & Analytics - Understand stored files & data
+- Compliance & Object Lock - Prevent object deletion / changes
+- Replication - Auto-replicate objects cross-bucket
+- Data Protection & Encryption - Automatically encrypt stored data
+- Static Website Hosting - Upload & host (static) website files (just enable option, and upload the files)
+
+When unchecking box for 'Block all public access' at bucket creation, it doesn't mean the bucket is public yet, you have to still go to permissions tab later to set proper permissions.
+
+## S3 vs EBS vs EFS
+EBS
+- Attachable hard drives
+- EC2 only
+- Automatic scaling & multi-attach possible
+EFS
+- Attachable file systems
+- Multiple services
+- Automatic scaling & multi attach are key features
+S3
+- Independent object storage
+- Access with or without services
+- Unlimited scaling built-in
+
+
+## Summary
+S3 - Object Storage
+- Focus on the objects /files, not the underlying system
+- Organize files into buckets
+- Access (upload, delete, retrieve) via services, CLI, HTTP API, etc
+Managing Objects & Storage
+- Different storage classes for different access patterns
+- Lifecycle Management
+- Fine-grained permission management
+- Encryption possible
+Advanced Features
+- Inventory overview & data analytics
+- Static website hosting
+- Versioning & object lock
+- Cross-region or single-region cross-bucket replication
+
+
+# Databases in the Cloud: RDS, Aurora, ElastiCache & DynamoDB
+Data can be stored & structured in different ways
+Two main kinds of database types
+Relational & Fixed Schema (SQL)
+- Data is normalized and split across multiple tables
+- Every table has a clearly defined data schema which enforces homogenous data records
+- Examples: MySQL, PostgreSQL, Oracle SQL,...
+Non-Relational & No Schema (NoSQL)
+- Data is not normalized and only split across a few (or no) tables
+- Tables don't enforce a fixed structure and allow for heterogenous data records
+- Examples: MongoDB, DynamoDB,...
+
+AWS gives lots of options:
+- Different types of DATabases, eg, SQL vs NoSQL, different data or workload requirements favor different database types -> AWS allows you to run & use  all database types
+- Different Hosting Options: Self-Hosted vs Managed, you can install + operate databases yourself (eg, on EC2 instances) or let AWS do that -> AWS supports both options
+
+Self-Hosted - install & operate database software manually, eg, on EC2 instances, full control but also full responsibility, important duties: keep software patched, manage backups, etc
+Managed Databased - Let AWS manage setup & database operations. Key Services: RDS, DynamoDB. Less control but also less responsibility. You define general rules but AWS does the heavy lifting.
+
+## RDS - Relational Database Service
+Managed SQL Databases
+- Choose Database Engine - MySQL, PostgreSQL, then version, the auto-update settings
+- Choose Hardware & Network Configuration - Instance Class (hardware profile), VPC, subnet & security group. Similar to EC2 instance setup (you can imagine AWS setting it up on EC2 instance)
+- Configure Database Server - login credentials & port, Replication (for high availability & performance), monitoring settings, encryption & backup settings
+
+Note: Replication creates replicas in different availability zones for high availability & performance. There can be a main rds instance and read replicas created in other availability zones.
+
+## Amazon Aurora
+Aurora is Amazon's own SQL database engine - MySQL & PostgreSQL compatible database engine with great scalability & performance. Amazon's own competitor to Postgres & MySQL.
+There are two options - serverless & non-serverless. Serverless is more cost-effective and can be used if you don't need database online all the time. 
+
+## Databases and VPCs
+Common setup is for databases to be in a private subnet in your VPC, while the webserver running on EC2 is in a public subnet. Maybe a NAT gateway can be used for updating software on the database server. But setup will make sure requests from the internet are not possible to the database.
+
+What is caching? - Storing data that is frequently requested in memory so that it can be retrieved quicker, than would be typically retrieved from a database, which needs to reach out to a file system under the hood.
+AWS offers caching service with ElastiCache. You can choose database engine - Redis or Memcached, optionally enable cluster mode (for scaling), choose version, and configure hardware & network configuration - node type (hardware profile), VPC, subnet & security group. Then you have to configure Database Server - Encryption & backup settings, maintenance settings, and monitoring settings.
+
+ElastiCache instance is called cluster. (which is different from the cluster mode option, but probably means cluster of 1 vs cluster of many.)
+
+## DynamoDB
+NoSQL Concept - No enforced schema, no cross-table relations, Instead: Values stored by key in a single table. With the right key & strategy, this can offer huge performance benefits.
+
+DynamoDB is Amazon's own NoSQL database engine. Managed Solution.
+Unlike RDS, you don't have to specify hardware profile, or network settings, all that is handled by AWS. You just create 'tables'. 
+Process - Create tables - set name & key(s), set expected read / write capacities (or on demand option), choose encryption settings, then write and read data via AWS API, CLI or SDK. There's no query language like SQL for RDS. Then you can configure backups.
+
+Advanced Features
+- Streams - time-ordered series of database item changes, subscribe to process item changes
+- Global Tables - fully mananged multi-region database, high availability thanks to automatic replication, great peformance thanks to global reach
+- DAX - Managed in-memory cache for DynamoDB, accelerates database queries
+
+
+## Other Database Services
+MemoryDB - Persistent in-memory database
+DocumentDB - Document (nested data structures) database, MongoDB compatible
+Keyspaces - Wide column database (flexible column formats)
+Neptune - Graph database (complex data relations)
+Timestream - Time series database
+Quantum Ledger Database - Immutable log of data changes
+
+
+## AWS Backup
+When setting up RDS, you can configure backups in creation process. But if you have lots of databases of different types, you can have a centralized backup management area through AWS Backup. 
+
+Create centralized backup management with AWS Backup
+Create Plan - use template or create custom, set frequency, retention period, etc, define destination & timeframe. 
+Manage Resources & Backups - assign resources (eg, RDS cluster) to backup plan. Access & restore backups if necessary.
+
+
+## Summary
+- Different Database SErvices - Self-hosted (on EC2) vs managed services, SQL (RDS, Aurora) vs NoSQL (DynamoDB, DocumentDB), Different database for different workloads / data requirements
+- RDS, Aurora & ElastiCache - Managed relational databse services, configure database cluster hardware, network & behavior. Leverage built-in scaling & availability (replicatioin) features, Access databases via HTTP endpoints / SQL queries
+- DynamoDB & More - DynamoDB: Managed high-performance key-value database. Define partition keys & read / write capacity (or on-demand). Access DynamoDB data via AWS API / SDKs (no query language). Other databases for specific use-cases.
+
+
+
+# Content Delivery  & Global Networking
+Domain Name System -> translates domain names to IP addresses. There are many domain name registrars. AWS has one as well - AWS Route 53, you can register domain names and manage them there as well.
+
+AWS Route 53 is a managed DNS service, its for managing and registering domain names. YOu an register or transfer domains. Create hosted zones for domains. 'Hosted Zone' is a group of DNS records (routing configuration for a domain name). Then you can manage DNS by creating routing records and manage failover or create complex routing rules. 
+
+You can forward incoming requests to a custom domain to another service like an Application Load Balancer by creating A-type DNS record that uses an alias for routing traffic to an ALB.
+
+## CDNs
+Edge locations - which are smaller data centers distributed all over the world, IN ADDITION to the regions and availability zones. This is a network of data centers that exists outside the main data centers. These edge locations can receive, for example a website, from your main server, and cache it. AWS caches requested data in edge locations for future requests. This is to make sure latency stays low.
+
+CloudFront is AWS's managed CDN. Uses AWS' Edge locations.
+- Manage Content Origins - Create a distribution connected to content sources, define distribution behaviors, set logging, SSL & security settings.
+- Deliver & Cache Content - Create caching policies (containing cache rules), connect caching policies to distribution, use functions for request / response manipulation
+
+When using CloudFront with static site hosted on S3, that has an application load balancer, what should you choose for 'Original Domain' - the S3 bucket or the load balancer? Max used S3 bucket url. Then cloudfront gives you its own URL which represents the CloudFront distribution. Using that url means the content will be served from the nearest edge location. Is that that url we should point our domain to?
+
+
+## Other Niche Parts of AWS Network in Addition to Regions (main data centers) and Edge Locations:
+- Local Zones - Smaller AWS regions close to big metropolitan areas, perfect for achieving ultra-low latency, limited set of supported services, can extend VPCs to local zones
+- Outposts - Add AWS infrastructure to your on-premises, AWS-managed infrastructure, limited set of supported services, can extends VPCs to outputs, for creating hybrid on-premises + cloud environment.
+- Wavelength Zones - super small data centers running in 5G networks, AWS services embedded into 5G networks, perfect for achieving lowest latency possible, limited set of supported services, can connect to other services running in a region.
+
+
+## Other Services that use the AWS network
+- Global Accelerator - Can speed up network requests, Improve user traffic performance via AWS network. Receive two unique, stable IP addresses, use GA for balancing multi-region traffic. Will make sure incoming requests are routed to your load balancer or app as efficiently as possible through the AWS network.
+- S3 Transfer Acceleration - Improve data transfer speed via AWS edge network. Less network variability, more bandwith utilization.
+Global Accelerator and S3 Transfer Acceleration use AWS's own network (their own physical cables) to improve performance.
+
+Global Accelerator also helps with high availability because it also functions as a load balancer. It monitors the application it should forward traffic to, and if the application becomes unhealthy, GA is capable of forwarding traffic to a healthy instance.
+
+
+## AWS Certificate Manager
+AWS Certificate Manager (ACM) allows you to manage SSL/TLS certificates for your applications. There is a dashboard for this in AWS, but you will often interact with this service from other services. Such as when using CloudFront, you have option to add SSL encrytion for the distribution and CloudFront will handle SSL termination - traffic from user to cloudfront will be encrypted, but traffic from cloudfront to your origin (edge location?) will be decrypted, since its running on Amazon's network at that point, not on public internet. 
+
+Can add certificates for load balancers and other services as well. 
+
+
+## Summary 
+- Various Networking Services - VPC: Cloud-internal. Route 53: DNS service - register domains, define routes. CloudFront: CDN service, using AWS edge locations. Local Zones, Outposts, Wavelength: Extended regions. Global Accelerator, S3 Transfer Acceleration: Traffic acceleration.
+- Route 53 & CloudFront - Register & manage domains with Route 53. Define request forwarding rules for (sub)domains. Use CloudFront for distributing (cached) content globally. Target (and 'wrap') other services with CF/Route 53. 
+- AWS Network & Acceleration Services - Local Zones, Wavelength: Run services closer to your customers. Outposts: Run services closer to your infrastructure. Accelerate traffic or data (file) transfers with accelerators. 
+
+
+# Beyond EC2: Serverless and Containers
+Serverless Services - Services where you don't need to provision, configure and pay for servers. Instead, Define that task that should be performed and when it should be performed, like when an event occurs.
+
+AWS Lambda is the main serverless compute service. 
+
+(You can think of S3 as a serverless storage service)
+
+Code - You upload or define the code that should be executed. Write code in console, upload zip file or Docker container. Choose a supported programming language. Advanced setup (eg, environment variables).
+Event - Choose a supported event source. eg, a file was uploaded to S3, Advanced setup (eg. event filtering)
+Configuration - Timeout, underlying architecture, file systems etc. Attach an execution role for permissions. Can connect to a VPC (it's NOT placed in there though)
+
+## EC2 vs Lambda
+- EC2 - spin up instances, install software & run your code. You can install & run any software. Good for running web server, run databases, etc. Extremely versatile & configurable. Does require lots of manual setup work & pay for uptime. 
+- Lambda - Upload your code & define execution events. You can only execute code (can't install software). No easy way of running web servers, no databases. Focused on event-driven code execution. Almost no manual setup work required, & only pay for usage.
+
+## Container Services
+Container - packages of code AND the execution environment --> images, from which you can run containers.
+
+You can have Single Image Applications (web server & database in one single image) or Multi Image Applications (web server & database in different images).
+
+To run containers you need a server that's able to create + run containers, so a server with Docker installed.
+
+## ECS - Elastic Container Service
+Service that helps with deploying, running, managing & scaling containerized applications in clusters. ECS uses AWS' custom container cluster deployment solution. 
+
+## EKS - Elastic Kubernetes Service
+Service that helps with deploying, running, managing & scaling containerized applications in clusters. EKS uses Kubernetes as the container cluster deployment solution. 
+
+Manually creating and managing clusters of servers (which run your containers) is very challenging, thats why ECS and EKS are used. 
+
+
+## Setting Up Container Clusters
+Define Cluster Structure - Define tasks: images & image configurations, Choose EC2 instances or Fargate as container host, Configure default network & security settings. 
+Operate & Scale Containers - Define service/task specific settings, monitor containers, start or stop when needed.
+
+Fargate - Serverless Container Execution Environment - you don't have to choose a hardware profile or EC2 instances, all that will be handled for you. (Recommended)
+
+## ECR - Elastic Container Registry
+ECR is Amazon's version of Docker Hub. You can create public or private repositories where images can be stored. 
+
+
+## Summary
+- Serverless & Containers - Alternative to EC2. Serverless: On-demand code execution (with a timeout). Containers: Packages of code + required execution environment. Different problems benefit from different solutions.
+- AWS Lambda - SErverless, event-driven code execution. Provide code + define event triggers + execution configuration. Many supported event types (eg S3 file changes). Assign execution role for permissions. 
+- ECS, EKS, ECR - Manged container clusters, help with running continaers. Provide images & environment configuration. Run on top of EC2 instances or Fargate (serverless).. Manage & distribute images with ECR.
+
+
+
+# Building Serverless REST & GraphQL APIs
+Web APIs -
+REST - Request targets resource paths (eg. /books/1). Request entire data for a selected resource. Utilize HTTP verbs (GET, POST, ...). Extremely common
+GraphQL - Request contains GraphQL query statement, request partial data, (only the data needed), POST requests only, popular because of reduced redundancy
+
+## AWS API Gateway
+API Gateway - allows you to build REST API without writing code.Managed REST API Service
+- Define API Structure - Define resources (paths & HTTP methods). Enforce query parameters or authentication. Define response codes & schema.
+- Handle Requests - Define rules for handlign & parsing requests. Configure response creation & forwarding logic. Handle real-time connections (websockets).
+- Test and Deploy - Test during development. Deploy with stages.
+
+API Gateway options - HTTP API, WebSocket API, REST API, etc (HTTP API is simpler version of REST API)
+
+
+## AWS AppSync
+AppSync - Managed GraphQL API Service
+- Define schemas, queries & mutations, Connect schema to data sources & resolvers, add authentication.
+- Handle Requests - Supports real-time and on-deamnad connections. Built-in query optimization & caching. 068c4f5cdf5167c818fc069ead73b7c1c8f32ead
+
+
+## User Authentication with Cognito
+Cognito - Managed App User Authentication Service
+(This service is not about IAM users, although it can give IAM permissions. It's about giving your frontend apps a way to authenticate your users.)
+
+Manage User Pools - Configure user credentials requirements, configure user authentication experience, integrate with your applications, assigns temporary IAM permissions to users. 
+Allow Social Sign In - Create federated identity pool. Add Google, Facebook, Apple, etc authentication. Assigns temporary IAM permissions to users.
+
+## Amplify  - Application Development Platform & Framework
+Amplify is a set of tools aimed to make it easier to build web or mobile apps that embrace AWS and has backend and frontend capabilities. For non-AWS experts that want to use AWS for the backend of the app they are building. It uses all the other AWS services behind the scenes, so you don't have to create your own EC2 instances or databases. 
+
+Provides frontend SDKs to integrate AWS backend services. Even if you are manually using AWS, you can still use these SDKs to integrate AWS services. Amplify is about simplifying process of writing frontend code to talk to your backend.
+
+Amplify allows you to use Cognito from your frontend to create user authentication.
+
+Focus on the Product - Don't focus on the underlying services. Creates infrastructure on your behalf (other services). Integrate with client side code via SDKs.
+Build a Backend or Host an Application - Let Amplify manage services & app data. Use Amplify Studio to configure the backend. Manage data via Amplify Studio. 
+
+## Summary
+- Connecting Cloud Services to Frontend Apps - Many cloud services should be used by frontend apps. Typical frontend <-> backend communication uses HTTP APIs. REST & GraphQL APIs are common HTTP API solutions. API Gateway: Build serverless REST APIs. AppSync: Build serverless GraphQL APIs. 
+- Building APIs - Define resources & request handling with API Gateway. CReate query definitions & schemas with AppSync. Define Lambda functions that 
+should be executed. Handle requests without running your own API server. Implement user authentication with Cognito. 
+- Simplifying the Cloud - Amplify is a platform that simplifies cloud app development. You can let Amplify create and manage AWS resources for you. Amplify also provides a complete CMS (Content Management System) if needed. Use the Amplify client-side SDK for frontend cloud integration.
+
+
+
+
+# Simplifying Application Deployment via Elastic Beanstalk, LightSail and AppRunner
+## Elastic Beanstalk - Simplified (Web) Application Deployment Service
+(partially to compete with Heroku, whose goal is to make it easy to deploy apps.)
+Configure web app environments in a single place, in a less overwhelming way.
+- Create Applications & Environments - Define programming language & environment. Choose a preset & adjust as needed. Configure instance types, security settings & more, but in a less overwhelming way.
+- Add load balancing, scaling & databases - add load balancing etc as needed. Add a connected database in the same creation wizard, all in a less overwhelming way.
+
+## Lightsail - A Simplified EC2 Management Console
+- Launch EC2 instances with a very simplified and user-friendly wizard. (Even simpler than Elastic Beanstalk)
+- Focus on specific tasks (eg, install + configure Wordpress)
+
+## AppRunner & Copilot - Simplifying Container Deployment
+- AppRunner - A service that simplifies the process of deploying containers. Use ECS & Fargate under the hood.
+- Copilot - A CLI that simplifies container app creation & deployment. Used to create cloud environments & deploy apps
+
+## Summary
+- Why Simplify? - Especially for beginners, AWS services can be challenging. Focus on the goal, instead of the tools. Goal: Make AWS more accessible to a broader audience. Not necessarily used by experts.
+- Elastic Beanstalk & Lightsail: Elastic Beanstalk helps with creating EC2-based apps. Configure network, security, load balancing etc, on one screen. Add database if needed. Lightsail focuses on customers looking for a hosting provider.
+- AppRunner & Copilot: AppRunner simplifies container deployment. Uses ECS etc under the hood. Copilot is a CLI for deploying containerized apps.

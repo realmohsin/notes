@@ -7,7 +7,7 @@ Cookies vs local storage
 you want to use cookies for anything that involves the initial render of your application if your rendering on the server. Also local storage is worse for security.
 
 
-can set cookies on the client and the server () 
+Can set cookies on the client and the server () 
 
 A cookie (also known as a web cookie or browser cookie) is a small piece of data a server sends to a user's web browser. The browser may store cookies, create new cookies, modify existing ones, and send them back to the same server with later requests. Cookies enable web applications to store limited amounts of data and remember state information; by default the HTTP protocol is stateless.
 
@@ -17,7 +17,6 @@ Setting cookies:
 Set-Cookie: <cookie-name>=<cookie-value>
 
 Example:
-
 HTTP/2.0 200 OK
 Content-Type: text/html
 Set-Cookie: yummy_cookie=chocolate
@@ -97,7 +96,6 @@ If path is '/' that means cookie will be sent with all requests (?).
 
 
 ## Controlling third-party cookies with SameSite
-
 The SameSite attribute lets servers specify whether/when cookies are sent with cross-site requests — i.e., third-party cookies.
 
 Cross-site requests are requests where the site (the registrable domain) and/or the scheme (http or https) do not match the site the user is currently visiting. This includes requests sent when links are clicked on other sites to navigate to your site, and any request sent by embedded third-party content.
@@ -166,7 +164,6 @@ bcrypt will take care of splitting the hash into it's salt and hash parts and th
 
 
 # Logout
-
 Logging out of a cookie-managed session is pretty easy. You simply need to remove the part of the cookie that identifies the user. You could delete the cookie altogether, or you could simply "unset" the user ID portion of the cookie.
 
 It's important to note that you should almost never perform mutations within a GET request, so rather than having a link to a /logout page which is too common, you should have a button that performs a POST request to /logout. This reduces the risk of CSRF attacks.
@@ -189,7 +186,6 @@ Depending on the application, this may not be necessary or desired, but for high
 
 
 ## Protecting Routes 
-
 redirect from login and signup pages if already logged in.
 guard authenticated routes
 guard authorized routes 
@@ -198,7 +194,6 @@ Redirecing from Login if user is logged out on a protected page from another win
 
 
 ## RBAC - Role Based Access Control
-
 "Role-Based Access Control." In this system, each user has a set of roles, and each role has a set of permissions. Then when the user is trying to perform an action, the app checks whether the user's roles have the necessary permissions.
 
 We're going to be using many-to-many relationships for our roles and permissions. A user can have many roles. A role can have many users. A role can have many permissions. A permission can have many roles.
@@ -210,17 +205,14 @@ A data dump refers to the process of extracting and copying a large amount of da
 
 
 ## Managed Sessions
-
 Instead of storing the userId in the cookie, the managed sessions pattern stores 'sessions' in the database and the sessionId in the cookie. The session has the userId and expirationDate, the two things the old userId cookie had - the userId and the cookie's expiration was all that was needed. This allows us to create features that will allow users to remotely log out of other sessions. It will also give us more control over logging out users, as all we need to do is delete all sessions a user has.
 
 
 ## Email
-
 Resend is a good option for sending emails for authentication flow. To test and develop authentication flows with email, you can use msw to mock out email service so you don't make real requests or send real emails.
 
 
 ## OAuth
-
 Before OAuth, third party applications asked users for the username/password of the other service they needed to connect on the user's behalf. This is obviously not ideal. So, public APIs (services third party applications frequently want to connect to on the behalf of users), each implemented their own way of allowing access to third party apps without the third pary app need to know the user's username/password. 
 
 Eventually people came together to create a common strtegy for allowing third party access, and they called this strategy or the OAuth 1.0 standard. However, OAuth 1.0 had a few flaws - it was very complicated and it required using API keys in a way that wasn't very safe in mobile phones.
@@ -230,6 +222,3 @@ The need for OAuth increases with the need or desire to have Single Sign On, whe
 So when saying the term 'Single Sign On', in the context of third party apps, what you're saying is you want your app to be a part of the user's Single Sign On experience. 
 
 What OAuth does at a high level, is require that every application sends the user out to the oauth server to login there and then redirects them back to app so that the app can get tokens and the key thing here is the redirect step. It means the user actually leaves the application and types in their password at the OAuth server instead of ever giving their password to the application. 
-
-
-
