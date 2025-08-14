@@ -1,3 +1,13 @@
+# CI/CD
+
+Continuous Integration is a way for developers to use a shared repository. Every new integration must go through an automatic build step, that may include testing and linting, to make sure our project builds as expected, to make sure the code to be integrated is compatible with the rest of our codebase and to make sure the code to be integrated does not break anything.
+
+Continuous Delivery is the process of putting small patches into production that pass end-to-end tests and are manually approved by a human.
+
+Continuous Deployment is the process of automatically deploying new code to production it has passed end-to-end tests.
+
+
+# Github Actions
 what are github actions?
 A workflow automation service by github, automate all kinds of repository-related processes and actions.
 github actions most important in automatcing the processes involved in code deployment.

@@ -11,5 +11,3 @@
 
 What is a Bearer Token?
 What is an access token and a refresh token?
-
-

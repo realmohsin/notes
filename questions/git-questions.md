@@ -1,5 +1,4 @@
 # Questions
-
 1. What is Git? 
 2. Why is Git the most popular version control system?
 3. What are the main Git configuration options, how are they applied and how do you change them?

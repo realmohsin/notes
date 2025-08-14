@@ -554,8 +554,8 @@ model Starport {
   locationId String
   location   Location @relation(fields: [locationId], references: [id])
 
-	// non-unique foreign key
-  @@index([locationId])
+// non-unique foreign key
+@@index([locationId])
 }
 ```
 
