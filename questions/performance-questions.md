@@ -32,4 +32,3 @@ Performance Questions
 28. How can you control the browser cache with HTTP headers? What are the Cache-Control and ETag headers?
 29. How and where is caching implemented across different layers of an application?
 30. What is load balancing? Give an example of a load balancer. How can you test load balancing?
-31.

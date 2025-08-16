@@ -1,5 +1,4 @@
 # TypeScript Questions
-
 1. What is TypeScript?
 2. What are the benefits of using TypeScript?
 3. What does it mean that JavaScript is dynamically typed?

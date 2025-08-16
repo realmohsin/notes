@@ -1,11 +1,19 @@
+# CI/CD Questions
 - What is Continuous Integration?
+- Describe a typical CI pipeline.
 - What is Continuous Delivery?
+- What is Continuous Deployment?
+- Describe a typical CD pipeline.
+- Describe an entire CI/CD pipeline.
+- What should happen to other branches when a hotfix is merged to production?
+- What type of testing should be done in CI/CD?
+- What is Synk and how can it be used in CI/CD?
 - What is GitHub Actions?
 - What are YAML files?
 - What are workflows?
-- What are jobs?
-- What is a runner?
-- What is a step?
+- What are jobs? How are they executed relative to each other?
+- What are steps?
+- What is a runner?  
 - What is an action?
 - What are events in GitHub Actions? What are event activity types and event filters? 
 - What are community Actions?
@@ -16,6 +24,4 @@
 - What is a job output? How do you create an output for a job?
 - How is caching helpful for running jobs and how can it be done?
 - How do you set environment variables in Github Actions?
-
-
-- 
+- What is a key difference between Jenkins and Github Actions or CircleCI?
