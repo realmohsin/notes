@@ -189,7 +189,6 @@ git objects are packed into package files to save space. Usually happens when ga
 in merge conflict when rebasing use git rebase --continue after fixing conflicts
 
 .git/ directory contents
-
 - HEAD - points to the branch you currently have checked out
 - index - where Git stores your staging area information
 - config file - contains project specific git configuration variables

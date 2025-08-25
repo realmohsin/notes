@@ -1,5 +1,9 @@
 # Testing Questions
 - What is testing?
+- What is test driven development (TDD)?
+- What is a unit test?
+- Waht is an integration test?
+- What is a mock? What is a stub? What is a spy?
 - What is automated testing?
 - What is a test runner?
 - What is an assertion library?
@@ -10,7 +14,7 @@
 - What is the 'expect' function and what library does it come from?
 - What does it mean to spy on function calls?
 - What is jest.fn and jest.spyOn used for?
-- What is module mocking? Give an example of it using Jest.
+- What is module mocking? Give an example of it using Jest. (jest.mock('axios') axios.get.mockResolvedValue(resp)) 
 - What is __mocks__ directory for and how is it used?
 - How can you test the DOM on the server?
 - What is DOM Testing Library?
@@ -19,38 +23,45 @@
 - How do you test async code using Jest? What is the 'done' function?
 - How do you test code that uses third-party modules?
 - Give a summary of how mocking modules, mocking function calls, and spying on function calls are used in testing. 
-- In what context or environment does Jest run tests in? Can it be changed? 
+- In what context or environment does Jest run tests in? Can it be changed? (by default it runs in browser env with window availabe and jsdom allows document to be available. You can change to node even using jest.config.js)
 - Jest runs using node, but node does not support 'import' statements natively. Does this mean we need to use 'require' instead of 'import' in tests?
-- How does Jest handle css imports in tests?
-- What is snapshot testing? What are the benefits? How does it work?
+- How does Jest handle css imports in tests? (stub out css modules using moduleNameMapper in jest.config.js)
+- What is snapshot testing? What are the benefits? How does it work? (serializes the component (turns to string))
 - What is the jest.config.js file used for? What can be done with it?
 - What is test coverage? How do you measure it?
+- What are some considerations for running tests in CI?
 - What are aria roles? How are they relevant to testing?
 - What is an accessible name? How can you manually assign an accessible name, if needed?
 - Explain the query function system in React Testing Library. Give some examples.
-- What is the act function?
-- What does it mean if you're getting an act warning?
+- Explain how aria roles and accessible names are used with queries.
+- When should you use getBy vs queryBy vs findBy?
+- The Link component from react-router throws errors when rendered in a test environment. Why is this and how can you handle it?
+- What is the act function? ( the act function makes sure unexpected state updates do not occur. you want to wrap code that triggers state updates in act, so that state updates and rerenders happen within act. )
+- What does it mean if you're getting an act warning? (state updates are occuring outside of act)
 - How do you solve act warnings? (part of hte answer is that if you're getting act warning from child components, you can mock them out, but if you're getting lots of act warnings from various places, you should probably be testing more granularly, and what you're probably doing wrong is meant more for end-to-end testing.)
-- How do you handle data fetching in tests?
+- How should you handle data fetching in tests? (msw)
 - What is the order of execution in test files?
-- How do you debug tests?
+- How do you debug tests? (screen.debug(), test.only, check for caching issues)
 - What is Cypress?
 - What is end-to-end testing?
 - How does testing work in Cypress? What environment does it run in? 
-- What is the best practice way to select elements in Cypress?
+- What is the best practice way to select elements in Cypress? (data-cy)
 - What are some things to keep in mind when writing tests in Cypress?
+- What is a timeout in Cypress? (default is 4000ms)
 - What is a stub?
+- What is a spy?
 - What are fixtures in Cypress?
-- How should you handle data fetching in Cypress? (talk about intercepting requests & test databases)
 - What is the cypress.config.js file used for? Give an example of something important that can be done with it?
+- What is the setupNodeEvents function used for in cypress.config.js?
 - What is .then used for in Cypress? (Talk about compilation.)
-- What is test driven development (TDD)?
-- What is a unit test?
-- Waht is an integration test?
-- What is a mock? What is a stub? What is a spy?
-(Use story of caching causeing testing problems)
+- What are the different ways to handle data fetching and network requests in End-to-End testing? (allow requests to a test database, intercept requests + spy, intercept + stub, test api endpoints directly)
+- How to test authentication in Cypress?
 
-What is a staging environment?
-What is smoke testing?
-What is a canary release?
-what is regression testing?
+# TODO
+Check if the below should be added to the questions list
+- What is a staging environment?
+- What is smoke testing?
+- What is a canary release?
+- what is regression testing?
+
+Create story of caching causing testing problems, check end of Grider's Jest & RTL course.

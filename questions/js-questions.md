@@ -1,0 +1,63 @@
+# JavaScript Questions
+
+- What is a JavaScript engine? Give some examples of JavaScript engines. What are JavaScript runtimes? Give some examples of JavaScript runtimes. What is nodeJs?
+- What is ECMAScript?
+- What is a statement? (separated by semicolons)
+- What is an expression? (returns a value ?)
+- What is automatic semicolon insertion?
+- What is 'use strict'? Why might we not need to specify this?
+- What is a variable? How can you make a variable in JavaScript? (var, let, const)
+- What are the data types in JavaScript?
+- What does it mean that JavaScript is dynamically typed?
+- What is the typeof operator? What are the nuances of using it?
+- How do you convert between data types? Where does implicit conversion occur? What are some nuances to remember?
+- What is NaN? When does it occur? 
+- What does the unary operators + and - do? 
+- Which operators can be used to increment or decrement numbers? Explain all the options.
+- Which operators are comparison operators? What happens when comparing different data types? What happens when comparing strings? What is the difference between == and ===? How to handle potential null and undefined in comparisons?
+- What happens in conditional statements? (if else and ? :) 
+- What are truthy and falsy values? 
+- What are the logical operators and how are they evaluated? What is short-circuit evaluation? 
+- What is the nullish coalescing operator?
+- What are the looping constructs in JavaScript? 
+- What are 'switch' statements in JavaScript? 
+
+
+
+- What is an object?
+- How do you retrieve a property from an object?
+- What do you get if you try to access a property that doesn't exist on an object?
+- What is a method?
+- What is the 'this' keyword?
+- What is a class? What does it mean to instantiate a class? How do you do it? (bundling data with functions that work on that data)
+- What does 'this' refer to in a class? 
+- What does 'instanceof' do? 
+- What is the 'constructor' function?
+- What is inheritance?
+- What is the 'super' function?
+- What are static methods and properties?
+- What are getters and setters?
+- What are public fields? What are private fields (#) and methods?
+- What does it mean that all functions in JavaScript are actually methods, in a sense? 
+- When is 'this' determined in a function? (at call time)
+- How is 'this' determined? (with context vs out of context) (out of context based where it was defined - in an object or class)
+- What does call, apply and bind do? (talk about bind being used for binding arguments as well as context) What are some scenarios where binding context is useful?
+- What is the value of 'this' in arrow functions? How can this be useful? (look into - does the value of 'this' in arrow function get defined at runtime or at declaration time)
+- What exactly does the 'new' keyword do? (talk about constructor functions)
+- What is a prototype? How is a prototype set for an object? (its prototype is set when the object is created, every function has a prototype property in case that function is used as a constructor (with new), so all objects created by that function will have a prototype set to that function's .prototype object)
+- Without class syntax, how do you create instances of objects that have an inheritance chain?
+- What is __proto__? How is it different from the prototype property? (the prototype property of a function points to the prototype of objects created by that function, whereas __proto__ is usually found on the instances of objects and points to their prototype)
+- What is the base prototype of all objects? (Object.prototype)
+- What does Object.create do?
+- What is optional chaining?
+- What is floating point imprecision?
+- How can you generate arrays of a certain length, filled with a certain value? 
+- What is functional programming? (paradigm or way of writing code that emphasizes pure functions, not mutating state, and instead moving values through a series of functions)
+- What does it mean that functions are first-class citizens? (functions can be assigned to variables, passed as arguments, and returned from other functions)
+- What are pure functions? (deterministic, same input always returns same output, no side effects, no dependence on mutaable state)
+- What is a higher-order function? (a function that takes another function as an argument or returns a function)
+- What is immutability? (not mutating data structures)
+- What is object-oriented programming?
+- What is polymorphism?  
+- What is encapsulation?
+- What is abstraction?

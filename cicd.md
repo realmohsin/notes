@@ -1,10 +1,7 @@
 # CI/CD
 Continuous Integration is a way for developers to use a shared repository. Every new integration must go through an automatic build step, that may include testing and linting, to make sure our project builds as expected, to make sure the code to be integrated is compatible with the rest of our codebase and to make sure the code to be integrated does not break anything.
-
 Continuous Delivery is the process of putting small patches into production that pass end-to-end tests and are manually approved by a human.
-
 Continuous Deployment is the process of automatically deploying new code to production it has passed end-to-end tests.
-
 Go back to Neagoie's last video of CICD section to add questions about entire pipeline.
 
 
@@ -276,7 +273,6 @@ In settings for environment creation (which is just a set of key value pairs sig
 
 ## Conditional Jobs and Steps
 You can have conditional execution via 'if' field. You can ignore errors via 'continue-on-error' field. And you can evaluate conditions via expressions.
-
 ```yaml
 name: Website Deployment
 on:

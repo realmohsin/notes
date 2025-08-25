@@ -12,7 +12,7 @@ I expect the thing to test to be ...
 I expect the thing to test to be greater than ...
 I expect the thing to test to be less than ...
 I expect the thing to test to not be ...
-I expect the thing to test to have these properties...
+I expect the thing to test to have these properties ...
 I expect the thing to test to be this length...
 etc
 
@@ -214,7 +214,7 @@ test("adding positive numbers is not zero", () => {
     }
   }
 });
-```
+``
 
 In tests, you sometimes need to distinguish between undefined, null, and false, but you sometimes do not want to treat these differently. Jest contains helpers that let you be explicit about what you want:
 - toBeNull matches only null
@@ -230,7 +230,7 @@ test("two plus two", () => {
   expect(value).toBeGreaterThan(3);
   expect(value).toBeGreaterThanOrEqual(3.5);
   expect(value).toBeLessThan(5);
-  expect(value).toBeLessThanOrEqual(4.5);
+`  expect(value).toBeLessThanOrEqual(4.5);
   // toBe and toEqual are equivalent for numbers
   expect(value).toBe(4);
   expect(value).toEqual(4);
@@ -557,7 +557,7 @@ expect(mockFunc).toMatchSnapshot();
 
 Jest runs in node, but node does not support 'import' statements.
 
-Jest is automatically picking up Babel configuration and applying it to our test code. ( the reason for this must be that if you have a babel config in your project, it means you want your source code to be run through babel before it runs. Now ofcourse we are needing to run portions of our source code to test it, so it makes sense that Jest would assume the portion of the source code it runs for testing will need to be run through babel first.)
+Jest is automatically picking up Babel configuration and applying it to our test code. (the reason for this must be that if you have a babel config in your project, it means you want your source code to be run through babel before it runs. Now ofcourse we are needing to run portions of our source code to test it, so it makes sense that Jest would assume the portion of the source code it runs for testing will need to be run through babel first.)
 
 Jest automatically sets process.env.NODE_ENV to 'test' when it runs. (The babel preset '@babel/preset-env' handles esmodule syntax, but if you have raw webpack, you might want webpack to handle it to do tree-shaking, so you want - ['@babel/preset-env', {modules: false}], but for test environment you want modules: 'commonjs', so you can use process.env_NODE_ENV for that.
 
@@ -574,6 +574,7 @@ module.exports = {
 ## css
 Its' uncommon to test css. When jest encounters a css import we need to tell it whats going on since that is unexpected. It's expecting only commonjs (see above for esmodules - we can have babel config that Jest will run our test code through before executing if we want to use esmodules.) So for css modules, we need to create a mock and then stub out the actual css module. (Remember that importing css modules into js files is only possible due to webpack and its css-loader and style-loader.) What we can do is use the moduleNameMapper config option in jest.config.js to map css modules to a different file. We'll create file mock in a test folder named style-mock.js -
 ```javascript
+// style-mock.js
 module.exports = {};
 ```
 And in jest.config.js:
@@ -988,7 +989,7 @@ Self-closing elements (also known as 'void elements') like `input`, `img`, and `
 
 If you're working with a void element (like a `br` or an `img`), or if you're working with an element that doesn't show plain text, you can apply an accessible name by using the `aria-label` attribute.
 
-A common component that does not have a role (?) is the form element. Add aria-label to forms to target them with ByRole selectors. 
+A common component that does not have a role (?) is the form element. (Perhaps this changed because chatgpt says forms have aria role of 'form'.) Add aria-label to forms to target them with ByRole selectors. 
 
 Don't be afraid to add accessible names to components so you can target them with getByRole.
 
@@ -1052,8 +1053,8 @@ Always prefer using query functions ending with ByRole, only use others if 'ByRo
 
 getByText(value) if value is a string, it will check the entire text against the value. If partial match is enough, use regex. /hello/ will match elements whose text has 'hello'.
 
-### Matchers
 
+### Matchers
 Matchers help make sure that a value is what we expect it to be. Jest comes with many matchers and @testing-library/jest-dom has many for the DOM specifically.
 
 # 3 difficult aspects of testing
@@ -1305,7 +1306,7 @@ Options for debugging tests:
 Be aware of caching when using third party code, (or even your own code!). Even if you mock out responses of data fetching functions, if there is a caching mechanism in front of it, you will get cached response which can lead to unexpected behavior. Getting cached responses on subsequent tests is a major source of bugs and headache.  
 
 
-## Cypress
+# Cypress
 Cypress is a JavaScript based Test Automation Tool & Framework. Cypress can be used for End-to-End tests as well as Component tests. 
 
 E2E testing is for testing complete application flows, whereas Component Tests are for testing individual UI elements. There is also Unit Testing, which is for testing small individual building blocks of an application, like an individual function.
